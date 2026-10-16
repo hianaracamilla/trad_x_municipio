@@ -1,0 +1,33 @@
+# Ambientes virtuais e interpretadores
+.venv/
+venv/
+ENV/
+env/
+*.env
+
+# Caches do Python e Jupyter
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Scripts de build geradores de notebooks (conforme solicitado pelo usuário)
+build_series_nb.py
+gerar_analise_municipios.py
+atualizar_dados_historicos.py
+
+# Arquivos temporários e scratch
+scratch*
+*.tmp
+*.log
+.system_generated/
+.gemini/
+
+# Pastas de extração intermediária e dados brutos
+extratores/
+dados_prioridades/
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
