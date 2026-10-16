@@ -12,7 +12,7 @@ __pycache__/
 .ipynb_checkpoints/
 .pytest_cache/
 
-# Scripts de build geradores de notebooks (conforme solicitado pelo usuário)
+# Scripts de builds
 build_series_nb.py
 gerar_analise_municipios.py
 atualizar_dados_historicos.py
