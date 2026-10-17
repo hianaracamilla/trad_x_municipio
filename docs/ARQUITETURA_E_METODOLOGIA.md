@@ -60,7 +60,6 @@ trad_x_municipio/
 │   ├── index.html                             # Estrutura HTML5 com design system governamental
 │   ├── app.js                                 # Motor de inteligência, Leaflet, Chart.js e Card Studio
 │   ├── style.css                              # Folhas de estilo executivas com suporte a temas e responsividade
-│   ├── assets/logo-brasil.png                 # Brasão e marca institucional de alta resolução
 │   └── data/
 │       ├── dashboard_data.json                # Payload unificado (~3.0 MB) com os 5.571 municípios
 │       └── brasil_estados.json                # Malha vetorial GeoJSON oficial das 27 UFs

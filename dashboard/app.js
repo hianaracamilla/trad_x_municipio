@@ -1518,7 +1518,7 @@ function atualizarPreviewCard() {
 
     stage.innerHTML = `
       <div class="card-export-header">
-        <img src="assets/logo-brasil.png" alt="Brasil" class="card-export-logo">
+        <div class="card-export-brand"><span class="brand-pill">BRASIL</span> <span>Inteligência Municipal</span></div>
         <span class="card-export-tag">RAIO-X MUNICIPAL</span>
       </div>
 
@@ -1562,7 +1562,7 @@ function atualizarPreviewCard() {
       </div>
 
       <div class="card-export-footer">
-        <span class="card-export-seal">✔ DADOS OFICIAIS VERIFICADOS</span>
+        <span class="card-export-seal">✔ DADOS OFICIAIS CONSOLIDADOS</span>
         <span>TSE • IBGE • MINISTÉRIOS</span>
       </div>
     `;
@@ -1575,7 +1575,7 @@ function atualizarPreviewCard() {
 
     stage.innerHTML = `
       <div class="card-export-header">
-        <img src="assets/logo-brasil.png" alt="Brasil" class="card-export-logo">
+        <div class="card-export-brand"><span class="brand-pill">BRASIL</span> <span>Inteligência Municipal</span></div>
         <span class="card-export-tag">PERFIL SOCIOECONÔMICO</span>
       </div>
 
@@ -1619,8 +1619,8 @@ function atualizarPreviewCard() {
       </div>
 
       <div class="card-export-footer">
-        <span class="card-export-seal">✔ DADOS OFICIAIS VERIFICADOS</span>
-        <span>GOVERNO FEDERAL DO BRASIL</span>
+        <span class="card-export-seal">✔ DADOS OFICIAIS CONSOLIDADOS</span>
+        <span>IBGE • TSE • MINISTÉRIOS</span>
       </div>
     `;
   } else if (studioConfig.theme === 'nacional') {
@@ -1628,7 +1628,7 @@ function atualizarPreviewCard() {
 
     stage.innerHTML = `
       <div class="card-export-header">
-        <img src="assets/logo-brasil.png" alt="Brasil" class="card-export-logo">
+        <div class="card-export-brand"><span class="brand-pill">BRASIL</span> <span>Inteligência Municipal</span></div>
         <span class="card-export-tag">GRANDES PRIORIDADES</span>
       </div>
 
@@ -1655,7 +1655,7 @@ function atualizarPreviewCard() {
       </div>
 
       <div class="card-export-footer">
-        <span class="card-export-seal">✔ UNIÃO E RECONSTRUÇÃO</span>
+        <span class="card-export-seal">✔ DADOS OFICIAIS CONSOLIDADOS</span>
         <span>MINISTÉRIOS DA SAÚDE, EDUCAÇÃO E PREVIDÊNCIA</span>
       </div>
     `;
@@ -1664,7 +1664,7 @@ function atualizarPreviewCard() {
 
     stage.innerHTML = `
       <div class="card-export-header">
-        <img src="assets/logo-brasil.png" alt="Brasil" class="card-export-logo">
+        <div class="card-export-brand"><span class="brand-pill">BRASIL</span> <span>Inteligência Municipal</span></div>
         <span class="card-export-tag">PANORAMA ELEITORAL</span>
       </div>
 
@@ -1695,7 +1695,7 @@ function atualizarPreviewCard() {
 
     stage.innerHTML = `
       <div class="card-export-header">
-        <img src="assets/logo-brasil.png" alt="Brasil" class="card-export-logo">
+        <div class="card-export-brand"><span class="brand-pill">BRASIL</span> <span>Inteligência Municipal</span></div>
         <span class="card-export-tag">PODER DE COMPRA & CONSUMO</span>
       </div>
 
@@ -1723,7 +1723,7 @@ function atualizarPreviewCard() {
 
       <div class="card-export-election-box">
         <div class="card-export-election-header">
-          <span>Destaques da Reconstrução Econômica</span>
+          <span>Destaques Macroeconômicos</span>
           <span>Série 2016 - 2026</span>
         </div>
         <div class="card-export-election-bars" style="flex-direction: column; gap: 8px;">

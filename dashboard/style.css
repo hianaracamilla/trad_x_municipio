@@ -89,16 +89,17 @@ body {
   flex-shrink: 0;
 }
 
-.brand-logo {
-  height: 42px;
-  width: auto;
-  object-fit: contain;
-}
-
-.brand-divider {
-  width: 1px;
-  height: 34px;
-  background-color: var(--border-strong);
+.brand-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--gov-blue-dark), var(--gov-blue-light));
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(11, 37, 69, 0.15);
+  flex-shrink: 0;
 }
 
 .brand-text {
@@ -1664,11 +1665,25 @@ body {
   margin-bottom: 20px;
 }
 
-.card-export-logo {
-  height: 38px;
-  width: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+.card-export-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #E2E8F0;
+  letter-spacing: 0.04em;
+}
+
+.card-export-brand .brand-pill {
+  background: linear-gradient(135deg, #009739, #007A2E);
+  color: #FFFFFF;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
 }
 
 .card-export-tag {
