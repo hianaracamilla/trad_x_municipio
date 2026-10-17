@@ -27,6 +27,8 @@ jobs:
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload da Pasta do Dashboard
         uses: actions/upload-pages-artifact@v3
