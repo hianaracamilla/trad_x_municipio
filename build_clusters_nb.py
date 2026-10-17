@@ -529,6 +529,75 @@ print(f" - {out_xlsx_completo}")
 print(f" - {out_csv_completo}")
 """))
 
+    # Célula 23: Markdown
+    nb.cells.append(new_markdown_cell(r"""## 🏙️ 11. Projeção e Reclassificação das 53 Metrópoles por Similaridade Socioeconômica
+Nesta etapa, pegamos as **53 grandes metrópoles e capitais**, desconsideramos sua população absoluta (focando apenas nas intensidades per capita de CLT, MEI, servidores, Bolsa Família, previdência, etc.) e calculamos a distância euclidiana multivariada ($Z$-Score) de cada uma até os centróides dos clusters já estabelecidos.
+
+* **Critério de Aderência:** Comparamos a distância com o limite do percentil 95 das cidades do interior ($Dist \le 3,02$).
+  * **Se Sim ($Dist \le 3,02$):** A metrópole se comporta como o cluster e é **reclassificada** para aquele perfil socioeconômico.
+  * **Se Não ($Dist > 3,02$):** A metrópole possui traços atípicos/extremos e **permanece classificada como Metrópole**.
+"""))
+
+    # Célula 24: Code
+    nb.cells.append(new_code_cell("""# 1. Distâncias das cidades do interior aos seus centróides (usando a média das 30 simulações)
+interior_dists = np.min(cdist(X_sem, mean_sem_sc), axis=1)
+limiar_p95 = np.percentile(interior_dists, 95) # ~3.02
+
+# 2. Projeção das 53 Metrópoles
+X_metr = scaler_sem.transform(df_metropoles_resumo[cols_sem])
+dist_metr = cdist(X_metr, mean_sem_sc)
+nearest_cluster = np.argmin(dist_metr, axis=1)
+dists_metr = np.min(dist_metr, axis=1)
+
+df_metr_proj = df_metropoles_resumo.copy()
+df_metr_proj['cluster_proximo_id'] = nearest_cluster
+df_metr_proj['cluster_proximo_nome'] = df_metr_proj['cluster_proximo_id'].map(nomes_perfis)
+df_metr_proj['distancia_centroide'] = dists_metr.round(2)
+df_metr_proj['se_comporta_como_cluster'] = df_metr_proj['distancia_centroide'] <= limiar_p95
+df_metr_proj['perfil_reclassificado'] = np.where(
+    df_metr_proj['se_comporta_como_cluster'],
+    df_metr_proj['cluster_proximo_nome'],
+    'Grandes Metrópoles e Capitais (Atípicas)'
+)
+
+print(f"📊 Resultado da Aderência das 53 Metrópoles (Limiar P95 = {limiar_p95:.2f}):")
+print(f" - Metrópoles que se comportam como os clusters: {df_metr_proj['se_comporta_como_cluster'].sum()} cidades")
+print(f" - Metrópoles atípicas que permanecem isoladas: {(~df_metr_proj['se_comporta_como_cluster']).sum()} cidades")
+print()
+
+print("📋 TABELA COMPLETA DA RECLASSIFICAÇÃO DAS 53 METRÓPOLES:")
+display(df_metr_proj[['municipio', 'uf', 'populacao_2025', 'cluster_proximo_nome', 'distancia_centroide', 'perfil_reclassificado']].sort_values(by='distancia_centroide'))
+"""))
+
+    # Célula 25: Code (Gráfico e Exportação da Base com Metrópoles Reclassificadas)
+    nb.cells.append(new_code_cell("""# Incorporação da Reclassificação na Base Consolidada de 5.571 Municípios
+dict_reclass_metr = dict(zip(df_metr_proj['cod_ibge7'], df_metr_proj['perfil_reclassificado']))
+
+df_brasil_5571['perfil_final_reclassificado'] = df_brasil_5571['cod_ibge7'].map(dict_reclass_metr).fillna(df_brasil_5571['nome_perfil_socioeconomico'])
+
+# Resumo Final Nacional após a Reclassificação
+resumo_final_reclass = df_brasil_5571.groupby('perfil_final_reclassificado').agg({
+    'cod_ibge7': 'count',
+    'populacao_2025': ['sum', 'mean'],
+    'servidores_100_hab': 'mean',
+    'taxa_clt_100_hab': 'mean',
+    'taxa_mei_100_hab': 'mean',
+    'familias_bf_100_hab': 'mean'
+}).round(1)
+
+print("📋 DISTRIBUIÇÃO NACIONAL FINAL (COM METRÓPOLES RECLASSIFICADAS):")
+display(resumo_final_reclass)
+
+# Atualização da Planilha Excel com a base completa atualizada e as novas abas
+with pd.ExcelWriter(out_xlsx_completo, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+    df_brasil_5571.to_excel(writer, sheet_name='Todos_Municipios_5571', index=False)
+    df_metr_proj[['cod_ibge7', 'municipio', 'uf', 'populacao_2025', 'cluster_proximo_nome', 'distancia_centroide', 'perfil_reclassificado']].to_excel(writer, sheet_name='Metropoles_Reclassificadas', index=False)
+    resumo_final_reclass.to_excel(writer, sheet_name='Resumo_Pos_Reclassificacao')
+
+df_brasil_5571.to_csv(out_csv_completo, sep=';', index=False)
+print("✅ Base consolidada e planilha Excel atualizadas com a nova classificação!")
+"""))
+
     with open("analise_clusters_perfis_municipios.ipynb", "w", encoding="utf-8") as f_out:
         nbf.write(nb, f_out)
     print("🎉 Notebook analise_clusters_perfis_municipios.ipynb compilado com sucesso via build_clusters_nb.py!")

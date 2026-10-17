@@ -105,3 +105,50 @@ Comparativo de Governos: Temer (2016-2018), Bolsonaro (2019-2022) e Lula 3 (2023
 | **Botijão de Gás** | `Preço 1 Botijão de Gás GLP 13kg (R$ - ANP)` | R$ | ANP (Agência Nacional do Petróleo) | Preço médio nacional ao consumidor final do botijão de GLP 13kg. |
 | **Gasolina Comum** | `Preço 1 Litro de Gasolina (R$ - ANP)` | R$ | ANP (Agência Nacional do Petróleo) | Preço médio nacional de bomba ao consumidor do litro da gasolina. |
 | **Aluguel Residencial** | `Aluguel Residencial Médio (R$ - FipeZAP)` | R$ | FipeZAP / FIPE | Valor locatício residencial mediano de imóveis de 1 a 2 dormitórios. |
+
+---
+
+## 🏛️ 3. Base de Tipologia Socioeconômica (`classificacao_perfis_municipios_completa.xlsx`)
+Abrangência: **5.571 municípios brasileiros**  
+Objetivo: Agrupamento multivariado não-supervisionado (K-Means) por intensidade de políticas públicas e estrutura produtiva.
+
+| Campo | Tipo | Unidade | Descrição / Fórmula |
+| :--- | :--- | :--- | :--- |
+| `taxa_clt_100_hab` | Numérico | Vagas / 100 hab | `(trabalhadores_clt_ativos / populacao_2025) * 100` |
+| `taxa_mei_100_hab` | Numérico | MEIs / 100 hab | `(total_mei_ativos / populacao_2025) * 100` |
+| `servidores_100_hab` | Numérico | Servidores / 100 hab | `(total_servidores_publicos / populacao_2025) * 100` |
+| `aposentados_100_hab` | Numérico | Benefícios / 100 hab | `(aposentadorias_rgps_dezembro / populacao_2025) * 100` |
+| `peso_prev_pib_pct` | Numérico | % | `(valor_liquido_aposentadorias_ano_brl / pib_municipal) * 100` |
+| `familias_bf_100_hab` | Numérico | Famílias / 100 hab | `(familias_bolsa_familia / populacao_2025) * 100` |
+| `bpc_100_hab` | Numérico | Beneficiários / 100 hab | `(beneficiarios_bpc_loas / populacao_2025) * 100` |
+| `pe_de_meia_cobertura_pct` | Numérico | % | `(beneficiarios_pe_de_meia / matriculas_em_publico) * 100` |
+| `dep_fundeb_uniao_pct` | Numérico | % | `(fundeb_uniao / fundeb_total_municipal) * 100` |
+| `farmacia_pop_100_hab` | Numérico | Retiradas / 100 hab | `(fp_total / populacao_2025) * 100` |
+| `nome_perfil_socioeconomico` | Categoria | Texto | Perfil obtido pelo K-Means inicial (com as 53 metrópoles isoladas) |
+| `perfil_final_reclassificado`| Categoria | Texto | Classificação final nacional após a projeção euclidiana das 48 metrópoles aderentes ($Dist \le 3,02$) |
+
+---
+
+## 🗳️ 4. Base Eleitoral Integrada (`cruzamento_perfil_x_eleicao_completo.xlsx`)
+Abrangência: **5.571 municípios brasileiros**  
+Fontes: Tribunal Superior Eleitoral (TSE) — Dados Abertos e Totalização Oficial (2010 a 2026).
+
+| Campo | Tipo | Descrição |
+| :--- | :--- | :--- |
+| `eleitores_aptos_2026` | Numérico | Total de eleitores cadastrados e aptos a votar no município em 2026 |
+| `comparecimento_2026_1t` | Numérico | Total de eleitores que compareceram às urnas no 1º Turno de 2026 |
+| `abstencao_2026_1t` | Numérico | Eleitores que deixaram de votar no 1º Turno de 2026 |
+| `taxa_abst_2026_1t` | Numérico (%) | `(abstencao_2026_1t / eleitores_aptos_2026) * 100` |
+| `votos_validos_2026_1t` | Numérico | Votos nominais válidos destinados aos candidatos no 1º Turno de 2026 |
+| `votos_lula_2026_1t` | Numérico | Votos recebidos por Lula (PT - 13) no 1º Turno de 2026 |
+| `votos_flavio_2026_1t` | Numérico | Votos recebidos por Flávio Bolsonaro (PL - 22) no 1º Turno de 2026 |
+| `votos_caiado_2026_1t` | Numérico | Votos recebidos por Ronaldo Caiado (PSD - 55) no 1º Turno de 2026 |
+| `votos_zema_2026_1t` | Numérico | Votos recebidos por Romeu Zema (NOVO - 30) no 1º Turno de 2026 |
+| `pct_lula_2026_1t` | Numérico (%) | `(votos_lula_2026_1t / votos_validos_2026_1t) * 100` |
+| `pct_flavio_2026_1t` | Numérico (%) | `(votos_flavio_2026_1t / votos_validos_2026_1t) * 100` |
+| `vencedor_2026_1t` | Texto | Candidato mais votado no município no 1º Turno de 2026 (`LULA` ou `FLAVIO BOLSONARO`) |
+| `taxa_abst_2010` a `2022` | Numérico (%) | Série histórica de abstenção apurada no 2º Turno das eleições presidenciais de 2010, 2014, 2018 e 2022 |
+| `taxa_abstencao_jovem_16_24_pct` | Numérico (%) | Taxa de abstenção entre eleitores de 16 a 24 anos no município |
+| `taxa_abstencao_adulto_25_59_pct`| Numérico (%) | Taxa de abstenção entre eleitores de 25 a 59 anos no município |
+| `taxa_abstencao_idoso_60_mais_pct`| Numérico (%) | Taxa de abstenção entre eleitores de 60 anos ou mais no município |
+

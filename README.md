@@ -1,184 +1,132 @@
-# 🇧🇷 Tradução para o Município & Séries Históricas do Brasil (2010–2025)
+# 🇧🇷 Inteligência Municipal, Tipologia Socioeconômica & Geografia Eleitoral (2010–2026)
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![Jupyter Notebooks](https://img.shields.io/badge/Jupyter-Notebooks-F37626.svg?style=flat&logo=jupyter&logoColor=white)](https://jupyter.org/)
 [![Pandas](https://img.shields.io/badge/Pandas-2.0+-150458.svg?style=flat&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
-[![Seaborn & Matplotlib](https://img.shields.io/badge/Visualização-Seaborn%20%7C%20Matplotlib-4B8BBE.svg?style=flat)](https://seaborn.pydata.org/)
+[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-K--Means%20%7C%20StandardScaler-F7931E.svg?style=flat)](https://scikit-learn.org/)
 [![Abrangência: 5.571 Municípios](https://img.shields.io/badge/Abrangência-5.571%20Municípios-009739.svg?style=flat)](https://www.ibge.gov.br/)
 
-> Repositório de inteligência de dados públicos conectando políticas públicas à vida real: Saúde, Educação, Previdência, Trabalho e Renda nos **5.571 municípios brasileiros**, combinado a **séries históricas econômicas e de poder de compra (2010–2025)**.
+> Plataforma integrada de ciência de dados e machine learning conectando políticas públicas (Saúde, Educação, Previdência, Trabalho e Renda) à vida real dos **5.571 municípios brasileiros**, tipologia socioeconômica por agrupamento não-supervisionado e comportamento eleitoral em eleições presidenciais (**2010 a 2026**).
 
 ---
 
 ## 🧭 Sumário do Repositório
 
-- [🎯 Visão Geral dos Cadernos](#-visão-geral-dos-cadernos)
-- [📊 Galeria de Visualizações (Destaques Municipais)](#-galeria-de-visualizações-destaques-municipais)
-- [💡 Principais Achados (Key Findings)](#-principais-achados-key-findings)
-- [📖 Dicionário de Dados](#-dicionário-de-dados)
-- [📁 Estrutura de Arquivos](#-estrutura-de-arquivos)
+- [🎯 Arquitetura dos Cadernos Analíticos](#-arquitetura-dos-cadernos-analíticos)
+- [🏛️ Metodologia dos Perfis Socioeconômicos](#️-metodologia-dos-perfis-socioeconômicos)
+- [🗳️ Resultados Eleitorais de 2026 por Perfil](#️-resultados-eleitorais-de-2026-por-perfil)
+- [🗺️ Mapeamento Geoespacial do Brasil](#️-mapeamento-geoespacial-do-brasil)
+- [📉 Série Histórica da Abstenção (2010 a 2026)](#-série-histórica-da-abstenção-2010-a-2026)
+- [📁 Estrutura de Arquivos e Bases de Dados](#-estrutura-de-arquivos-e-bases-de-dados)
+- [📚 Documentação Técnica Completa](#-documentação-técnica-completa)
 - [🚀 Como Executar Localmente](#-como-executar-localmente)
-- [🏛️ Fontes Primárias](#️-fontes-primárias)
 
 ---
 
-## 🎯 Visão Geral dos Cadernos
+## 🎯 Arquitetura dos Cadernos Analíticos
 
-O repositório é estruturado em torno de dois cadernos principais de análise de dados:
+O ecossistema é organizado em cadernos modulares, cada um acompanhado por um script de compilação reproduzível (`build_*.py`):
 
-### 1. [`analise_cruzamentos_municipios.ipynb`](analise_cruzamentos_municipios.ipynb)
-- **Escopo:** Análise transversal dos **5.571 municípios do Brasil** cruzando dados demográficos, Produto Interno Bruto (PIB), Previdência Social (RGPS), Bolsa Família, Benefício de Prestação Continuada (BPC/LOAS), Carteiras Assinadas (CLT), Microempreendedores Individuais (MEI), FUNDEB (MEC/FNDE), Programa Pé-de-Meia e Farmácia Popular (DataSUS).
-- **Foco:** Transformar estatísticas macroeconômicas na resposta direta para o cidadão comum: *"O que essa política pública representa na prática para a economia da minha cidade e para a mesa da minha família?"*.
-- **Base de Dados:** [`traducao_municipios_consolidado.xlsx`](traducao_municipios_consolidado.xlsx) (72 colunas auditadas).
-
-### 2. [`series_historicas_brasil_2010_2025.ipynb`](series_historicas_brasil_2010_2025.ipynb)
-- **Escopo:** Séries temporais históricas mensais e anuais abrangendo os ciclos dos governos Dilma, Temer, Bolsonaro e Lula 3.
-- **Dimensões Acompanhadas:** 
-  - Mercado Automotivo (Veículos Novos vs. Usados e a razão Fenabrave/Fenauto).
-  - Mercado Imobiliário (Crédito Imobiliário SBPE e Habitação).
-  - Varejo e Consumo (Índices PMC/IBGE e ICV).
-  - Agronegócio e Balança Comercial (Safras CONAB e Exportações Agropecuárias).
-  - Mercado de Trabalho (Estoque formal CLT Novo CAGED e formalização MEI).
-  - Poder de Compra das Famílias (Cesta Básica DIEESE, Botijão de Gás ANP, Gasolina Comum ANP e Aluguel Residencial FipeZap ponderados pelo Salário Mínimo).
-- **Base de Dados:** [`series_historicas_brasil_2010_2025.xlsx`](series_historicas_brasil_2010_2025.xlsx).
+| Caderno | Script de Build | Escopo e Objetivo Central | Base de Dados Principal |
+| :--- | :--- | :--- | :--- |
+| [`analise_clusters_perfis_municipios.ipynb`](analise_clusters_perfis_municipios.ipynb) | [`build_clusters_nb.py`](build_clusters_nb.py) | **Tipologia Socioeconômica (Machine Learning):** Diagnóstico de $K$ ideal (Cotovelo e Silhueta), simulação de 30 rodadas K-Means, isolamento e projeção euclidiana das 53 metrópoles. | `classificacao_perfis_municipios_completa.xlsx` |
+| [`analise_eleitoral_perfis_municipios.ipynb`](analise_eleitoral_perfis_municipios.ipynb) | [`build_eleitoral_nb.py`](build_eleitoral_nb.py) | **Inteligência Eleitoral (2010–2026):** Votação no 1º Turno de 2026 (Lula x Flávio Bolsonaro), peso nos votos válidos do país, série histórica de abstenção (5 eleições) e mapa do Brasil. | `cruzamento_perfil_x_eleicao_completo.xlsx` |
+| [`analise_cruzamentos_municipios.ipynb`](analise_cruzamentos_municipios.ipynb) | `gerar_analise_municipios.py` | **Impacto das Políticas Públicas no PIB Municipal:** RGPS, Bolsa Família, BPC, Fundeb, Pé-de-Meia e Farmácia Popular nos 5.571 municípios. | `traducao_municipios_consolidado.xlsx` |
+| [`series_historicas_brasil_2010_2025.ipynb`](series_historicas_brasil_2010_2025.ipynb) | [`build_series_nb.py`](build_series_nb.py) | **Macroeconomia e Poder de Compra das Famílias:** Séries mensais de 2010 a 2025 (Cesta Básica, Gás, Combustíveis, Aluguel, Automotivo e Habitação). | `series_historicas_brasil_2010_2025.xlsx` |
 
 ---
 
-## 📊 Galeria de Visualizações (Destaques Municipais)
+## 🏛️ Metodologia dos Perfis Socioeconômicos
 
-Os gráficos abaixo foram gerados com estilização editorial via **Matplotlib** e **Seaborn**, paleta de cores balanceada, anotações de contexto socioeconômico e alta resolução (300 DPI):
+Para agrupar os municípios de forma imparcial e sem viés de escala populacional:
+1. **10 Indicadores de Intensidade Relativa:** Carteira assinada (CLT), MEI, servidores públicos totais (municipais e federais), aposentadorias do INSS, peso da previdência no PIB, Bolsa Família, BPC, cobertura do Pé-de-Meia, dependência do Fundeb da União e dispensação de remédios na Farmácia Popular — todos medidos **por 100 habitantes ou em percentual**.
+2. **Isolamento Metropolitano:** As 53 grandes metrópoles e capitais foram separadas inicialmente para não distorcer a formação dos centróides das cidades pequenas e médias do interior.
+3. **K-Means com 30 Rodadas:** Estabilização dos centróides via alinhamento euclidiano (`cdist`).
+4. **Projeção e Reclassificação das Metrópoles:** As 53 metrópoles foram projetadas no espaço padronizado dos clusters. 48 delas tinham distância euclidiana $\le 3,02$ (dentro do percentil 95 das cidades brasileiras) e foram reclassificadas nos clusters correspondentes, enquanto apenas 5 cidades atípicas permaneceram isoladas.
 
-### 1. Dependência da Renda Social e Previdenciária no PIB Estadual
-> *Explica em linguagem simples o impacto combinado de Aposentadorias do INSS, Bolsa Família e BPC na economia dos estados.*
-![Dependência do PIB por Estado](graficos_municipios/grafico_1_dependencia_pib_estados.png)
-
-### 2. Peso da Seguridade Social por Porte Populacional
-> *Demonstra como nas cidades pequenas (até 10.000 hab.), a seguridade social responde por mais de 25% de toda a riqueza municipal gerada.*
-![Peso por Porte de Cidade](graficos_municipios/grafico_2_peso_seguridade_porte_cidades.png)
-
-### 3. Dependência do FUNDEB da Complementação da União
-> *Evidencia o papel do Governo Federal na manutenção de escolas públicas, merenda e salários de professores no Norte e Nordeste.*
-![Dependência do FUNDEB](graficos_municipios/grafico_3_fundeb_uniao_regioes.png)
-
-### 4. Alcance do Programa Pé-de-Meia por Grande Região
-> *Distribuição dos mais de 4 milhões de estudantes do ensino médio público amparados pela poupança da juventude.*
-![Pé-de-Meia por Região](graficos_municipios/grafico_4_pe_de_meia_regioes.png)
-
-### 5. Farmácia Popular: Economia Real no Bolso Familiar
-> *R$ 7,75 bilhões de alívio anual no bolso das famílias e economia média de ~R$ 50/mês por paciente atendido com remédios para pressão, diabetes e asma.*
-![Farmácia Popular Economia](graficos_municipios/grafico_5_farmacia_popular_economia_bolso.png)
-
-### 6. Risco de Desvinculação do Salário Mínimo: Perda Média por Habitante da Cidade
-> *Impacto macroeconômico local no comércio e circulação de dinheiro por habitante no município.*
-![Perda por Habitante](graficos_municipios/grafico_6_perda_desvinculacao_salario_minimo.png)
-
-### 7. Risco de Desvinculação do Salário Mínimo: Perda Individual por Aposentado
-> *O impacto direto no contracheque: simulação de perda de R$ 2.510,84 ao ano (~R$ 209/mês ou 1,7 salário mínimo por ano) no bolso do aposentado.*
-![Perda por Aposentado](graficos_municipios/grafico_7_perda_desvinculacao_por_aposentado.png)
+### Os 7 Perfis Nacionais Consolidados (5.571 Municípios):
+* **1. Jovens e Dependentes de Apoio Social (1.414 cidades | 25,4% do Brasil):** Alta cobertura de Bolsa Família e Pé-de-Meia, forte dependência do Fundeb da União, população jovem e menor densidade de carteira assinada. Inclui capitais como Salvador, Fortaleza, Recife, Belém e Manaus.
+* **2. Polos Regionais de Emprego e Serviços (1.134 cidades | 20,4% do Brasil):** Cidades médias e centros metropolitanos com mercado formal robusto (CLT e MEI elevados), baixa dependência de auxílios e forte economia terciária. Inclui Belo Horizonte, Curitiba, Porto Alegre, Rio de Janeiro e Campinas.
+* **3. Cidades Autônomas e Agroindustriais (957 cidades | 17,2% do Brasil):** O menor índice de Bolsa Família do país (4,2/100 hab), alto dinamismo formal e forte presença do agronegócio e indústria. Inclui São Paulo, Brasília, Florianópolis, Campo Grande e Uberlândia.
+* **4. Municípios Dependentes de Seguridade e Repasses (766 cidades | 13,8% do Brasil):** Extrema dependência da seguridade pública: 17,6% de todo o PIB vem de aposentadorias (principalmente rurais), somado a alto Bolsa Família e máxima complementação do Fundeb.
+* **5. Cidades da Terceira Idade e Aposentados (722 cidades | 13,0% do Brasil):** A maior proporção de idosos/aposentados do país (22,1/100 hab) e o maior consumo de medicamentos na Farmácia Popular (15,1/100 hab), combinados com baixo Bolsa Família e bom mercado formal.
+* **6. Pequenos Municípios do Funcionalismo Público (573 cidades | 10,3% do Brasil):** Cidades de pequeno porte (média 5.300 hab) onde a presença da administração pública é máxima: **10,7 servidores por 100 habitantes** (1 em cada 10 moradores trabalha no setor público).
+* **7. Grandes Metrópoles e Capitais Atípicas (5 cidades | 0,1% do Brasil):** Cidades com distorções estruturais severas que ultrapassaram a dispersão dos clusters (Duque de Caxias, Boa Vista, Natal, Nova Iguaçu e Aracaju).
 
 ---
 
-## 💡 Principais Achados (Key Findings)
+## 🗳️ Resultados Eleitorais de 2026 por Perfil
 
-Para a leitura aprofundada de todas as conclusões, consulte o documento completo em:  
-👉 **[`docs/PRINCIPAIS_ACHADOS.md`](docs/PRINCIPAIS_ACHADOS.md)**
+Cruzamento oficial com os dados do **1º Turno das Eleições Presidenciais de 2026** (TSE):
 
-### Síntese Executiva:
-1. **Seguridade Social como Sustentáculo Econômico:** No Piauí, Paraíba e Maranhão, a soma de RGPS, Bolsa Família e BPC supera **20% do PIB de todos os municípios**. Nas cidades brasileiras com até 10 mil habitantes, a média atinge **25,6% do PIB local**.
-2. **Educação e Pacto Federativo:** No Nordeste (**40,5%**) e no Norte (**36,7%**), quase metade dos recursos da educação básica municipal depende do aporte financeiro da União via complementação do FUNDEB.
-3. **Pé-de-Meia:** Mais de **1,67 milhão de jovens** no Nordeste e **1,24 milhão** no Sudeste recebem a poupança estudantil, combatendo a evasão escolar precoce.
-4. **Farmácia Popular:** Mais de **R$ 7,74 bilhões** de reais deixaram de sair do bolso das famílias com a gratuidade de remédios contínuos, representando alívio médio de **R$ 530 a R$ 618 por paciente atendido ao ano** (~R$ 50 mensais).
-5. **Risco da Desvinculação Previdenciária:** A perda da paridade das aposentadorias com o ganho real do salário mínimo provocaria um corte médio de **R$ 2.510,84 por aposentado ao ano** (equivalente a 1,7 salários mínimos a menos anualmente).
-6. **Poder de Compra (2010–2025):** 
-   - A **cesta básica**, que exigia **59,3% do salário mínimo em 2021**, recuou para **~53,1% em 2024**.
-   - O **botijão de gás 13kg**, que atingiu o pico de **9,3% do salário mínimo em 2021/2022**, baixou para **6,9% em 2024**.
-   - A **gasolina comum** caiu de **0,55% do SM/litro** para **0,42% do SM/litro** após o encerramento da Paridade de Preços de Importação (PPI) pela Petrobras em maio de 2023.
-
----
-
-## 📖 Dicionário de Dados
-
-A especificação detalhada de todas as variáveis, unidades de medida, métodos de agregação e fontes governamentais está documentada em:  
-👉 **[`docs/DICIONARIO_DE_DADOS.md`](docs/DICIONARIO_DE_DADOS.md)**
-
-O dicionário abrange:
-- **Demografia e Identificação:** Códigos IBGE (6 e 7 dígitos), UF, Macrorregião, População 2025 e PIB a preços correntes.
-- **Previdência Social:** Quantidade e valores do RGPS, benefícios rurais, participação no PIB e cenários de simulação fiscal.
-- **Trabalho e Transferência de Renda:** Carteiras assinadas CLT, MEIs ativos, famílias do Bolsa Família e beneficiários do BPC/LOAS.
-- **Educação Básica:** Matrículas na rede pública, volume do FUNDEB municipal, complementação da União e beneficiários do Pé-de-Meia.
-- **Saúde e Medicamentos:** Pacientes e economia estimada da Farmácia Popular, atendimentos de oncologia, HIV e hemodiálise.
-- **Séries Históricas:** Frotas de veículos novos e usados, crédito SBPE, postos CLT, MEIs, índices de cesta básica DIEESE, combustíveis ANP e locação residencial FipeZap.
+| Perfil Socioeconômico Reclassificado | Qtd Cidades | % Votos Válidos BR | Lula (1ºT 2026) | Flávio Bolsonaro (1ºT 2026) | Caiado (1ºT 2026) | Zema (1ºT 2026) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Municípios Dependentes de Seguridade e Repasses** | 766 | 10,22% | **71,19%** | 24,66% | 0,88% | 0,05% |
+| **Jovens e Dependentes de Apoio Social** | 1.414 | 25,46% | **63,80%** | 31,76% | 1,01% | 0,05% |
+| **Pequenos Municípios do Funcionalismo** | 573 | 1,79% | 44,00% | **48,77%** | 3,23% | 0,24% |
+| **Grandes Metrópoles e Capitais (Atípicas)** | 5 | 1,60% | 38,65% | **54,02%** | 1,72% | 0,15% |
+| **Cidades Autônomas e Agroindustriais** | 957 | 24,66% | 35,99% | **56,36%** | 2,85% | 0,26% |
+| **Polos Regionais de Emprego e Serviços** | 1.134 | **31,82%** | 35,59% | **56,79%** | 2,60% | 0,29% |
+| **Cidades da Terceira Idade e Aposentados** | 722 | 4,45% | 34,53% | **58,31%** | 2,37% | 0,27% |
+| **TOTAL BRASIL (118,9M Votos Válidos)** | **5.571** | **100,00%** | **45,16%** | **47,03%** | **2,19%** | **0,27%** |
 
 ---
 
-## 📁 Estrutura de Arquivos
+## 🗺️ Mapeamento Geoespacial do Brasil
 
-```bash
-trad_x_municipio/
-│
-├── analise_cruzamentos_municipios.ipynb    # Notebook principal: Análise dos 5.571 municípios
-├── series_historicas_brasil_2010_2025.ipynb # Notebook: Séries temporais históricas (2010-2025)
-│
-├── traducao_municipios_consolidado.xlsx     # Planilha consolidada das 4 prioridades (5.571 municípios)
-├── series_historicas_brasil_2010_2025.xlsx  # Planilha com séries temporais e preços relativos
-│
-├── graficos_municipios/                     # Imagens dos gráficos em 300 DPI
-│   ├── grafico_1_dependencia_pib_estados.png
-│   ├── grafico_2_peso_seguridade_porte_cidades.png
-│   ├── grafico_3_fundeb_uniao_regioes.png
-│   ├── grafico_4_pe_de_meia_regioes.png
-│   ├── grafico_5_farmacia_popular_economia_bolso.png
-│   ├── grafico_6_perda_desvinculacao_salario_minimo.png
-│   └── grafico_7_perda_desvinculacao_por_aposentado.png
-│
-├── docs/                                    # Documentação técnica e analítica
-│   ├── DICIONARIO_DE_DADOS.md               # Dicionário de dados das 72 colunas e séries
-│   └── PRINCIPAIS_ACHADOS.md                # Relatório executivo completo de achados
-│
-├── .gitignore                               # Exclusão de caches, venvs e builds
-└── README.md                                # Apresentação do projeto e guia de uso
-```
+O mapeamento de todos os municípios brasileiros geolocalizados por perfil foi gerado em alta resolução editorial (300 DPI):
+
+![Mapa do Brasil por Perfil](dados_prioridades/mapa_brasil_perfis_municipios.png)
+
+---
+
+## 📉 Série Histórica da Abstenção (2010 a 2026)
+
+Evolução da taxa de abstenção (% de eleitores aptos que deixaram de comparecer às urnas) em cinco eleições presidenciais:
+
+| Perfil Socioeconômico | 2010 | 2014 | 2018 | 2022 | 2026 (1ºT) | Trajetória (2010→2026) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Grandes Metrópoles e Capitais (Atípicas)** | 19,4% | 17,6% | 18,5% | 18,8% | **18,97%** | Estável |
+| **Municípios Dependentes de Seguridade e Repasses** | **26,3%** | 25,9% | 23,3% | 21,9% | **19,43%** | **-6,9%** *(maior ganho de participação)* |
+| **Jovens e Dependentes de Apoio Social** | **26,1%** | 24,9% | 23,4% | 22,5% | **19,45%** | **-6,6%** *(forte queda da abstenção)* |
+| **Cidades da Terceira Idade e Aposentados** | 18,0% | 18,2% | 19,0% | 18,2% | **19,81%** | +1,8% *(baixo absenteísmo)* |
+| **Polos Regionais de Emprego e Serviços** | 20,9% | 21,4% | 22,5% | 20,9% | **21,75%** | +0,8% |
+| **Cidades Autônomas e Agroindustriais** | 21,2% | 21,8% | 22,3% | 20,9% | **21,77%** | +0,5% |
+| **Pequenos Municípios do Funcionalismo** | 23,4% | 24,3% | 25,6% | 22,5% | **22,92%** | -0,5% |
+
+---
+
+## 📁 Estrutura de Arquivos e Bases de Dados
+
+As bases processadas e consolidadas estão salvas no diretório [`dados_prioridades/`](dados_prioridades/):
+
+* 📊 [`classificacao_perfis_municipios_completa.xlsx`](dados_prioridades/classificacao_perfis_municipios_completa.xlsx): Planilha mestra com todos os 5.571 municípios, indicadores per capita e a coluna `perfil_final_reclassificado`.
+* 📊 [`cruzamento_perfil_x_eleicao_completo.xlsx`](dados_prioridades/cruzamento_perfil_x_eleicao_completo.xlsx): Planilha integrada contendo abas com o Peso Eleitoral 2026, Votação 1ºT 2026, Histórico de Abstenção 2010–2026 e Abstenção por Idade.
+* 📄 [`metropoles_brasileiras.xlsx`](dados_prioridades/metropoles_brasileiras.xlsx): Planilha dedicada das 53 metrópoles com 5 abas detalhadas.
+* 📄 [`votacao_presidencial_municipios_2026.csv`](dados_prioridades/eleicoes_tse/votacao_presidencial_municipios_2026.csv): Votação municipal completa do 1º Turno de 2026.
+
+---
+
+## 📚 Documentação Técnica Completa
+
+Para aprofundar na fundamentação matemática e no significado de cada métrica:
+* 👉 **[Arquitetura de Dados e Metodologia Científica](docs/ARQUITETURA_E_METODOLOGIA.md):** Pipelines, diagramas Mermaid, formulações de normalização Z-score e projeção euclidiana.
+* 👉 **[Dicionário de Dados](docs/DICIONARIO_DE_DADOS.md):** Descrição campo a campo de todas as variáveis e fontes primárias.
+* 👉 **[Principais Achados Socioeconômicos](docs/PRINCIPAIS_ACHADOS.md):** Relatório detalhado dos impactos de renda e previdência na economia local.
 
 ---
 
 ## 🚀 Como Executar Localmente
 
-### 1. Clonar o repositório
 ```bash
-git clone https://github.com/<SEU_USUARIO>/trad_x_municipio.git
-cd trad_x_municipio
+# 1. Ativar o ambiente virtual
+source .venv/bin/activate
+
+# 2. Compilar e rodar os clusters
+python build_clusters_nb.py
+jupyter nbconvert --to notebook --execute --inplace analise_clusters_perfis_municipios.ipynb
+
+# 3. Compilar e rodar a análise eleitoral
+python build_eleitoral_nb.py
+jupyter nbconvert --to notebook --execute --inplace analise_eleitoral_perfis_municipios.ipynb
 ```
-
-### 2. Criar e ativar o ambiente virtual (Python 3.10+)
-```bash
-python3 -m venv venv
-source venv/bin/activate  # No Windows: venv\Scripts\activate
-```
-
-### 3. Instalar as dependências necessárias
-```bash
-pip install pandas numpy openpyxl matplotlib seaborn jupyter ipykernel
-```
-
-### 4. Executar os Cadernos Jupyter
-Você pode abrir e rodar os notebooks diretamente no **VS Code / Antigravity IDE** ou iniciar a interface web do Jupyter:
-```bash
-jupyter notebook
-```
-> **Dica no VS Code:** Ao abrir `analise_cruzamentos_municipios.ipynb`, clique no botão **"Select Kernel"** no canto superior direito e aponte para o Python do seu ambiente virtual.
-
----
-
-## 🏛️ Fontes Primárias
-
-Os dados consolidados neste projeto foram extraídos e tratados a partir de bases oficiais e abertas do Estado brasileiro e entidades de pesquisa:
-- **IBGE:** Censo Demográfico, Projeções Populacionais e Contas Regionais do PIB Municipal.
-- **Ministério da Previdência Social (MPS / INSS):** Boletim Estatístico da Previdência Social e Censo Previdenciário.
-- **Ministério do Desenvolvimento e Assistência Social (MDS / SAGICAD):** Folhas de pagamento do Bolsa Família e do BPC/LOAS.
-- **Ministério do Trabalho e Emprego (MTE):** Novo CAGED e RAIS.
-- **Ministério da Educação (MEC / INEP / FNDE):** Censo Escolar, Repasses do FUNDEB e Programa Pé-de-Meia.
-- **Ministério da Saúde (MS / DataSUS):** Sistema de Informações Ambulatoriais (SIA/SUS), Farmácia Popular e CEAF.
-- **Entidades Setoriais:** DIEESE (Cesta Básica), ANP (Preços de Combustíveis e Gás GLP), FipeZap (Locação Residencial), ABECIP (Crédito Imobiliário), Fenabrave e Fenauto (Veículos).
-
----
-*Desenvolvido com foco em transparência pública, rigor metodológico e visualização de dados acessível.*
