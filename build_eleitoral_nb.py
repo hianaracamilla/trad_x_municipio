@@ -22,10 +22,11 @@ def build():
 ### 🎯 Objetivos deste Caderno:
 1. **Resultado do 1º Turno de 2026:** Analisar a média de votos de **Lula** e **Flávio Bolsonaro** (e demais candidatos) em cada um dos perfis socioeconômicos dos 5.571 municípios.
 2. **Peso Eleitoral de Cada Perfil:** Calcular a fatia dos votos válidos do país que cada grupo representa e de onde vêm os votos de cada candidato.
-3. **Série Histórica da Abstenção (2010 a 2026):** Acompanhar a evolução do comparecimento eleitoral em 5 eleições presidenciais consecutivas.
-4. **Abstenção por Faixa Etária:** Identificar os padrões de abstenção entre jovens (16-24), adultos (25-59) e idosos (60+).
-5. **Mapeamento Geoespacial do Brasil:** Plotar o mapa geográfico com todos os municípios brasileiros geolocalizados e coloridos de acordo com seu perfil socioeconômico.
-6. **Exportação Consolidada:** Salvar as bases com indicadores socioeconômicos e eleitorais integrados.
+3. **Dinâmica de Mudança e Migração de Votos (2022 ➔ 2026):** Quantificar quantos % do eleitorado mudou de voto entre o 1º turno de 2022 e o de 2026 (considerando Flávio Bolsonaro = Bolsonaro), o swing eleitoral e os principais municípios em cada perfil.
+4. **Série Histórica da Abstenção (2010 a 2026):** Acompanhar a evolução do comparecimento eleitoral em 5 eleições presidenciais consecutivas.
+5. **Abstenção por Faixa Etária:** Identificar os padrões de abstenção entre jovens (16-24), adultos (25-59) e idosos (60+).
+6. **Mapeamento Geoespacial do Brasil:** Plotar o mapa geográfico com todos os municípios brasileiros geolocalizados e coloridos de acordo com seu perfil socioeconômico.
+7. **Exportação Consolidada:** Salvar as bases com indicadores socioeconômicos e eleitorais integrados.
 """))
 
     # Célula 1: Code (Imports)
@@ -98,7 +99,7 @@ df_eleitoral = df_eleitoral.merge(
 
 # Merge com Eleições 2022
 df_eleitoral = df_eleitoral.merge(
-    df_2022[['cod_ibge7', 'pct_lula_1t', 'pct_bolsonaro_1t', 'pct_lula_2t', 'pct_bolsonaro_2t']],
+    df_2022[['cod_ibge7', 'votos_lula_1t', 'votos_bolsonaro_1t', 'votos_validos_1t', 'pct_lula_1t', 'pct_bolsonaro_1t', 'pct_lula_2t', 'pct_bolsonaro_2t']],
     on='cod_ibge7', how='left'
 )
 
@@ -247,8 +248,189 @@ plt.tight_layout()
 plt.show()
 """))
 
-    # Célula 10: Markdown
-    nb.cells.append(new_markdown_cell(r"""## 📉 4. Trajetória Histórica da Abstenção (2010 a 2026 — 5 Eleições Presidenciais)
+    # Célula 10: Markdown (Nova Seção 4: Mudança de Voto 2022 x 2026)
+    nb.cells.append(new_markdown_cell(r"""## 🔄 4. Dinâmica de Mudança e Migração de Votos (1º Turno 2022 vs 1º Turno 2026)
+### Premissa Política: Continuidade Eleitoral (Flávio Bolsonaro 2026 = Jair Bolsonaro 2022)
+
+Analisamos como o eleitor brasileiro mudou de voto entre o 1º Turno de 2022 e o 1º Turno de 2026:
+1. **Δ Lula (p.p.):** Variação percentual de Lula nos votos válidos (`pct_lula_2026_1t - pct_lula_1t`).
+2. **Δ Flávio / Bolsonaro (p.p.):** Variação percentual do campo bolsonarista (`pct_flavio_2026_1t - pct_bolsonaro_1t`).
+3. **Swing Líquido Pró-Flávio (p.p.):** Quanto a balança se inclinou em direção a Flávio Bolsonaro em relação a Lula (`Δ_Flavio - Δ_Lula`).
+4. **% do Eleitorado que Mudou o Voto:** Calculado via **Índice de Volatilidade de Pedersen** ponderado pelo total de votos válidos de cada perfil:
+   $$\text{Taxa de Mudança} = \frac{1}{2} \left( |\Delta \text{Lula}| + |\Delta \text{Flávio/Bolsonaro}| + |\Delta \text{Outros}| \right)$$
+5. **Principais Municípios:** Análise dos maiores colégios eleitorais do país, das cidades que viraram de vencedor ("flips" de Lula 2022 para Flávio 2026) e das maiores oscilações por perfil socioeconômico.
+"""))
+
+    # Célula 11: Code (Tabela Analítica de Mudança de Voto por Perfil)
+    nb.cells.append(new_code_cell("""# 1. Nível Municipal: Cálculos de Migração e Mudança de Voto
+df_eleitoral['delta_lula'] = (df_eleitoral['pct_lula_2026_1t'] - df_eleitoral['pct_lula_1t']).round(2)
+df_eleitoral['delta_bolso_flavio'] = (df_eleitoral['pct_flavio_2026_1t'] - df_eleitoral['pct_bolsonaro_1t']).round(2)
+df_eleitoral['pct_outros_2022'] = (100 - (df_eleitoral['pct_lula_1t'] + df_eleitoral['pct_bolsonaro_1t'])).round(2)
+df_eleitoral['pct_outros_2026'] = (100 - (df_eleitoral['pct_lula_2026_1t'] + df_eleitoral['pct_flavio_2026_1t'])).round(2)
+df_eleitoral['delta_outros'] = (df_eleitoral['pct_outros_2026'] - df_eleitoral['pct_outros_2022']).round(2)
+
+# Taxa de Mudança de Voto a nível municipal
+df_eleitoral['pct_mudanca_voto_mun'] = (0.5 * (
+    df_eleitoral['delta_lula'].abs() + 
+    df_eleitoral['delta_bolso_flavio'].abs() + 
+    df_eleitoral['delta_outros'].abs()
+)).round(2)
+df_eleitoral['swing_flavio_vs_lula'] = (df_eleitoral['delta_bolso_flavio'] - df_eleitoral['delta_lula']).round(2)
+
+# Vencedores do 1º Turno (2022 vs 2026)
+venc_22_1t = np.where(df_eleitoral['pct_lula_1t'] > df_eleitoral['pct_bolsonaro_1t'], 'LULA', 
+                      np.where(df_eleitoral['pct_bolsonaro_1t'] > df_eleitoral['pct_lula_1t'], 'BOLSONARO', 'EMPATE'))
+venc_26_1t = df_eleitoral['vencedor_2026_1t'].replace({'FLAVIO BOLSONARO': 'BOLSONARO'})
+df_eleitoral['vencedor_2022_1t'] = venc_22_1t
+df_eleitoral['virada_lula_para_flavio'] = (venc_22_1t == 'LULA') & (venc_26_1t == 'BOLSONARO')
+
+# 2. Agregação Ponderada por Perfil Socioeconômico (Total de Votos Reais)
+resumo_migracao_perfil = df_eleitoral.groupby('perfil_analise').agg({
+    'cod_ibge7': 'count',
+    'votos_validos_1t': 'sum',
+    'votos_lula_1t': 'sum',
+    'votos_bolsonaro_1t': 'sum',
+    'votos_validos_2026_1t': 'sum',
+    'votos_lula_2026_1t': 'sum',
+    'votos_flavio_2026_1t': 'sum',
+    'virada_lula_para_flavio': 'sum'
+}).copy()
+
+resumo_migracao_perfil['pct_lula_2022_pond'] = (resumo_migracao_perfil['votos_lula_1t'] / resumo_migracao_perfil['votos_validos_1t'] * 100).round(2)
+resumo_migracao_perfil['pct_bolso_2022_pond'] = (resumo_migracao_perfil['votos_bolsonaro_1t'] / resumo_migracao_perfil['votos_validos_1t'] * 100).round(2)
+resumo_migracao_perfil['pct_lula_2026_pond'] = (resumo_migracao_perfil['votos_lula_2026_1t'] / resumo_migracao_perfil['votos_validos_2026_1t'] * 100).round(2)
+resumo_migracao_perfil['pct_flavio_2026_pond'] = (resumo_migracao_perfil['votos_flavio_2026_1t'] / resumo_migracao_perfil['votos_validos_2026_1t'] * 100).round(2)
+
+resumo_migracao_perfil['delta_lula_pp'] = (resumo_migracao_perfil['pct_lula_2026_pond'] - resumo_migracao_perfil['pct_lula_2022_pond']).round(2)
+resumo_migracao_perfil['delta_flavio_bolso_pp'] = (resumo_migracao_perfil['pct_flavio_2026_pond'] - resumo_migracao_perfil['pct_bolso_2022_pond']).round(2)
+
+resumo_migracao_perfil['pct_outros_2022_pond'] = (100 - resumo_migracao_perfil['pct_lula_2022_pond'] - resumo_migracao_perfil['pct_bolso_2022_pond']).round(2)
+resumo_migracao_perfil['pct_outros_2026_pond'] = (100 - resumo_migracao_perfil['pct_lula_2026_pond'] - resumo_migracao_perfil['pct_flavio_2026_pond']).round(2)
+resumo_migracao_perfil['delta_outros_pp'] = (resumo_migracao_perfil['pct_outros_2026_pond'] - resumo_migracao_perfil['pct_outros_2022_pond']).round(2)
+
+# % Real do Eleitorado que Mudou de Voto
+resumo_migracao_perfil['pct_eleitor_mudou_voto'] = (0.5 * (
+    resumo_migracao_perfil['delta_lula_pp'].abs() + 
+    resumo_migracao_perfil['delta_flavio_bolso_pp'].abs() + 
+    resumo_migracao_perfil['delta_outros_pp'].abs()
+)).round(2)
+
+resumo_migracao_perfil['swing_flavio_vs_lula'] = (
+    resumo_migracao_perfil['delta_flavio_bolso_pp'] - resumo_migracao_perfil['delta_lula_pp']
+).round(2)
+
+resumo_migracao_perfil = resumo_migracao_perfil.sort_values(by='pct_eleitor_mudou_voto', ascending=False)
+
+print("📊 TAXA DE MUDANÇA DE VOTO E SWING ELEITORAL POR PERFIL SOCIOECONÔMICO (1ºT 2022 vs 1ºT 2026):")
+tabela_migracao_show = resumo_migracao_perfil[[
+    'cod_ibge7', 'pct_lula_2022_pond', 'pct_lula_2026_pond', 'delta_lula_pp',
+    'pct_bolso_2022_pond', 'pct_flavio_2026_pond', 'delta_flavio_bolso_pp',
+    'swing_flavio_vs_lula', 'pct_eleitor_mudou_voto', 'virada_lula_para_flavio'
+]].copy()
+tabela_migracao_show.columns = [
+    'Qtd_Cidades', 'Lula_2022_%', 'Lula_2026_%', 'Δ_Lula_(p.p.)',
+    'Bolso_2022_%', 'Flavio_2026_%', 'Δ_Flavio_(p.p.)',
+    'Swing_Flavio_vs_Lula_(p.p.)', '%_Eleitor_Mudou_Voto', 'Cidades_Viraram_p/_Flavio'
+]
+display(tabela_migracao_show)
+"""))
+
+    # Célula 12: Code (Visualização Gráfica Dupla: Deslocamento dos Polos e % de Mudança)
+    nb.cells.append(new_code_cell("""# Visualização Gráfica Editorial: Deslocamento dos Polos e Taxa de Mudança de Voto
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7), sharey=True)
+
+y_pos = np.arange(len(resumo_migracao_perfil))
+
+# Subplot 1: Variação dos Polos em p.p. (Δ Lula vs Δ Flávio Bolsonaro)
+ax1.barh(y_pos - 0.2, resumo_migracao_perfil['delta_lula_pp'], height=0.38, color='#C00000', alpha=0.85, edgecolor='black', label='Δ Lula (2026 - 2022)')
+ax1.barh(y_pos + 0.2, resumo_migracao_perfil['delta_flavio_bolso_pp'], height=0.38, color='#1F4E79', alpha=0.85, edgecolor='black', label='Δ Flávio / Bolsonaro (2026 - 2022)')
+ax1.axvline(0, color='black', lw=1, ls='--')
+ax1.set_yticks(y_pos)
+ax1.set_yticklabels(resumo_migracao_perfil.index, fontsize=10, fontweight='bold')
+ax1.invert_yaxis()
+ax1.set_xlabel('Variação em Pontos Percentuais (p.p.)', fontsize=11, fontweight='bold')
+ax1.set_title('Deslocamento dos Polos: Lula vs Flávio Bolsonaro', fontsize=13, fontweight='bold', pad=12)
+ax1.legend(loc='lower left', fontsize=10)
+
+for p in ax1.patches:
+    w = p.get_width()
+    offset = 0.3 if w >= 0 else -0.3
+    ha = 'left' if w >= 0 else 'right'
+    cor = '#0F2840' if w >= 0 else '#800000'
+    ax1.annotate(f"{w:+.2f} p.p.", (w + offset, p.get_y() + p.get_height()/2.), va='center', ha=ha, fontsize=9, fontweight='bold', color=cor)
+ax1.set_xlim(-10, 9)
+
+# Subplot 2: % Real do Eleitorado que Mudou o Voto
+cores_mudanca = ['#B22222' if v >= 7.0 else '#E26B00' if v >= 4.5 else '#1F4E79' for v in resumo_migracao_perfil['pct_eleitor_mudou_voto']]
+bars2 = ax2.barh(y_pos, resumo_migracao_perfil['pct_eleitor_mudou_voto'], height=0.55, color=cores_mudanca, alpha=0.85, edgecolor='black')
+ax2.set_xlabel('% do Eleitorado que Mudou o Voto', fontsize=11, fontweight='bold')
+ax2.set_title('Intensidade da Mudança de Voto (% do Eleitorado)', fontsize=13, fontweight='bold', pad=12)
+ax2.set_xlim(0, 10)
+
+for p in bars2:
+    w = p.get_width()
+    ax2.annotate(f"{w:.2f}%", (w + 0.25, p.get_y() + p.get_height()/2.), va='center', fontsize=10, fontweight='bold', color='#222222')
+
+plt.suptitle('🔄 Diagnóstico da Mudança de Voto: 1ºT 2022 vs 1ºT 2026 por Perfil Socioeconômico (Flávio = Bolsonaro)', fontsize=15, fontweight='bold', y=1.02)
+plt.tight_layout()
+plt.show()
+"""))
+
+    # Célula 13: Code (Diagnóstico dos Principais Municípios e Perfis)
+    nb.cells.append(new_code_cell("""# 1. Os 15 Maiores Colégios Eleitorais do Brasil
+top15_maiores = df_eleitoral.sort_values(by='eleitores_aptos_2026', ascending=False).head(15).copy()
+top15_maiores_exib = top15_maiores[[
+    'municipio', 'uf', 'perfil_analise', 'eleitores_aptos_2026',
+    'pct_lula_1t', 'pct_lula_2026_1t', 'delta_lula',
+    'pct_bolsonaro_1t', 'pct_flavio_2026_1t', 'delta_bolso_flavio',
+    'pct_mudanca_voto_mun', 'swing_flavio_vs_lula'
+]].copy()
+top15_maiores_exib.columns = [
+    'Município', 'UF', 'Perfil_Socioeconômico', 'Eleitores_Aptos_2026',
+    'Lula_2022_%', 'Lula_2026_%', 'Δ_Lula_(p.p.)',
+    'Bolso_2022_%', 'Flavio_2026_%', 'Δ_Flavio_(p.p.)',
+    '%_Mudou_Voto', 'Swing_Flavio_vs_Lula_(p.p.)'
+]
+top15_maiores_exib['Eleitores_Aptos_2026'] = top15_maiores_exib['Eleitores_Aptos_2026'].map('{:,.0f}'.format)
+
+print("🏙️ 1. OS 15 MAIORES MUNICÍPIOS DO BRASIL — MUDANÇA DE VOTO E PERFIL:")
+display(top15_maiores_exib)
+
+# 2. Cidades que Viraram de Lula (2022) para Flávio Bolsonaro (2026)
+top_viradas = df_eleitoral[df_eleitoral['virada_lula_para_flavio']].sort_values(by='eleitores_aptos_2026', ascending=False).head(15).copy()
+top_viradas_exib = top_viradas[[
+    'municipio', 'uf', 'perfil_analise', 'eleitores_aptos_2026',
+    'pct_lula_1t', 'pct_lula_2026_1t', 'pct_bolsonaro_1t', 'pct_flavio_2026_1t',
+    'swing_flavio_vs_lula'
+]].copy()
+top_viradas_exib.columns = [
+    'Município', 'UF', 'Perfil_Socioeconômico', 'Eleitores_Aptos_2026',
+    'Lula_2022_%', 'Lula_2026_%', 'Bolso_2022_%', 'Flavio_2026_%',
+    'Swing_Flavio_vs_Lula_(p.p.)'
+]
+top_viradas_exib['Eleitores_Aptos_2026'] = top_viradas_exib['Eleitores_Aptos_2026'].map('{:,.0f}'.format)
+
+print(f"\\n🔄 2. PRINCIPAIS MUNICÍPIOS QUE VIRARAM DE LADO (Lula 2022 ➔ Flávio Bolsonaro 2026 — Total no País: {df_eleitoral['virada_lula_para_flavio'].sum()} cidades):")
+display(top_viradas_exib)
+
+# 3. Top Cidades com Maior Virada / Swing Pró-Flávio (Mínimo 50 mil Eleitores)
+top_swing = df_eleitoral[df_eleitoral['eleitores_aptos_2026'] >= 50000].sort_values(by='swing_flavio_vs_lula', ascending=False).head(10).copy()
+top_swing_exib = top_swing[[
+    'municipio', 'uf', 'perfil_analise', 'eleitores_aptos_2026',
+    'delta_lula', 'delta_bolso_flavio', 'pct_mudanca_voto_mun', 'swing_flavio_vs_lula'
+]].copy()
+top_swing_exib.columns = [
+    'Município', 'UF', 'Perfil_Socioeconômico', 'Eleitores_Aptos_2026',
+    'Δ_Lula_(p.p.)', 'Δ_Flavio_(p.p.)', '%_Mudou_Voto', 'Swing_Flavio_vs_Lula_(p.p.)'
+]
+top_swing_exib['Eleitores_Aptos_2026'] = top_swing_exib['Eleitores_Aptos_2026'].map('{:,.0f}'.format)
+
+print("\\n⚡ 3. TOP 10 CIDADES COM MAIOR SWING PRÓ-FLÁVIO (Mínimo 50.000 Eleitores):")
+display(top_swing_exib)
+"""))
+
+    # Célula 14: Markdown
+    nb.cells.append(new_markdown_cell(r"""## 📉 5. Trajetória Histórica da Abstenção (2010 a 2026 — 5 Eleições Presidenciais)
 Acompanhamos a taxa de abstenção (% de eleitores aptos que deixaram de votar) ao longo de cinco eleições presidenciais consecutivas: **2010, 2014, 2018, 2022 e 2026**.
 """))
 
@@ -294,12 +476,12 @@ plt.tight_layout()
 plt.show()
 """))
 
-    # Célula 12: Markdown
-    nb.cells.append(new_markdown_cell(r"""## 👥 5. Diagnóstico de Abstenção por Faixa Etária
+    # Célula 16: Markdown
+    nb.cells.append(new_markdown_cell(r"""## 👥 6. Diagnóstico de Abstenção por Faixa Etária
 Avaliamos a taxa de abstenção em cada estrato etário do eleitorado (Jovens 16-24, Adultos 25-59 e Idosos 60+).
 """))
 
-    # Célula 13: Code
+    # Célula 17: Code
     nb.cells.append(new_code_cell("""resumo_idade = df_eleitoral.groupby('perfil_analise').agg({
     'taxa_abstencao_jovem_16_24_pct': 'mean',
     'taxa_abstencao_adulto_25_59_pct': 'mean',
@@ -330,8 +512,8 @@ plt.tight_layout()
 plt.show()
 """))
 
-    # Célula 14: Markdown
-    nb.cells.append(new_markdown_cell(r"""## 🗺️ 6. Mapa Geográfico do Brasil com as Cidades Pintadas por Perfil
+    # Célula 18: Markdown
+    nb.cells.append(new_markdown_cell(r"""## 🗺️ 7. Mapa Geográfico do Brasil com as Cidades Pintadas por Perfil
 Plotamos os **5.571 municípios brasileiros** georreferenciados sobre a malha territorial oficial das 27 Unidades da Federação do IBGE.
 """))
 
@@ -397,12 +579,12 @@ plt.show()
 print("✅ Mapa salvo em alta resolução em 'dados_prioridades/mapa_brasil_perfis_municipios.png'!")
 """))
 
-    # Célula 16: Markdown
-    nb.cells.append(new_markdown_cell(r"""## 💾 7. Exportação da Base Completa Integrada (Socioeconômica + Eleitoral 2026)
-Exportamos a base unificada com todas as 5.571 cidades, seus perfis socioeconômicos reclassificados e todas as variáveis de votação de 2026 e séries temporais.
+    # Célula 20: Markdown
+    nb.cells.append(new_markdown_cell(r"""## 💾 8. Exportação da Base Completa Integrada (Socioeconômica + Eleitoral 2026)
+Exportamos a base unificada com todas as 5.571 cidades, seus perfis socioeconômicos reclassificados, matriz de mudança de votos e séries temporais.
 """))
 
-    # Célula 17: Code
+    # Célula 21: Code
     nb.cells.append(new_code_cell("""out_xlsx_integrado = 'dados_prioridades/cruzamento_perfil_x_eleicao_completo.xlsx'
 out_csv_integrado = 'dados_prioridades/cruzamento_perfil_x_eleicao_completo.csv'
 
@@ -410,15 +592,18 @@ with pd.ExcelWriter(out_xlsx_integrado, engine='openpyxl') as writer:
     df_eleitoral.to_excel(writer, sheet_name='Base_Consolidada_5571', index=False)
     resumo_peso_26.to_excel(writer, sheet_name='Peso_Eleitoral_2026')
     resumo_voto_26.to_excel(writer, sheet_name='Votacao_1T_2026')
+    resumo_migracao_perfil.to_excel(writer, sheet_name='Migracao_Voto_2022_2026')
+    top15_maiores.to_excel(writer, sheet_name='Maiores_Cidades_Mudanca')
+    df_eleitoral[df_eleitoral['virada_lula_para_flavio']].to_excel(writer, sheet_name='Cidades_Virada_Flavio')
     resumo_hist_abst.to_excel(writer, sheet_name='Historico_Abstencao_2010_2026')
     resumo_idade.to_excel(writer, sheet_name='Abstencao_Idade')
 
 df_eleitoral.to_csv(out_csv_integrado, sep=';', index=False, encoding='utf-8')
-print(f"🎉 Base completa com Eleições 2026 exportada com sucesso:")
+print(f"🎉 Base completa com Eleições 2026 e Migração de Votos exportada com sucesso:")
 print(f" - {out_xlsx_integrado}")
 print(f" - {out_csv_integrado}")
-print("Amostra das primeiras 5 cidades com dados de 2026:")
-display(df_eleitoral[['cod_ibge7', 'municipio', 'uf', 'perfil_analise', 'pct_lula_2026_1t', 'pct_flavio_2026_1t', 'taxa_abst_2026_1t']].head(5))
+print("Amostra das primeiras 5 cidades com dados consolidados:")
+display(df_eleitoral[['cod_ibge7', 'municipio', 'uf', 'perfil_analise', 'pct_lula_2026_1t', 'pct_flavio_2026_1t', 'delta_lula', 'delta_bolso_flavio', 'pct_mudanca_voto_mun']].head(5))
 """))
 
     with open("analise_eleitoral_perfis_municipios.ipynb", "w", encoding="utf-8") as f_out:
