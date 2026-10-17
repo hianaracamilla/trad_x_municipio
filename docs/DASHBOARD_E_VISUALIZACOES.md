@@ -94,11 +94,46 @@ O mapa possui 3 níveis de profundidade com transição de câmera fluida (`flyT
 
 ---
 
-## 📈 4. Painel de Séries Históricas & Poder de Compra (2016–2026)
+## 🔵 4. Gráfico de Dispersão & Correlação Municipal (Bolinhas)
+
+O painel inclui uma visualização avançada de dispersão multivariada (`type: 'bubble'` / `Chart.js`):
+
+### 4.1. Estrutura do Gráfico
+- **Cada Bolinha representa 1 Município Brasileiro (5.571 cidades no total)**.
+- **Tamanho da Bolinha (`r`)**: Proporcional à população residente / eleitores (calculado via $\text{raio} = \min(26, \max(3.2, \text{pop}^{0.27} \times 0.52))$), permitindo identificar visualmente grandes metrópoles como São Paulo, Salvador, Rio de Janeiro e capitais em relação aos municípios menores.
+- **Cor da Bolinha**: Pinta o ponto com a cor oficial do seu **Perfil Socioeconômico**. Cada perfil atua como um *dataset* independente no Chart.js, permitindo ao usuário **clicar na legenda para ligar/desligar clusters** e isolar grupos específicos.
+- **Eixo Y**: Percentual de votos em Lula (0% a 100%) na eleição selecionada (2026 1T, 2022 1T ou 2022 2T).
+- **Linha de Referência (50%)**: Linha pontilhada horizontal no patamar da maioria absoluta dos votos válidos.
+- **Linha de Regressão Linear (Linha Preta)**: Reta calculada matematicamente pelo método dos Mínimos Quadrados Ordinários ($y = ax + b$). Representa o **voto esperado pela presença/dependência do benefício público**:
+  - *Cidades acima da linha preta*: tiveram votação superior à tendência estatística esperada para seu nível de apoio social;
+  - *Cidades abaixo da linha preta*: tiveram votação inferior à tendência esperada.
+
+### 4.2. Controles Dinâmicos do Eixo X
+O usuário pode alternar dinamicamente o indicador do Eixo X:
+1. **⭐ Índice Composto de Dependência Pública (0 a 100)**: Score ponderado calibrado combinando intensidade per capita de Bolsa Família (28%), Aposentadorias RGPS (22%), BPC/LOAS (14%), Fundeb da União (12%), Pé-de-Meia (10%), Servidores Públicos (8%) e Farmácia Popular (6%).
+2. **Famílias no Bolsa Família (por 100 hab)**.
+3. **Aposentados RGPS / INSS (por 100 hab)**.
+4. **Cobertura Pé-de-Meia (% dos estudantes da rede pública)**.
+5. **Dependência do Fundeb da União (%)**.
+6. **Servidores Públicos (por 100 hab)**.
+7. **Beneficiários BPC / LOAS (por 100 hab)**.
+8. **Dispensação Farmácia Popular (beneficiários por 100 hab)**.
+9. **Peso das Aposentadorias no PIB Municipal (%)**.
+
+### 4.3. Filtro por Macrorregião
+Possibilidade de filtrar o gráfico instantaneamente por **Brasil Todo (5.571 cidades)** ou focar em uma das macrorregiões (**Nordeste, Sudeste, Sul, Norte ou Centro-Oeste**).
+
+### 4.4. Interatividade
+- **Hover / Tooltip**: Exibe nome da cidade, UF, perfil socioeconômico, população, valor do indicador X, % Lula e % Opositor.
+- **Clique na Bolinha**: Dispara a abertura automática do **Modal Raio-X** detalhado da cidade selecionada.
+
+---
+
+## 📈 5. Painel de Séries Históricas & Poder de Compra (2016–2026)
 
 Integrado logo após a inteligência territorial, o módulo histórico acompanha a evolução do padrão de vida dos brasileiros nos últimos 10 anos:
 
-### 4.1. Abas e Categorias de Indicadores
+### 5.1. Abas e Categorias de Indicadores
 O usuário pode alternar dinamicamente entre quatro perspectivas:
 1. **🛒 Poder de Compra das Famílias**:
    - Custo da Cesta Básica oficial (DIEESE) em percentual do Salário Mínimo (2016 a 2026).
@@ -118,13 +153,13 @@ O usuário pode alternar dinamicamente entre quatro perspectivas:
    - Estoque de Microempreendedores Individuais (MEIs) ativos (Receita Federal / Mapa de Empresas).
    - Saldo comercial / lucro líquido recorde das exportações do Agronegócio (Comex Stat / MAPA).
 
-### 4.2. Gráfico Interativo com Chart.js
+### 5.2. Gráfico Interativo com Chart.js
 - Eixos adaptativos com formatação automática de moeda (R$), percentual (%) e milhões de postos.
 - Comparativos visuais explícitos entre o encerramento do governo anterior (2022) e o momento atual (2026).
 
 ---
 
-## 🔍 5. Busca Preditiva Municipal & Modal Raio-X
+## 🔍 6. Busca Preditiva Municipal & Modal Raio-X
 
 - **Autocomplete Instantâneo**: Campo de busca discreto no topo do painel que filtra em milissegundos entre as 5.571 cidades por nome ou sigla da UF.
 - **Modal de Detalhes da Cidade**:
@@ -136,25 +171,25 @@ O usuário pode alternar dinamicamente entre quatro perspectivas:
 
 ---
 
-## 🎨 6. Estúdio de Cards Sociais (Card Studio)
+## 🎨 7. Estúdio de Cards Sociais (Card Studio)
 
 O painel conta com um motor dedicado de geração e exportação de artes visuais para redes sociais:
 
-### 6.1. Formatos Disponíveis
+### 7.1. Formatos Disponíveis
 - **Feed / Carrossel (1:1)**: 1080 × 1080 px (otimizado para Instagram, LinkedIn e Twitter/X).
 - **Stories / Reels / TikTok (9:16)**: 1080 × 1920 px (layout vertical com espaçamento e hierarquia ajustados).
 
-### 6.2. Quatro Temas Estruturados
+### 7.2. Quatro Temas Estruturados
 1. **Raio-X Municipal**: Apresenta a cidade selecionada, selo oficial, população, indicadores per capita de saúde, educação, previdência e votação apurada.
 2. **Perfil Socioeconômico**: Sintetiza um dos 7 perfis, quantidade de municípios agrupados, peso no eleitorado nacional e médias dos indicadores.
 3. **Grandes Prioridades Nacionais**: Focado no impacto agregado das políticas (12,96M na Farmácia Popular, R$ 10,53 Bi no Pé-de-Meia, R$ 606 Bi na Previdência RGPS e 102,7M de trabalhadores formais).
 4. **Poder de Compra & Séries Históricas**: Comparativo direto 2022 vs. 2026 destacando a redução do custo da Cesta Básica, do Gás de Cozinha e da Gasolina como proporção do Salário Mínimo, além da criação de +6,7 milhões de empregos formais.
 
-### 6.3. Motor de Renderização Retina 2x (`html2canvas`)
+### 7.3. Motor de Renderização Retina 2x (`html2canvas`)
 - Utiliza renderização com escala `scale: 2` com interpolação de alta definição.
 - O arquivo PNG resultante possui bordas nítidas, tipografia cristalina e peso otimizado.
 
-### 6.4. Compartilhamento Multicanal em 1 Clique
+### 7.4. Compartilhamento Multicanal em 1 Clique
 - **Copiar Imagem (Ctrl+V)**: Utiliza a API `navigator.clipboard.write([new ClipboardItem({'image/png': blob})])`. O usuário simplesmente clica no botão e dá `Ctrl+V` dentro do WhatsApp Web, Telegram Desktop ou no gerenciador de postagens do Instagram.
 - **WhatsApp Web & App**: Abre mensagem pré-formatada com negritos, emojis e link canônico.
 - **Mais Redes (Web Share API)**: Em dispositivos móveis (Android e iOS), dispara o menu nativo do sistema operacional para enviar diretamente para Stories, direct ou mensagens.
@@ -162,9 +197,9 @@ O painel conta com um motor dedicado de geração e exportação de artes visuai
 
 ---
 
-## 🛠️ 7. Guia de Execução Local e Deploy
+## 🛠️ 8. Guia de Execução Local e Deploy
 
-### 7.1. Execução Local com Servidor Python
+### 8.1. Execução Local com Servidor Python
 Como a aplicação consome arquivos JSON locais (`fetch`), ela deve ser servida através de um servidor HTTP (não abre via `file:///` direto devido às restrições de CORS do navegador):
 
 ```bash

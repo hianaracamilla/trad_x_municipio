@@ -1802,6 +1802,150 @@ body {
   gap: 4px;
 }
 
+/* ==========================================================================
+   SCATTER & BUBBLE CORRELATION SECTION
+   ========================================================================== */
+.scatter-analysis-section {
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  padding: 28px;
+  margin-bottom: 40px;
+}
+
+.scatter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.scatter-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--gov-blue-light);
+  background: rgba(26, 86, 219, 0.08);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.scatter-title {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+  letter-spacing: -0.01em;
+}
+
+.scatter-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.scatter-controls-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.scatter-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.scatter-control-group label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.scatter-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: #F8FAFC;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1E293B;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.scatter-select:hover {
+  border-color: var(--gov-blue-light);
+  background: #FFFFFF;
+}
+
+.scatter-select:focus {
+  border-color: var(--gov-blue-light);
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.12);
+  background: #FFFFFF;
+}
+
+.scatter-chart-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  padding: 20px;
+}
+
+.scatter-chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 560px;
+}
+
+.scatter-footer-notes {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #F1F5F9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.footnote-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footnote-item.tip {
+  color: var(--gov-blue-light);
+  margin-top: 4px;
+}
+
+.footnote-line.black-line {
+  width: 24px;
+  height: 3px;
+  background: #0F172A;
+  display: inline-block;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.footnote-line.dashed-line {
+  width: 24px;
+  height: 2px;
+  border-top: 2px dashed #94A3B8;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
 /* Utilities */
 .hidden {
   display: none !important;

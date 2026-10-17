@@ -28,6 +28,9 @@ let studioConfig = {
 let chartVotosPerfil = null;
 let chartPesoPerfil = null;
 let chartAbstencao = null;
+let chartDispersao = null;
+let currentScatterMetricX = 'indice_composto';
+let currentScatterRegion = 'todas';
 let chartSeriesHistoricas = null;
 let currentSeriesMetric = 'poder_compra';
 
@@ -49,6 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initMap();
     renderizarDrilldown(true);
     renderizarGraficos();
+    renderizarGraficoDispersao();
     renderizarSeriesHistoricas();
     configurarEstudioCards();
   } catch (error) {
@@ -96,6 +100,7 @@ function configurarEventosGlobais() {
       renderizarRibbonEleitoral();
       renderizarDrilldown(false); // atualiza sem animação agressiva
       atualizarGraficoVotos();
+      atualizarGraficoDispersao();
       atualizarPreviewCard();
     });
   });
@@ -165,6 +170,23 @@ function configurarEventosGlobais() {
   document.getElementById('cards-studio-modal').addEventListener('click', (e) => {
     if (e.target.id === 'cards-studio-modal') fecharEstudioCards();
   });
+
+  // Controles do Gráfico de Dispersão (Bolinhas)
+  const selScatterX = document.getElementById('scatter-metric-x');
+  if (selScatterX) {
+    selScatterX.addEventListener('change', (e) => {
+      currentScatterMetricX = e.target.value;
+      atualizarGraficoDispersao();
+    });
+  }
+
+  const selScatterRegion = document.getElementById('scatter-region-filter');
+  if (selScatterRegion) {
+    selScatterRegion.addEventListener('change', (e) => {
+      currentScatterRegion = e.target.value;
+      atualizarGraficoDispersao();
+    });
+  }
 }
 
 /**
@@ -1005,7 +1027,352 @@ function renderizarGraficoAbstencao() {
 }
 
 /**
- * 6B. Séries Históricas & Poder de Compra (2016 – 2026)
+ * 6B. Gráfico Interativo de Dispersão (Bolinhas): Voto Presidencial vs. Dependência Governamental
+ */
+const METRICAS_DISPERSAO = {
+  indice_composto: {
+    nome: 'Índice de Dependência Pública',
+    unidade: ' pts',
+    minX: 0,
+    maxX: 100,
+    getValue: (m) => calcularIndiceDependencia(m)
+  },
+  bf: {
+    nome: 'Famílias no Bolsa Família',
+    unidade: ' / 100 hab',
+    minX: 0,
+    maxX: 50,
+    getValue: (m) => (m.ind && m.ind.bf !== undefined ? m.ind.bf : 0)
+  },
+  apos: {
+    nome: 'Aposentados RGPS / INSS',
+    unidade: ' / 100 hab',
+    minX: 0,
+    maxX: 35,
+    getValue: (m) => (m.ind && m.ind.apos !== undefined ? m.ind.apos : 0)
+  },
+  pdm: {
+    nome: 'Cobertura Pé-de-Meia',
+    unidade: '%',
+    minX: 0,
+    maxX: 100,
+    getValue: (m) => (m.ind && m.ind.pdm !== undefined ? m.ind.pdm : 0)
+  },
+  fundeb: {
+    nome: 'Dependência do Fundeb da União',
+    unidade: '%',
+    minX: 0,
+    maxX: 80,
+    getValue: (m) => (m.ind && m.ind.fundeb !== undefined ? m.ind.fundeb : 0)
+  },
+  serv: {
+    nome: 'Servidores Públicos',
+    unidade: ' / 100 hab',
+    minX: 0,
+    maxX: 25,
+    getValue: (m) => (m.ind && m.ind.serv !== undefined ? m.ind.serv : 0)
+  },
+  bpc: {
+    nome: 'Beneficiários BPC / LOAS',
+    unidade: ' / 100 hab',
+    minX: 0,
+    maxX: 15,
+    getValue: (m) => (m.ind && m.ind.bpc !== undefined ? m.ind.bpc : 0)
+  },
+  fp: {
+    nome: 'Farmácia Popular',
+    unidade: ' / 100 hab',
+    minX: 0,
+    maxX: 25,
+    getValue: (m) => (m.ind && m.ind.fp !== undefined ? m.ind.fp : 0)
+  },
+  prev_pib: {
+    nome: 'Peso das Aposentadorias no PIB',
+    unidade: '%',
+    minX: 0,
+    maxX: 40,
+    getValue: (m) => (m.ind && m.ind.prev_pib !== undefined ? m.ind.prev_pib : 0)
+  }
+};
+
+function calcularIndiceDependencia(m) {
+  if (!m || !m.ind) return 0;
+  const bf = Math.min(100, ((m.ind.bf || 0) / 35) * 100) * 0.28;
+  const apos = Math.min(100, ((m.ind.apos || 0) / 25) * 100) * 0.22;
+  const bpc = Math.min(100, ((m.ind.bpc || 0) / 8) * 100) * 0.14;
+  const fundeb = Math.min(100, ((m.ind.fundeb || 0) / 65) * 100) * 0.12;
+  const pdm = Math.min(100, ((m.ind.pdm || 0) / 85) * 100) * 0.10;
+  const serv = Math.min(100, ((m.ind.serv || 0) / 15) * 100) * 0.08;
+  const fp = Math.min(100, ((m.ind.fp || 0) / 18) * 100) * 0.06;
+  return Math.min(100, Math.max(0, Math.round((bf + apos + bpc + fundeb + pdm + serv + fp) * 10) / 10));
+}
+
+function calcularRaioBolha(pop) {
+  if (!pop || pop <= 0) return 3.5;
+  return Math.min(26, Math.max(3.2, Math.pow(pop, 0.27) * 0.52));
+}
+
+function calcularRegressaoLinear(pontos) {
+  const n = pontos.length;
+  if (n < 2) return null;
+  let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+  for (let i = 0; i < n; i++) {
+    const x = pontos[i].x;
+    const y = pontos[i].y;
+    sumX += x;
+    sumY += y;
+    sumXY += x * y;
+    sumXX += x * x;
+  }
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  const denominador = sumXX - sumX * meanX;
+  if (denominador === 0) return null;
+  const slope = (sumXY - sumX * meanY) / denominador;
+  const intercept = meanY - slope * meanX;
+  return { slope, intercept };
+}
+
+function hexToRgba(hex, alpha = 0.5) {
+  if (!hex || typeof hex !== 'string') return `rgba(100, 116, 139, ${alpha})`;
+  let c = hex.replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  const num = parseInt(c, 16);
+  if (isNaN(num)) return `rgba(100, 116, 139, ${alpha})`;
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function renderizarGraficoDispersao() {
+  atualizarGraficoDispersao();
+}
+
+function atualizarGraficoDispersao() {
+  const canvas = document.getElementById('chart-dispersao-municipios');
+  if (!canvas || !APP_DATA) return;
+  const ctx = canvas.getContext('2d');
+
+  const configX = METRICAS_DISPERSAO[currentScatterMetricX] || METRICAS_DISPERSAO.indice_composto;
+  const eleicNome = currentElection === '2026_1t' ? '2026 (1ºT)' : (currentElection === '2022_1t' ? '2022 (1ºT)' : '2022 (2ºT)');
+  const opositorNome = currentElection.includes('2026') ? 'Flávio' : 'Bolsonaro';
+
+  // Filtra municípios por região se aplicável
+  let listaMunicipios = APP_DATA.municipios;
+  if (currentScatterRegion && currentScatterRegion !== 'todas') {
+    listaMunicipios = listaMunicipios.filter(m => m.reg === currentScatterRegion);
+  }
+
+  // Agrupa os municípios por perfil socioeconômico
+  const perfis = Object.values(APP_DATA.perfis);
+  const datasets = [];
+  const todosPontos = [];
+
+  perfis.forEach(p => {
+    const cidadesDoPerfil = listaMunicipios.filter(m => m.pf === p.nome);
+    const dataPoints = [];
+
+    cidadesDoPerfil.forEach(m => {
+      const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : m.e22_2t);
+      const lulaPct = eleic.lula || 0;
+      const xVal = configX.getValue(m);
+
+      if (xVal !== null && xVal !== undefined && !isNaN(xVal) && !isNaN(lulaPct)) {
+        const rVal = calcularRaioBolha(m.pop);
+        dataPoints.push({
+          x: Math.round(xVal * 100) / 100,
+          y: Math.round(lulaPct * 100) / 100,
+          r: rVal,
+          cidade: m
+        });
+        todosPontos.push({ x: xVal, y: lulaPct });
+      }
+    });
+
+    const corHex = p.cor || '#4B5563';
+    const corBg = hexToRgba(corHex, 0.52);
+    const corBorder = hexToRgba(corHex, 0.95);
+
+    datasets.push({
+      type: 'bubble',
+      label: p.nome,
+      data: dataPoints,
+      backgroundColor: corBg,
+      borderColor: corBorder,
+      borderWidth: 1.2,
+      hoverBorderWidth: 3,
+      hoverBackgroundColor: hexToRgba(corHex, 0.85),
+      order: 3
+    });
+  });
+
+  // Calcula limites reais do eixo X para as linhas de referência
+  let minX = configX.minX;
+  let maxX = configX.maxX;
+  if (todosPontos.length > 0) {
+    const xVals = todosPontos.map(p => p.x);
+    minX = Math.floor(Math.min(...xVals));
+    maxX = Math.ceil(Math.max(...xVals));
+  }
+
+  // 1. Linha pontilhada em 50% dos votos
+  datasets.push({
+    type: 'line',
+    label: 'Patamar 50% dos Votos',
+    data: [
+      { x: minX, y: 50 },
+      { x: maxX, y: 50 }
+    ],
+    borderColor: '#94A3B8',
+    borderWidth: 1.5,
+    borderDash: [6, 6],
+    pointRadius: 0,
+    pointHoverRadius: 0,
+    fill: false,
+    order: 0
+  });
+
+  // 2. Linha de Regressão Linear (Voto Esperado)
+  const reg = calcularRegressaoLinear(todosPontos);
+  if (reg) {
+    const yMin = Math.max(0, Math.min(100, reg.slope * minX + reg.intercept));
+    const yMax = Math.max(0, Math.min(100, reg.slope * maxX + reg.intercept));
+    datasets.push({
+      type: 'line',
+      label: 'Voto Esperado (Tendência Linear)',
+      data: [
+        { x: minX, y: Math.round(yMin * 100) / 100 },
+        { x: maxX, y: Math.round(yMax * 100) / 100 }
+      ],
+      borderColor: '#0F172A',
+      borderWidth: 2.8,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      fill: false,
+      order: 1
+    });
+  }
+
+  if (chartDispersao) {
+    chartDispersao.destroy();
+  }
+
+  chartDispersao = new Chart(ctx, {
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 350
+      },
+      onClick: (e, elements) => {
+        if (elements && elements.length > 0) {
+          const el = elements[0];
+          const dataset = chartDispersao.data.datasets[el.datasetIndex];
+          if (dataset && dataset.data && dataset.data[el.index] && dataset.data[el.index].cidade) {
+            const cid = dataset.data[el.index].cidade;
+            abrirModalMunicipio(cid.id);
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 14,
+            boxHeight: 14,
+            usePointStyle: true,
+            pointStyle: 'circle',
+            font: { family: 'Plus Jakarta Sans', size: 12, weight: 600 },
+            padding: 16
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.94)',
+          titleColor: '#FFFFFF',
+          bodyColor: '#E2E8F0',
+          titleFont: { family: 'Plus Jakarta Sans', size: 13, weight: 700 },
+          bodyFont: { family: 'Plus Jakarta Sans', size: 12 },
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: {
+            title: (items) => {
+              const item = items[0];
+              const pt = item.dataset.data[item.dataIndex];
+              if (pt && pt.cidade) {
+                return `${pt.cidade.nm} (${pt.cidade.uf})`;
+              }
+              return item.dataset.label;
+            },
+            label: (item) => {
+              const pt = item.dataset.data[item.dataIndex];
+              if (!pt || !pt.cidade) {
+                return `${item.dataset.label}: ${item.parsed.y.toFixed(1)}%`;
+              }
+              const cid = pt.cidade;
+              const eleic = currentElection === '2026_1t' ? cid.e26 : (currentElection === '2022_1t' ? cid.e22_1t : cid.e22_2t);
+              const lulaPct = (eleic.lula || 0).toFixed(1);
+              const opositorPct = (currentElection.includes('2026') ? (eleic.flavio || 0) : (eleic.bolsonaro || 0)).toFixed(1);
+
+              return [
+                `● Perfil: ${cid.pf}`,
+                `👥 População: ${formatarNumero(cid.pop)} hab`,
+                `📊 ${configX.nome}: ${pt.x.toFixed(1)}${configX.unidade}`,
+                `🗳️ Votação Lula: ${lulaPct}%`,
+                `🗳️ Votação ${opositorNome}: ${opositorPct}%`,
+                `🔍 Clique na bolinha para ver o Raio-X`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          position: 'bottom',
+          title: {
+            display: true,
+            text: `${configX.nome} (${configX.unidade.trim()})`,
+            font: { family: 'Plus Jakarta Sans', size: 13, weight: 700 },
+            color: '#1E293B',
+            padding: { top: 10 }
+          },
+          grid: {
+            color: '#F1F5F9'
+          },
+          ticks: {
+            color: '#64748B',
+            font: { family: 'Plus Jakarta Sans', size: 11 }
+          }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          title: {
+            display: true,
+            text: `% de Votos em Lula (${eleicNome})`,
+            font: { family: 'Plus Jakarta Sans', size: 13, weight: 700 },
+            color: '#1E293B',
+            padding: { bottom: 10 }
+          },
+          grid: {
+            color: '#F1F5F9'
+          },
+          ticks: {
+            callback: (v) => v + '%',
+            color: '#64748B',
+            font: { family: 'Plus Jakarta Sans', size: 11 },
+            stepSize: 20
+          }
+        }
+      }
+    }
+  });
+}
+
+/**
+ * 6C. Séries Históricas & Poder de Compra (2016 – 2026)
  */
 function renderizarSeriesHistoricas() {
   if (!APP_DATA || !APP_DATA.series_historicas) return;

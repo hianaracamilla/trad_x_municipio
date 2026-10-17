@@ -301,6 +301,71 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- Scatter / Bubble Correlation Section: Voto vs Dependência Governamental -->
+    <section class="scatter-analysis-section" id="scatter-section">
+      <div class="scatter-header">
+        <div class="scatter-titles">
+          <span class="scatter-eyebrow">CORRELAÇÃO SOCIOECONÔMICA & ELEITORAL</span>
+          <h3 class="scatter-title">Voto Presidencial vs. Dependência de Políticas Públicas</h3>
+          <p class="scatter-desc">Cada bolinha representa 1 município brasileiro · <strong>tamanho = eleitores / população</strong> · <strong>cor = perfil socioeconômico</strong></p>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="scatter-controls-bar">
+          <div class="scatter-control-group">
+            <label for="scatter-metric-x">Indicador do Eixo X:</label>
+            <select id="scatter-metric-x" class="scatter-select">
+              <option value="indice_composto" selected>⭐ Índice Composto de Dependência Pública (0 a 100)</option>
+              <option value="bf">Famílias no Bolsa Família (por 100 hab)</option>
+              <option value="apos">Aposentados RGPS / INSS (por 100 hab)</option>
+              <option value="pdm">Cobertura Pé-de-Meia (% dos estudantes)</option>
+              <option value="fundeb">Dependência do Fundeb da União (%)</option>
+              <option value="serv">Servidores Públicos (por 100 hab)</option>
+              <option value="bpc">Beneficiários BPC / LOAS (por 100 hab)</option>
+              <option value="fp">Farmácia Popular (benef. por 100 hab)</option>
+              <option value="prev_pib">Peso das Aposentadorias no PIB (%)</option>
+            </select>
+          </div>
+
+          <div class="scatter-control-group">
+            <label for="scatter-region-filter">Filtrar por Região:</label>
+            <select id="scatter-region-filter" class="scatter-select">
+              <option value="todas" selected>Todas as Regiões (Brasil - 5.571 municípios)</option>
+              <option value="Nordeste">Nordeste</option>
+              <option value="Sudeste">Sudeste</option>
+              <option value="Sul">Sul</option>
+              <option value="Norte">Norte</option>
+              <option value="Centro-Oeste">Centro-Oeste</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Card -->
+      <div class="scatter-chart-card">
+        <div class="scatter-chart-wrapper">
+          <canvas id="chart-dispersao-municipios"></canvas>
+        </div>
+
+        <!-- Bottom Legend & Footnotes -->
+        <div class="scatter-footer-notes">
+          <div class="footnote-item">
+            <span class="footnote-line black-line"></span>
+            <span><strong>Linha preta:</strong> Voto esperado pela presença das políticas públicas (regressão linear). Acima: votação de Lula superior à tendência estatística. Abaixo: votação inferior.</span>
+          </div>
+          <div class="footnote-item">
+            <span class="footnote-line dashed-line"></span>
+            <span><strong>Linha pontilhada:</strong> Patamar de 50% dos votos válidos.</span>
+          </div>
+          <div class="footnote-item tip">
+            <span>💡 <em>Dica: Clique em qualquer perfil na legenda para filtrar clusters. Clique em qualquer bolinha para abrir o Raio-X detalhado do município.</em></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Séries Históricas & Poder de Compra (2016 - 2026) -->
     <section class="series-historicas-section">
       <div class="series-header">
