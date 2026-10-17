@@ -12,6 +12,7 @@
 
 ## 🧭 Sumário do Repositório
 
+- [🖥️ Dashboard Web Interativo (Aplicação Completa)](#️-dashboard-web-interativo-aplicação-completa)
 - [🎯 Arquitetura dos Cadernos Analíticos](#-arquitetura-dos-cadernos-analíticos)
 - [🏛️ Metodologia dos Perfis Socioeconômicos](#️-metodologia-dos-perfis-socioeconômicos)
 - [🗳️ Resultados Eleitorais de 2026 por Perfil](#️-resultados-eleitorais-de-2026-por-perfil)
@@ -20,6 +21,20 @@
 - [📁 Estrutura de Arquivos e Bases de Dados](#-estrutura-de-arquivos-e-bases-de-dados)
 - [📚 Documentação Técnica Completa](#-documentação-técnica-completa)
 - [🚀 Como Executar Localmente](#-como-executar-localmente)
+
+---
+
+## 🖥️ Dashboard Web Interativo (Aplicação Completa)
+
+A pasta [`dashboard/`](dashboard/) abriga a aplicação web executiva completa de visualização e exploração dos dados:
+
+* 🗺️ **Mapa Territorial Interativo (Leaflet + Esri Canvas):** Navegação fluida e transições de câmera suaves em 3 níveis: **Brasil ➔ 5 Regiões ➔ 27 Estados ➔ 5.571 Municípios** com polígonos GeoJSON coloridos por perfil, marcadores municipais e tooltips instantâneos (livre de chaves de API e marcas d'água).
+* 🗳️ **Seletor de Pleito Eleitoral:** Alternância em 1 clique entre **2026 (1º Turno)**, **2022 (1º Turno)** e **2022 (2º Turno)**, com recálculo instantâneo de todos os gráficos e cards.
+* 🔎 **Busca Preditiva de Municípios:** Autocomplete em milissegundos para localizar qualquer cidade e exibir seu raio-x completo (Saúde, Educação, RGPS, Emprego e Votação).
+* 📈 **Séries Históricas & Poder de Compra (2016–2026):** Gráficos analíticos de Cesta Básica (DIEESE), Botijão de Gás e Gasolina (ANP) em relação ao Salário Mínimo, Emprego CLT, MEIs, Veículos e Habitação.
+* 🎨 **Estúdio de Cards Sociais (Card Studio):** Gerador client-side de cards em alta resolução (**Retina 2x**) nos formatos **Feed (1:1)** e **Stories (9:16)**, com botão de **Copiar Imagem (Ctrl+V)** e compartilhamento direto para **WhatsApp, X/Twitter, Telegram, LinkedIn e Web Share API**.
+
+👉 **Documentação Completa da Interface:** Consulte o manual em [docs/DASHBOARD_E_VISUALIZACOES.md](docs/DASHBOARD_E_VISUALIZACOES.md).
 
 ---
 
@@ -109,9 +124,10 @@ As bases processadas e consolidadas estão salvas no diretório [`dados_priorida
 
 ## 📚 Documentação Técnica Completa
 
-Para aprofundar na fundamentação matemática e no significado de cada métrica:
+Para aprofundar na fundamentação matemática, nos dados e na plataforma:
+* 👉 **[Dashboard Web, Mapa e Visualizações Interativas](docs/DASHBOARD_E_VISUALIZACOES.md):** Manual completo de operação da aplicação web, navegação geoespacial Leaflet, séries históricas e motor de exportação de cards sociais.
 * 👉 **[Arquitetura de Dados e Metodologia Científica](docs/ARQUITETURA_E_METODOLOGIA.md):** Pipelines, diagramas Mermaid, formulações de normalização Z-score e projeção euclidiana.
-* 👉 **[Dicionário de Dados](docs/DICIONARIO_DE_DADOS.md):** Descrição campo a campo de todas as variáveis e fontes primárias.
+* 👉 **[Dicionário de Dados Oficial](docs/DICIONARIO_DE_DADOS.md):** Descrição campo a campo de todas as variáveis, fontes primárias e schema do JSON.
 * 👉 **[Principais Achados Socioeconômicos](docs/PRINCIPAIS_ACHADOS.md):** Relatório detalhado dos impactos de renda e previdência na economia local.
 
 ---
@@ -129,4 +145,11 @@ jupyter nbconvert --to notebook --execute --inplace analise_clusters_perfis_muni
 # 3. Compilar e rodar a análise eleitoral
 python build_eleitoral_nb.py
 jupyter nbconvert --to notebook --execute --inplace analise_eleitoral_perfis_municipios.ipynb
+
+# 4. Atualizar o payload de dados do Dashboard
+python export_dashboard_data.py
+
+# 5. Iniciar o Dashboard Web Interativo
+python -m http.server 8080 --directory dashboard
+# Abra no navegador: http://localhost:8080/index.html
 ```

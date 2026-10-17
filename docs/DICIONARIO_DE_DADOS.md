@@ -152,3 +152,86 @@ Fontes: Tribunal Superior Eleitoral (TSE) — Dados Abertos e Totalização Ofic
 | `taxa_abstencao_adulto_25_59_pct`| Numérico (%) | Taxa de abstenção entre eleitores de 25 a 59 anos no município |
 | `taxa_abstencao_idoso_60_mais_pct`| Numérico (%) | Taxa de abstenção entre eleitores de 60 anos ou mais no município |
 
+---
+
+## 📉 5. Séries Históricas de Poder de Compra & Macroeconomia (2016–2026)
+Fontes Primárias: DIEESE, ANP, Banco Central do Brasil (SGS), MTE (Novo CAGED), FENABRAVE, FENAUTO, FipeZAP e MCID.  
+Frequência: Anual consolidada (valores de referência de dezembro de cada ano).
+
+| Variável | Unidade | Descrição / Metodologia | Fonte Primária |
+| :--- | :---: | :--- | :--- |
+| `Salário Mínimo Nominal (R$)` | R$ / mês | Valor legal vigente em dezembro de cada exercício financeiro | Presidência da República / BCB SGS 1619 |
+| `Rendimento Médio Habitual (R$)` | R$ / mês | Rendimento médio real habitual de todos os trabalhos | IBGE / PNAD Contínua / BCB SGS 24381 |
+| `Custo da Cesta Básica SP (R$)` | R$ | Custo da ração essencial mínima para um trabalhador adulto | DIEESE / BCB SGS 7493 |
+| `Cesta Básica em % do Salário Mínimo` | % | Proporção do salário mínimo consumida para adquirir 1 cesta básica | `(cesta_basica_rs / salario_minimo_rs) * 100` |
+| `Preço 1 Botijão de Gás GLP 13kg (R$)` | R$ | Média nacional apurada no consumidor final residencial | Agência Nacional do Petróleo (ANP) |
+| `Botijão de Gás em % do Salário Mínimo` | % | Peso relativo do botijão no orçamento do salário mínimo | `(gas_glp_rs / salario_minimo_rs) * 100` |
+| `Preço 1 Litro de Gasolina Comum (R$)` | R$ | Preço médio ponderado nacional na bomba | Agência Nacional do Petróleo (ANP) |
+| `1L Gasolina em % do Salário Mínimo` | % | Custo de um litro de gasolina sobre o salário mínimo | `(gasolina_rs / salario_minimo_rs) * 100` |
+| `Trabalhadores com Carteira CLT (Milhões)` | Milhões | Total de vínculos celetistas ativos no mercado formal | MTE / Novo CAGED / BCB SGS 24379 |
+| `MEIs Ativos no Brasil (Milhões)` | Milhões | Total de Microempreendedores Individuais formalmente registrados | Receita Federal / Mapa de Empresas MDIC |
+| `Veículos Novos Vendidos (Milhões)` | Milhões unid. | Total de emplacamentos de automóveis, comerciais leves, caminhões e ônibus | FENABRAVE / Renavam |
+| `Veículos Usados Vendidos (Milhões)` | Milhões unid. | Total de transações de veículos seminovos e usados transferidos | FENAUTO |
+| `Razão Usados / Novos` | Proporção | Quantos veículos usados foram negociados para cada veículo zero-km vendido | `veiculos_usados / veiculos_novos` |
+| `Financiamentos SBPE (Milhares Unidades)` | Milhares unid. | Imóveis residenciais adquiridos via crédito do Sistema Brasileiro de Poupança | Banco Central do Brasil (BCB SGS 20703) |
+| `Volume de Crédito Imobiliário SBPE (R$ Bi)`| R$ Bilhões | Volume total de crédito liberado pelo SBPE para pessoas físicas | Banco Central do Brasil (BCB SGS 20704) |
+| `MCMV Habitação Contratada (Milhares Unid.)`| Milhares unid. | Unidades habitacionais subsidiadas contratadas pelo programa | Ministério das Cidades (MCID) |
+| `Saldo do Agronegócio (US$ Bi)` | US$ Bilhões | Saldo da balança comercial do agronegócio brasileiro (exportações - importações)| MAPA / Comex Stat |
+| `Repasses FPE por UF (R$ Bi)` | R$ Bilhões | Repasses constitucionais do Fundo de Participação dos Estados (2016 a 2026)| Secretaria do Tesouro Nacional (STN) |
+
+---
+
+## 🗄️ 6. Schema do Payload do Dashboard (`dashboard_data.json`)
+O arquivo gerado por [`export_dashboard_data.py`](../export_dashboard_data.py) possui ~3.0 MB e agrupa todo o ecossistema em nós JSON estritos:
+
+```json
+{
+  "totais_nacionais": {
+    "populacao_total": 213245678,
+    "total_municipios": 5571,
+    "farmacia_popular_beneficiarios": 12961803,
+    "pe_de_meia_investimento_anual_brl": 10534200000,
+    "rgps_aposentadorias_anual_brl": 606240000000,
+    "clt_trabalhadores_total": 49660124
+  },
+  "eleicoes_info": {
+    "2026_1t": { "nome_exibicao": "Eleição Presidencial 2026 (1º Turno)", "votos_validos": 118900000, "candidatos": [...] },
+    "2022_1t": { "nome_exibicao": "Eleição Presidencial 2022 (1º Turno)", "votos_validos": 118580000, "candidatos": [...] },
+    "2022_2t": { "nome_exibicao": "Eleição Presidencial 2022 (2º Turno)", "votos_validos": 118552349, "candidatos": [...] }
+  },
+  "perfis": {
+    "Jovens e Dependentes de Apoio Social": {
+      "nome": "Jovens e Dependentes de Apoio Social",
+      "total_cidades": 1414,
+      "pct_cidades_brasil": 25.4,
+      "pct_eleitorado_nacional": 25.46,
+      "indicadores_medios": { "clt_100_hab": 8.4, "farmacia_popular_100_hab": 4.1, "pe_de_meia_pct": 82.5, ... },
+      "eleicoes": { "2026_1t": { "lula_pct": 63.8, "flavio_pct": 31.76, "taxa_abstencao": 19.45 } }
+    }
+  },
+  "regioes": { "Nordeste": { ... }, "Sudeste": { ... }, "Sul": { ... }, "Norte": { ... }, "Centro-Oeste": { ... } },
+  "estados": { "SP": { "nome": "São Paulo", "regiao": "Sudeste", "perfil_predominante": "...", "total_cidades": 645 }, ... },
+  "municipios": [
+    {
+      "id": "3550308",
+      "nm": "São Paulo",
+      "uf": "SP",
+      "reg": "Sudeste",
+      "pf": "Cidades Autônomas e Agroindustriais",
+      "pop": 11895578,
+      "lat": -23.5505,
+      "lng": -46.6333,
+      "e26": { "lula": 48.2, "flavio": 44.1, "vtot": 6840000, "abst": 19.2 },
+      "e22_1t": { "lula": 47.5, "bolsonaro": 44.8, "vtot": 6780000 },
+      "e22_2t": { "lula": 53.5, "bolsonaro": 46.5, "vtot": 6810000 },
+      "ind": { "clt": 32.5, "mei": 9.8, "apos": 14.1, "fp": 9.2, "pdm": 54.1 }
+    }
+  ],
+  "series_historicas": {
+    "nacional": [ { "ano": 2016, "salario_minimo": 880, ... }, ... { "ano": 2026, "salario_minimo": 1621, ... } ],
+    "fpe_estados_bi": { "BA": { "2016": 6.8, "2026": 14.2 }, ... }
+  }
+}
+```
+
+

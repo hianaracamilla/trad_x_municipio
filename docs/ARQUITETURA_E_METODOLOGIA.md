@@ -53,7 +53,17 @@ trad_x_municipio/
 ├── build_clusters_nb.py                       # Script de compilação reproduzível do caderno de clusters
 ├── build_eleitoral_nb.py                      # Script de compilação reproduzível do caderno eleitoral
 ├── build_series_nb.py                         # Script de compilação reproduzível do caderno de séries históricas
+├── export_dashboard_data.py                   # Script de compilação do payload JSON do dashboard web
 ├── traducao_municipios_consolidado.xlsx       # Matriz mestre municipal auditada (5.571 municípios, 72 variáveis)
+│
+├── dashboard/                                 # Plataforma Web Interativa do Dashboard
+│   ├── index.html                             # Estrutura HTML5 com design system governamental
+│   ├── app.js                                 # Motor de inteligência, Leaflet, Chart.js e Card Studio
+│   ├── style.css                              # Folhas de estilo executivas com suporte a temas e responsividade
+│   ├── assets/logo-brasil.png                 # Brasão e marca institucional de alta resolução
+│   └── data/
+│       ├── dashboard_data.json                # Payload unificado (~3.0 MB) com os 5.571 municípios
+│       └── brasil_estados.json                # Malha vetorial GeoJSON oficial das 27 UFs
 │
 ├── dados_prioridades/                         # Repositório de dados processados e saídas analíticas
 │   ├── classificacao_perfis_municipios_completa.xlsx  # Classificação final dos 5.571 municípios
@@ -84,6 +94,7 @@ trad_x_municipio/
 │
 ├── docs/                                      # Documentação técnica e metodológica
 │   ├── ARQUITETURA_E_METODOLOGIA.md           # Este documento
+│   ├── DASHBOARD_E_VISUALIZACOES.md           # Manual completo do Dashboard, mapa e estúdio de cards
 │   ├── DICIONARIO_DE_DADOS.md                 # Dicionário de todas as colunas e métricas
 │   └── PRINCIPAIS_ACHADOS.md                  # Resumo executivo dos insights socioeconômicos
 │
@@ -148,7 +159,29 @@ O TSE utiliza um código próprio de município de 5 dígitos (`CD_MUNICIPIO` / 
 
 ---
 
-## 🚀 5. Como Reproduzir os Resultados Localmente
+## 🖥️ 5. Arquitetura da Plataforma Web & Distribuição de Inteligência
+
+Para permitir que gestores públicos, estrategistas e a sociedade civil naveguem pelos dados sem necessidade de ambiente Python local, foi desenvolvida a plataforma web interativa (`dashboard/`).
+
+### 5.1. Pipeline de Dados do Frontend
+1. **Compilação do Payload Otimizado (`export_dashboard_data.py`):**
+   - Cruza a base socioeconômica consolidada, os resultados eleitorais e as coordenadas geográficas (latitude/longitude) das 5.571 cidades.
+   - Converte e compacta os dados em formato JSON estrito (`dashboard/data/dashboard_data.json`, ~3.0 MB), minimizando o consumo de banda e dispensando bancos de dados relacionais em tempo de execução.
+2. **Camada Geoespacial Vetorial (`brasil_estados.json`):**
+   - GeoJSON oficial das 27 UFs para renderização em tempo real de polígonos no Leaflet.js.
+
+### 5.2. Mapeamento Territorial e Transições Suaves
+- **Motor**: Leaflet.js sobre cartografia minimalista **Esri World Light Gray Canvas** (livre de chaves de API e sem marcas d'água).
+- **Hierarquia Visual**: Brasil ➔ 5 Macrorregiões ➔ 27 Estados ➔ 5.571 Municípios, com movimentação animada da câmera (`flyToBounds`) e tooltips instantâneos.
+
+### 5.3. Motor de Difusão em Redes Sociais (Card Studio)
+- Renderização client-side em **Retina 2x** via `html2canvas`.
+- Exportação nos formatos **Feed (1:1)** e **Stories (9:16)** em 4 temas executivos.
+- Suporte a **Copiar Imagem** direto para a área de transferência (`navigator.clipboard.write`), permitindo colar (`Ctrl+V`) instantaneamente em chats e editores, além de disparo nativo para WhatsApp, Telegram, X/Twitter e LinkedIn.
+
+---
+
+## 🚀 6. Como Reproduzir os Resultados Localmente
 
 ### Pré-requisitos
 * Python 3.10 ou superior
@@ -169,4 +202,11 @@ jupyter nbconvert --to notebook --execute --inplace analise_clusters_perfis_muni
 # 4. Compilar e executar o caderno Eleitoral
 python build_eleitoral_nb.py
 jupyter nbconvert --to notebook --execute --inplace analise_eleitoral_perfis_municipios.ipynb
+
+# 5. Exportar dados para a aplicação Web
+python export_dashboard_data.py
+
+# 6. Iniciar o Dashboard Web Interativo
+python -m http.server 8080 --directory dashboard
+# Acessar: http://localhost:8080/index.html
 ```
