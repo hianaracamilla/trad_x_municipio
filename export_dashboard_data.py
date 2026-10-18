@@ -11,9 +11,12 @@ df_22 = pd.read_csv('dados_prioridades/eleicoes_tse/votacao_presidencial_municip
 df_cruz['cod_ibge7'] = df_cruz['cod_ibge7'].astype(str).str.strip()
 df_22['cod_ibge7'] = df_22['cod_ibge7'].astype(str).str.strip()
 
+cols_from_df22 = ['cod_ibge7', 'votos_tebet_1t', 'votos_ciro_1t', 'votos_lula_2t', 'votos_bolsonaro_2t', 'votos_validos_2t', 'pct_lula_2t', 'pct_bolsonaro_2t', 'pct_lula_1t', 'pct_bolsonaro_1t']
+cols_exist = [c for c in cols_from_df22 if c in df_22.columns and (c not in df_cruz.columns or c == 'cod_ibge7')]
+
 merged = pd.merge(
     df_cruz, 
-    df_22[['cod_ibge7', 'votos_lula_1t', 'votos_bolsonaro_1t', 'votos_tebet_1t', 'votos_ciro_1t', 'votos_validos_1t', 'votos_lula_2t', 'votos_bolsonaro_2t', 'votos_validos_2t']], 
+    df_22[cols_exist], 
     on='cod_ibge7', 
     how='left'
 )
@@ -39,15 +42,30 @@ uf_to_nome = {
 
 merged['regiao'] = merged['uf'].map(uf_to_regiao)
 
-# Paleta harmoniosa para os perfis - Cores equilibradas e oficiais sem saturação excessiva
+# Mapeamento para nomes de clusters mais curtos, diretos e informativos
+cluster_nome_map = {
+    'Polos Regionais de Emprego e Serviços': 'Polos de Emprego & Serviços',
+    'Cidades Autônomas e Agroindustriais': 'Polos Agroindustriais',
+    'Cidades da Terceira Idade e Aposentados': 'Cidades de Aposentados',
+    'Municípios Dependentes de Seguridade e Repasses': 'Seguridade & Repasses',
+    'Pequenos Municípios do Funcionalismo Público': 'Funcionalismo Público',
+    'Jovens e Dependentes de Apoio Social': 'Jovens & Apoio Social',
+    'Grandes Metrópoles e Capitais (Atípicas)': 'Metrópoles & Capitais'
+}
+
+merged['perfil_final_reclassificado'] = merged['perfil_final_reclassificado'].map(lambda x: cluster_nome_map.get(x, x))
+if 'perfil_analise' in merged.columns:
+    merged['perfil_analise'] = merged['perfil_analise'].map(lambda x: cluster_nome_map.get(x, x))
+
+# Paleta harmoniosa para os novos nomes curtos dos perfis
 perfil_cores = {
-    'Polos Regionais de Emprego e Serviços': '#1A56DB',            # Azul institucional
-    'Cidades Autônomas e Agroindustriais': '#0E9F6E',              # Verde esmeralda dinâmico
-    'Cidades da Terceira Idade e Aposentados': '#7E3AF2',          # Roxo/Lavanda elegante
-    'Municípios Dependentes de Seguridade e Repasses': '#D97706',  # Âmbar dourado
-    'Pequenos Municípios do Funcionalismo Público': '#0284C7',     # Azul ciano celeste
-    'Jovens e Dependentes de Apoio Social': '#F59E0B',             # Amarelo/Ouro vibrante
-    'Grandes Metrópoles e Capitais (Atípicas)': '#374151'           # Ardósia profundo
+    'Polos de Emprego & Serviços': '#1A56DB',      # Azul institucional
+    'Polos Agroindustriais': '#0E9F6E',            # Verde esmeralda dinâmico
+    'Cidades de Aposentados': '#7E3AF2',           # Roxo/Lavanda elegante
+    'Seguridade & Repasses': '#E05252',            # Vermelho clarinho / Coral
+    'Funcionalismo Público': '#0D9488',            # Teal / Turquesa mineral
+    'Jovens & Apoio Social': '#F59E0B',            # Amarelo/Ouro vibrante
+    'Metrópoles & Capitais': '#374151'             # Ardósia profundo
 }
 
 # 1. Totais Nacionais
@@ -105,8 +123,51 @@ totais_nacionais = {
             {"rotulo": "Repasse mensal Bolsa Família", "valor": "R$ 11,96 Bilhões/mês"}
         ],
         "cor": "#D97706"
+    },
+    "agro": {
+        "titulo": "Agricultura Familiar & Merenda Escolar",
+        "destaque_numero": "R$ 1,51 Bi",
+        "destaque_rotulo": "Compras da Agricultura Familiar (PNAE)",
+        "subtitulo": "Alimentação escolar comprada direto de pequenos produtores",
+        "detalhes": [
+            {"rotulo": "Repasse direto aos produtores rurais", "valor": "R$ 1,51 Bilhão/ano"},
+            {"rotulo": "Exigência legal mínima da merenda", "valor": "Mínimo de 30% da agricultura familiar"},
+            {"rotulo": "Estudantes com alimentação saudável", "valor": "40,5 Milhões de alunos"},
+            {"rotulo": "CONAB / PAA (Aquisição de Alimentos)", "valor": "R$ 1,20 Bilhão executado"}
+        ],
+        "cor": "#059669"
     }
 }
+
+# Cálculo Exato de Medianas, Mínimos e Máximos Municipais de todos os 5.571 municípios
+indicadores_map = {
+    'clt': 'taxa_clt_100_hab',
+    'mei': 'taxa_mei_100_hab',
+    'serv': 'servidores_100_hab',
+    'apos': 'aposentados_100_hab',
+    'prev_pib': 'peso_prev_pib_pct',
+    'bf': 'familias_bf_100_hab',
+    'bpc': 'bpc_100_hab',
+    'fp': 'farmacia_pop_100_hab',
+    'pdm': 'pe_de_meia_cobertura_pct',
+    'fundeb': 'dep_fundeb_uniao_pct'
+}
+
+medianas_municipais = {}
+brasil_indicadores = {}
+for k, col in indicadores_map.items():
+    if col in merged.columns:
+        s = pd.to_numeric(merged[col], errors='coerce').dropna()
+        medianas_municipais[k] = {
+            'min': round(float(s.min()), 1),
+            'mediana': round(float(s.median()), 1),
+            'media': round(float(s.mean()), 1),
+            'max': round(float(s.max()), 1)
+        }
+        brasil_indicadores[k] = round(float(s.mean()), 1)
+
+totais_nacionais['medianas_municipais'] = medianas_municipais
+totais_nacionais['brasil_indicadores'] = brasil_indicadores
 
 # 2. Resumo Eleitoral Nacional por Eleição
 eleicoes_info = {
@@ -369,33 +430,42 @@ for _, row in merged.iterrows():
 
 # 7. Séries Históricas e Poder de Compra (2016 - 2026)
 print("Processando Séries Históricas...")
-df_hist = pd.read_excel('series_historicas_brasil_2010_2025.xlsx', sheet_name='Series_Historicas_2016_2026')
 series_nacionais = []
-for _, r in df_hist.iterrows():
-    series_nacionais.append({
-        "ano": int(r['Ano']),
-        "salario_minimo": round(float(r['Salário Mínimo Nominal (R$ - BCB 1619)']), 2),
-        "rendimento_medio": round(float(r['Rendimento Médio Habitual Nominal (R$ - BCB 24381)']), 2),
-        "cesta_basica_rs": round(float(r['Custo da Cesta Básica SP Oficial (R$ - BCB 7493)']), 2),
-        "cesta_basica_pct_sm": round(float(r['Cesta Básica em % do Salário Mínimo']), 2),
-        "gasolina_rs": round(float(r['Preço 1 Litro de Gasolina (R$ - ANP)']), 2),
-        "gasolina_pct_sm": round(float(r['1L de Gasolina em % do Salário Mínimo']), 3),
-        "gas_glp_rs": round(float(r['Preço 1 Botijão de Gás GLP 13kg (R$ - ANP)']), 2),
-        "gas_glp_pct_sm": round(float(r['Botijão de Gás em % do Salário Mínimo']), 2),
-        "aluguel_rs": round(float(r['Aluguel Residencial Médio (R$ - FipeZAP)']), 2),
-        "aluguel_pct_sm": round(float(r['Aluguel Residencial em % do Salário Médio']), 2),
-        "veiculos_novos_milhoes": round(float(r['Veículos Novos Vendidos (Milhões Unidades)']), 3),
-        "veiculos_usados_milhoes": round(float(r['Veículos Usados Vendidos (Milhões Unidades - FENAUTO)']), 2),
-        "razao_usados_novos": round(float(r['Razão Veículos Usados por Novo (Proporção)']), 2),
-        "imoveis_sbpe_unidades": round(float(r['Quantidade Imóveis Financiados SBPE (Milhares Unidades - BCB 20703 Oficial)']), 1),
-        "imoveis_sbpe_rs_bi": round(float(r['Venda de Imóveis Financiados PF (R$ Bi - BCB 20704)']), 2),
-        "comercio_varejo_rs_tri": round(float(r['Faturamento Comércio Varejista Ampliado (R$ Tri - BCB 28544)']), 3),
-        "gastos_exterior_usd_bi": round(float(r['Gastos de Brasileiros no Exterior (US$ Bi - BCB 22742)']), 2),
-        "clt_milhoes": round(float(r['Trabalhadores com Carteira Assinada / CLT (Milhões - BCB 24379)']), 2),
-        "meis_milhoes": round(float(r['MEIs Ativos no Brasil (Milhões)']), 2),
-        "empresas_abertas_milhoes": round(float(r['Empresas Novas Abertas (Milhões)']), 2),
-        "agro_saldo_usd_bi": round(float(r['Agronegócio - Saldo das Exportações / Lucro Líquido (US$ Bi)']), 1)
-    })
+try:
+    df_hist = pd.read_excel('series_historicas_brasil_2010_2025.xlsx', sheet_name='Series_Historicas_2016_2026')
+    for _, r in df_hist.iterrows():
+        series_nacionais.append({
+            "ano": int(r['Ano']),
+            "salario_minimo": round(float(r['Salário Mínimo Nominal (R$ - BCB 1619)']), 2),
+            "rendimento_medio": round(float(r['Rendimento Médio Habitual Nominal (R$ - BCB 24381)']), 2),
+            "cesta_basica_rs": round(float(r['Custo da Cesta Básica SP Oficial (R$ - BCB 7493)']), 2),
+            "cesta_basica_pct_sm": round(float(r['Cesta Básica em % do Salário Mínimo']), 2),
+            "gasolina_rs": round(float(r['Preço 1 Litro de Gasolina (R$ - ANP)']), 2),
+            "gasolina_pct_sm": round(float(r['1L de Gasolina em % do Salário Mínimo']), 3),
+            "gas_glp_rs": round(float(r['Preço 1 Botijão de Gás GLP 13kg (R$ - ANP)']), 2),
+            "gas_glp_pct_sm": round(float(r['Botijão de Gás em % do Salário Mínimo']), 2),
+            "aluguel_rs": round(float(r['Aluguel Residencial Médio (R$ - FipeZAP)']), 2),
+            "aluguel_pct_sm": round(float(r['Aluguel Residencial em % do Salário Médio']), 2),
+            "veiculos_novos_milhoes": round(float(r['Veículos Novos Vendidos (Milhões Unidades)']), 3),
+            "veiculos_usados_milhoes": round(float(r['Veículos Usados Vendidos (Milhões Unidades - FENAUTO)']), 2),
+            "razao_usados_novos": round(float(r['Razão Veículos Usados por Novo (Proporção)']), 2),
+            "imoveis_sbpe_unidades": round(float(r['Quantidade Imóveis Financiados SBPE (Milhares Unidades - BCB 20703 Oficial)']), 1),
+            "imoveis_sbpe_rs_bi": round(float(r['Venda de Imóveis Financiados PF (R$ Bi - BCB 20704)']), 2),
+            "comercio_varejo_rs_tri": round(float(r['Faturamento Comércio Varejista Ampliado (R$ Tri - BCB 28544)']), 3),
+            "gastos_exterior_usd_bi": round(float(r['Gastos de Brasileiros no Exterior (US$ Bi - BCB 22742)']), 2),
+            "clt_milhoes": round(float(r['Trabalhadores com Carteira Assinada / CLT (Milhões - BCB 24379)']), 2),
+            "meis_milhoes": round(float(r['MEIs Ativos no Brasil (Milhões)']), 2),
+            "empresas_abertas_milhoes": round(float(r['Empresas Novas Abertas (Milhões)']), 2),
+            "agro_saldo_usd_bi": round(float(r['Agronegócio - Saldo das Exportações / Lucro Líquido (US$ Bi)']), 1)
+        })
+except Exception as e:
+    print("Aviso ao ler excel de series (carregando de dashboard_data.json):", e)
+    try:
+        with open('dashboard/data/dashboard_data.json', 'r', encoding='utf-8') as f_prev:
+            prev_d = json.load(f_prev)
+            series_nacionais = prev_d.get('series_historicas', {}).get('nacional', [])
+    except Exception as e2:
+        print("Erro no fallback de series_nacionais:", e2)
 
 # FPE por Estado
 df_fpe = pd.read_csv('dados_prioridades/fpe_estados_series_historicas.csv', sep=';')
@@ -404,9 +474,19 @@ fpe_estados = {}
 for uf, grp in df_fpe.groupby('UF'):
     fpe_estados[uf] = {int(row['ano']): round(float(row['valor_repasse_brl']) / 1e9, 2) for _, row in grp.iterrows()}
 
+# Séries do Orçamento Federal por Governo (2010 - 2026)
+orcamento_series = []
+try:
+    df_orc = pd.read_csv('dados_prioridades/series_orcamento_governos_2010_2026.csv')
+    df_orc = df_orc.replace({np.nan: None})
+    orcamento_series = [{k: (None if (isinstance(v, float) and np.isnan(v)) else v) for k, v in row.items()} for row in df_orc.to_dict(orient='records')]
+except Exception as e:
+    print("Aviso ao carregar orçamento:", e)
+
 series_historicas_data = {
     "nacional": series_nacionais,
-    "fpe_estados_bi": fpe_estados
+    "fpe_estados_bi": fpe_estados,
+    "orcamento_governos": orcamento_series
 }
 
 dashboard_data = {
@@ -419,9 +499,21 @@ dashboard_data = {
     "series_historicas": series_historicas_data
 }
 
+# Recursively clean any remaining float NaN in dashboard_data
+def clean_nans(obj):
+    if isinstance(obj, float) and (np.isnan(obj) or np.isinf(obj)):
+        return None
+    elif isinstance(obj, dict):
+        return {k: clean_nans(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [clean_nans(item) for item in obj]
+    return obj
+
+dashboard_data = clean_nans(dashboard_data)
+
 saida_json = 'dashboard/data/dashboard_data.json'
 with open(saida_json, 'w', encoding='utf-8') as f:
-    json.dump(dashboard_data, f, ensure_ascii=False)
+    json.dump(dashboard_data, f, ensure_ascii=False, allow_nan=False)
 
 print(f"Exportação concluída com sucesso: {saida_json}")
 print(f"Total de municípios exportados: {len(municipios_lista)}")

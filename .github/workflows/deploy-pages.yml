@@ -5,7 +5,6 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-# Permissões necessárias para publicar no GitHub Pages via Actions
 permissions:
   contents: read
   pages: write

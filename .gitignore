@@ -16,6 +16,10 @@ __pycache__/
 build_series_nb.py
 gerar_analise_municipios.py
 atualizar_dados_historicos.py
+build_clusters_nb.py
+build_eleitoral_nb.py
+
+
 
 # Arquivos temporários e scratch
 scratch*
