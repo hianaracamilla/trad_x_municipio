@@ -2215,34 +2215,52 @@ function atualizarNumerosMunicipaisSeries(cidade) {
 
     container.innerHTML = `
       <div class="mun-series-item">
-        <div class="mun-series-lbl">Vagas Formais CLT</div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="mun-series-lbl">Vagas Formais CLT</div>
+          <span style="font-size: 0.65rem; color: #1E40AF; background: #EEF2FF; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024</span>
+        </div>
         <div class="mun-series-val" style="color: #1A56DB;">49,66 M</div>
-        <span style="font-size: 0.72rem; color: #64748B;">Recorde histórico nacional</span>
+        <span style="font-size: 0.72rem; color: #64748B;">Novo CAGED / RAIS (Recorde)</span>
       </div>
       <div class="mun-series-item">
-        <div class="mun-series-lbl">MEIs Cadastrados</div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="mun-series-lbl">MEIs Cadastrados</div>
+          <span style="font-size: 0.65rem; color: #0369A1; background: #E0F2FE; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024</span>
+        </div>
         <div class="mun-series-val" style="color: #0284C7;">16,94 M</div>
-        <span style="font-size: 0.72rem; color: #64748B;">Microempreendedores ativos</span>
+        <span style="font-size: 0.72rem; color: #64748B;">Receita Federal (Ativos)</span>
       </div>
       <div class="mun-series-item">
-        <div class="mun-series-lbl">Aposentadorias RGPS</div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="mun-series-lbl">Aposentadorias RGPS</div>
+          <span style="font-size: 0.65rem; color: #6D28D9; background: #F3E8FF; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024</span>
+        </div>
         <div class="mun-series-val" style="color: #7E3AF2;">R$ 633,5 Bi</div>
-        <span style="font-size: 0.72rem; color: #64748B;">35,17 M benefícios pagos</span>
+        <span style="font-size: 0.72rem; color: #64748B;">35,17 M benefícios (RTN/MPS)</span>
       </div>
       <div class="mun-series-item">
-        <div class="mun-series-lbl">Farmácia Popular</div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="mun-series-lbl">Farmácia Popular</div>
+          <span style="font-size: 0.65rem; color: #047857; background: #D1FAE5; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024</span>
+        </div>
         <div class="mun-series-val" style="color: #0E9F6E;">12,96 M</div>
-        <span style="font-size: 0.72rem; color: #64748B;">R$ 7,73 Bi de economia</span>
+        <span style="font-size: 0.72rem; color: #64748B;">R$ 7,73 Bi economia (MS)</span>
       </div>
       <div class="mun-series-item">
-        <div class="mun-series-lbl">Pé-de-Meia</div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="mun-series-lbl">Pé-de-Meia</div>
+          <span style="font-size: 0.65rem; color: #B45309; background: #FEF3C7; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024/2025</span>
+        </div>
         <div class="mun-series-val" style="color: #F59E0B;">4,08 M</div>
-        <span style="font-size: 0.72rem; color: #64748B;">Jovens do ensino médio</span>
+        <span style="font-size: 0.72rem; color: #64748B;">MEC / FNDE / CAIXA</span>
       </div>
       <div class="mun-series-item">
-        <div class="mun-series-lbl">Merenda / Agro Familiar</div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="mun-series-lbl">Merenda / Agro Familiar</div>
+          <span style="font-size: 0.65rem; color: #047857; background: #ECFDF5; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024/2025</span>
+        </div>
         <div class="mun-series-val" style="color: #059669;">R$ 1,51 Bi</div>
-        <span style="font-size: 0.72rem; color: #64748B;">Mín. 30% pequenos produtores</span>
+        <span style="font-size: 0.72rem; color: #64748B;">FNDE / PNAE (Mín. 30%)</span>
       </div>
     `;
     return;
@@ -2260,34 +2278,52 @@ function atualizarNumerosMunicipaisSeries(cidade) {
 
   container.innerHTML = `
     <div class="mun-series-item">
-      <div class="mun-series-lbl">MEIs no Município</div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="mun-series-lbl">MEIs no Município</div>
+        <span style="font-size: 0.65rem; color: #0369A1; background: #E0F2FE; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024</span>
+      </div>
       <div class="mun-series-val" style="color: #0284C7;">${formatarNumero(meiEstimado)}</div>
       <span style="font-size: 0.72rem; color: #64748B;">${(m.ind?.mei || 0).toFixed(1)} MEIs / 100 hab</span>
     </div>
     <div class="mun-series-item">
-      <div class="mun-series-lbl">Aposentados INSS</div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="mun-series-lbl">Aposentados INSS</div>
+        <span style="font-size: 0.65rem; color: #6D28D9; background: #F3E8FF; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024</span>
+      </div>
       <div class="mun-series-val" style="color: #7E3AF2;">${formatarNumero(aposEstimados)}</div>
       <span style="font-size: 0.72rem; color: #64748B;">Injeção: ~R$ ${formatarNumero(injeaoInssEstimada)} M/ano</span>
     </div>
     <div class="mun-series-item">
-      <div class="mun-series-lbl">Farmácia Popular</div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="mun-series-lbl">Farmácia Popular</div>
+        <span style="font-size: 0.65rem; color: #047857; background: #D1FAE5; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024</span>
+      </div>
       <div class="mun-series-val" style="color: #0E9F6E;">${formatarNumero(fpBenef)} hab</div>
       <span style="font-size: 0.72rem; color: #64748B;">${(m.ind?.fp || 0).toFixed(1)} atendidos / 100 hab</span>
     </div>
     <div class="mun-series-item">
-      <div class="mun-series-lbl">Cobertura Pé-de-Meia</div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="mun-series-lbl">Cobertura Pé-de-Meia</div>
+        <span style="font-size: 0.65rem; color: #B45309; background: #FEF3C7; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024/2025</span>
+      </div>
       <div class="mun-series-val" style="color: #F59E0B;">${(m.ind?.pdm || 0).toFixed(1)}%</div>
       <span style="font-size: 0.72rem; color: #64748B;">Jovens do EM c/ poupança</span>
     </div>
     <div class="mun-series-item">
-      <div class="mun-series-lbl">Merenda Escolar (PNAE)</div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="mun-series-lbl">Merenda Escolar (PNAE)</div>
+        <span style="font-size: 0.65rem; color: #047857; background: #ECFDF5; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2024/2025</span>
+      </div>
       <div class="mun-series-val" style="color: #059669;">Mín. 30% Local</div>
       <span style="font-size: 0.72rem; color: #64748B;">~R$ ${formatarNumero(pnaeAgroEst)} mil pequenos produtores</span>
     </div>
     <div class="mun-series-item">
-      <div class="mun-series-lbl">Funcionalismo Público</div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="mun-series-lbl">Funcionalismo Público</div>
+        <span style="font-size: 0.65rem; color: #475569; background: #F1F5F9; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Ref: 2023/2024</span>
+      </div>
       <div class="mun-series-val" style="color: #C026D3;">${(m.ind?.serv || 0).toFixed(1)} / 100</div>
-      <span style="font-size: 0.72rem; color: #64748B;">Servidores por 100 hab</span>
+      <span style="font-size: 0.72rem; color: #64748B;">IBGE MUNIC / Servidores por 100 hab</span>
     </div>
   `;
 }
@@ -4544,13 +4580,13 @@ async function abrirModalMunicipio(idIbge) {
 
   const medianas = APP_DATA.totais_nacionais?.medianas_municipais || {};
   const itensIndicadores = [
-    { key: 'clt', label: 'CLT / 100 hab', sub: 'carteiras assinadas', sufixo: '' },
-    { key: 'mei', label: 'MEI / 100 hab', sub: 'microempreendedores', sufixo: '' },
-    { key: 'serv', label: 'Servidores / 100 hab', sub: 'funcionalismo público', sufixo: '' },
-    { key: 'bpc', label: 'BPC / 100 hab', sub: 'beneficiários LOAS', sufixo: '' },
-    { key: 'fp', label: 'Farmácia Popular', sub: 'beneficiários / 100 hab', sufixo: '' },
-    { key: 'pdm', label: 'Pé-de-Meia (Cobertura)', sub: 'jovens EM c/ poupança', sufixo: '%' },
-    { key: 'apos', label: 'Aposentadorias RGPS', sub: 'aposentados / 100 hab', sufixo: '' }
+    { key: 'clt', label: 'CLT / 100 hab', sub: 'carteiras assinadas', sufixo: '', ano: 'Ref: 2024 (Novo CAGED)' },
+    { key: 'mei', label: 'MEI / 100 hab', sub: 'microempreendedores', sufixo: '', ano: 'Ref: 2024 (Receita Federal)' },
+    { key: 'serv', label: 'Servidores / 100 hab', sub: 'funcionalismo público', sufixo: '', ano: 'Ref: 2023/2024 (IBGE MUNIC)' },
+    { key: 'bpc', label: 'BPC / 100 hab', sub: 'beneficiários LOAS', sufixo: '', ano: 'Ref: 2024 (MDS / INSS)' },
+    { key: 'fp', label: 'Farmácia Popular', sub: 'beneficiários / 100 hab', sufixo: '', ano: 'Ref: 2024 (DataSUS / MS)' },
+    { key: 'pdm', label: 'Pé-de-Meia (Cobertura)', sub: 'jovens EM c/ poupança', sufixo: '%', ano: 'Ref: 2024/2025 (MEC)' },
+    { key: 'apos', label: 'Aposentadorias RGPS', sub: 'aposentados / 100 hab', sufixo: '', ano: 'Ref: 2024 (MPS / INSS)' }
   ];
 
   const cardsIndicadoresHtml = itensIndicadores.map(cfg => {
@@ -4576,8 +4612,11 @@ async function abrirModalMunicipio(idIbge) {
           <span class="indicator-box-label" style="margin-bottom: 0;">${cfg.label}</span>
           ${badgeHtml}
         </div>
-        <div class="indicator-box-val" style="color: ${isAbove ? '#0E9F6E' : 'var(--gov-blue-dark)'};">
-          ${val.toFixed(1)}${cfg.sufixo}
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <div class="indicator-box-val" style="color: ${isAbove ? '#0E9F6E' : 'var(--gov-blue-dark)'};">
+            ${val.toFixed(1)}${cfg.sufixo}
+          </div>
+          <span style="font-size: 0.65rem; color: #64748B; background: #F1F5F9; padding: 2px 5px; border-radius: 4px; font-weight: 600;">${cfg.ano}</span>
         </div>
         <span class="indicator-box-sub">${cfg.sub}</span>
 
