@@ -802,7 +802,7 @@ function atualizarCardsPrioridades(cidades, nivel) {
     document.getElementById('card-subval-educacao-1').textContent = '4,08 M';
     document.getElementById('card-subval-educacao-2').textContent = 'R$ 46,07 Bi';
 
-    document.getElementById('card-val-previdencia').textContent = 'R$ 606,2 Bi';
+    document.getElementById('card-val-previdencia').textContent = 'R$ 633,5 Bi';
     document.getElementById('card-subval-prev-1').textContent = '35,17 M';
     document.getElementById('card-subval-prev-2').textContent = '24,14 M (7,0M rural)';
 
@@ -822,7 +822,7 @@ function atualizarCardsPrioridades(cidades, nivel) {
     const descEdu = document.getElementById('card-desc-educacao');
     if (descEdu) descEdu.textContent = 'Jovens do ensino médio público com poupança e incentivo permanente à conclusão.';
     const descPrev = document.getElementById('card-desc-previdencia');
-    if (descPrev) descPrev.textContent = 'R$ 606,2 Bi em aposentadorias (sendo R$ 121,4 Bi rurais), superando o FPM em 78% das cidades.';
+    if (descPrev) descPrev.textContent = 'R$ 633,5 Bi em aposentadorias (sendo R$ 196,9 Bi rurais), superando o FPM em 78% das cidades.';
     const descTrab = document.getElementById('card-desc-trabalho');
     if (descTrab) descTrab.textContent = 'Recorde de ocupação formal no país aliado ao suporte a 16,9M de MEIs.';
     const descAgro = document.getElementById('card-desc-agro');
@@ -844,7 +844,7 @@ function atualizarCardsPrioridades(cidades, nivel) {
   const fpEconomia = fpAtendidos * 600; // ~R$ 600/ano per capita
 
   const prevBenef = cidades.reduce((sum, c) => sum + ((c.pop || 0) * (c.ind?.apos || 0) / 100), 0);
-  const prevValor = prevBenef * 17235; // R$ 606,2 Bi / 35,17 M benefícios
+  const prevValor = prevBenef * 18012; // R$ 633,5 Bi (Consolidado 2024) / 35,17 M benefícios
   const prevApos = prevBenef * (24.14 / 35.17);
   const prevRural = prevBenef * (7.01 / 35.17);
 
@@ -2222,7 +2222,7 @@ function atualizarNumerosMunicipaisSeries(cidade) {
       </div>
       <div class="mun-series-item">
         <div class="mun-series-lbl">Aposentadorias RGPS</div>
-        <div class="mun-series-val" style="color: #7E3AF2;">R$ 606,2 Bi</div>
+        <div class="mun-series-val" style="color: #7E3AF2;">R$ 633,5 Bi</div>
         <span style="font-size: 0.72rem; color: #64748B;">35,17 M benefícios pagos</span>
       </div>
       <div class="mun-series-item">
@@ -4286,10 +4286,10 @@ function abrirModalPrioridade(tipo) {
         titulo: 'Previdência Social RGPS: O Maior Motor de Renda dos Municípios',
         descricao: 'Em mais de 78% dos municípios brasileiros (mais de 4.300 cidades), o total pago em benefícios do Regime Geral de Previdência Social (aposentadorias urbanas e rurais) supera a receita total arrecadada via Fundo de Participação dos Municípios (FPM).',
         destaques: [
-          { label: 'Aposentadorias Pagas (RGPS)', valor: 'R$ 606,2 Bilhões', ano: 'Ref: 2024/2025' },
-          { label: 'Aposentadoria / Benefício Rural', valor: 'R$ 121,4 a 218,8 Bi', ano: 'Ref: 2024/2025' },
-          { label: 'Total de Benefícios Mantidos', valor: '35,17 Milhões', ano: 'Ref: 2024/2025' },
-          { label: 'Cidades onde RGPS > FPM', valor: '4.345 Municípios (78%)', ano: 'Ref: 2023/2024' }
+          { label: 'Aposentadorias Pagas (RGPS)', valor: 'R$ 633,5 Bilhões', ano: 'Ref: 2024' },
+          { label: 'Aposentadoria & Benefício Rural', valor: 'R$ 196,9 Bilhões', ano: 'Ref: 2024' },
+          { label: 'Total de Benefícios Mantidos', valor: '35,17 Milhões', ano: 'Ref: 2024' },
+          { label: 'Cidades onde RGPS > FPM', valor: '4.345 Municípios (78%)', ano: 'Ref: 2024' }
         ],
         impactoPolitico: 'Sustentáculo absoluto da atividade econômica local em cidades do interior, especialmente no Nordeste, Sul e Centro-Oeste rural, com forte impacto no consumo básico de supermercados e farmácias.'
       },
@@ -4335,8 +4335,8 @@ function abrirModalPrioridade(tipo) {
     const etiMatriculas = escopo.cidades.reduce((s, c) => s + (c.eti?.mat || 0), 0);
 
     const prevBenef = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * (c.ind?.apos || 0) / 100), 0);
-    const prevValor = prevBenef * 17235;
-    const prevRuralValor = prevValor * (121.4 / 606.2);
+    const prevValor = prevBenef * 18012;
+    const prevRuralValor = prevValor * (196.93 / 633.5);
     const mediaPesoPib = totalCidades > 0 ? (escopo.cidades.reduce((s, c) => s + (c.ind?.prev_pib || 0), 0) / totalCidades).toFixed(1) : '0.0';
 
     const cltVagas = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * (c.ind?.clt || 0) / 100), 0);
@@ -4379,9 +4379,9 @@ function abrirModalPrioridade(tipo) {
         titulo: `Previdência Social RGPS: Motor de Renda Local • ${escopo.nomeTerritorio}`,
         descricao: `Em ${escopo.nomeTerritorio}, os benefícios pagos pelo Regime Geral de Previdência Social (aposentadorias urbanas e rurais) constituem a principal base de sustentação da economia local, injetando recursos regulares no comércio e serviços.`,
         destaques: [
-          { label: 'Total Pago em Benefícios RGPS', valor: `${formatarGrandeza(prevValor, true)} / ano`, ano: 'Ref: 2024/2025' },
-          { label: 'Aposentadorias e Benefício Rural', valor: `${formatarGrandeza(prevRuralValor, true)} / ano`, ano: 'Ref: 2024/2025' },
-          { label: 'Beneficiários Mantidos (INSS)', valor: `${formatarGrandeza(prevBenef)} Pessoas`, ano: 'Ref: 2024/2025' },
+          { label: 'Total Pago em Benefícios RGPS', valor: `${formatarGrandeza(prevValor, true)} / ano`, ano: 'Ref: 2024' },
+          { label: 'Aposentadorias e Benefício Rural', valor: `${formatarGrandeza(prevRuralValor, true)} / ano`, ano: 'Ref: 2024' },
+          { label: 'Beneficiários Mantidos (INSS)', valor: `${formatarGrandeza(prevBenef)} Pessoas`, ano: 'Ref: 2024' },
           { label: isMunUnico ? 'Peso da Previdência no PIB' : 'Peso Médio no PIB Municipal', valor: isMunUnico ? `${munUnico.ind?.prev_pib || 0}% do PIB Local` : `${mediaPesoPib}% do PIB`, ano: 'Ref: MPS / IBGE' }
         ],
         impactoPolitico: `Segurança social contínua em ${escopo.nomeTerritorio}: o dinheiro das aposentadorias circula integralmente na economia municipal, sustentando supermercados, farmácias e feiras livres mesmo em momentos de crise ou entressafra.`
@@ -4931,7 +4931,7 @@ function atualizarPreviewCard() {
           <span class="card-export-stat-lbl">Investidos no Pé-de-Meia</span>
         </div>
         <div class="card-export-stat-box" style="border-left: 4px solid #7E3AF2;">
-          <span class="card-export-stat-val">R$ 606,2 Bi</span>
+          <span class="card-export-stat-val">R$ 633,5 Bi</span>
           <span class="card-export-stat-lbl">Aposentadorias RGPS ao ano</span>
         </div>
         <div class="card-export-stat-box" style="border-left: 4px solid var(--gov-yellow-ouro);">

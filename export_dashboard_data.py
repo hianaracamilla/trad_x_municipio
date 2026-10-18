@@ -133,14 +133,14 @@ totais_nacionais = {
     },
     "previdencia": {
         "titulo": "Previdência & Economia Local",
-        "destaque_numero": "R$ 606,2 Bi",
+        "destaque_numero": "R$ 633,5 Bi",
         "destaque_rotulo": "Injeção Anual de Aposentadorias",
         "subtitulo": "Sustentáculo do comércio em 78% dos municípios",
         "detalhes": [
             {"rotulo": "Benefícios RGPS totais", "valor": "35.173.071 benefícios"},
             {"rotulo": "Aposentadorias concedidas", "valor": "24.144.902 aposentados"},
-            {"rotulo": "Aposentadoria & Benefício Rural", "valor": "7.012.090 rurais (R$ 121,4 a 218,8 Bi)"},
-            {"rotulo": "Massa anual de aposentadorias", "valor": "R$ 606,24 Bilhões"},
+            {"rotulo": "Aposentadoria & Benefício Rural", "valor": "7.012.090 rurais (R$ 196,9 Bi)"},
+            {"rotulo": "Massa anual de aposentadorias", "valor": "R$ 633,50 Bilhões"},
             {"rotulo": "Impacto médio no PIB local", "valor": "Até 17,6% do PIB em municípios pequenos"}
         ],
         "cor": "#7E3AF2"
