@@ -133,7 +133,7 @@ Para assegurar contraste visual imediato no mapa e nos gráficos, cada cluster m
 - 🤝 **Seguridade & Repasses**: Coral / Vermelho Suave (`#E05252`)
 - 🏛️ **Funcionalismo Público**: **Magenta / Fúcsia Executivo** (`#C026D3` — totalmente diferenciado do verde do agro)
 - 🎒 **Jovens & Apoio Social**: Ouro / Âmbar Vibrante (`#F59E0B`)
-- 🏙️ **Metrópoles & Capitais**: Ardósia Profundo (`#374151`)
+- 🏙️ **Grandes Cidades Atípicas**: Ardósia Profundo (`#374151`)
 
 ---
 

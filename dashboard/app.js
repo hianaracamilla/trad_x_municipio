@@ -85,10 +85,21 @@ const PERFIS_IMPACTO = {
       'Combate ao endividamento abusivo de consignados'
     ]
   },
+  'Grandes Cidades Atípicas': {
+    cor: '#374151',
+    icone: '🏙️',
+    resumo: 'Grandes centros urbanos com dinâmica socioeconômica e densidade atípicas, concentrando desafios metropolitanos complexos de serviços e habitação.',
+    assuntos_impacto: [
+      'Geração de emprego formal CLT e renda média familiar',
+      'Mobilidade urbana, transporte público e PAC Cidades Sustentáveis',
+      'Custo da alimentação e inflação da cesta básica',
+      'Crédito imobiliário (Faixa 3 e Minha Casa Minha Vida)'
+    ]
+  },
   'Metrópoles & Capitais': {
     cor: '#374151',
     icone: '🏙️',
-    resumo: 'Grandes centros urbanos com economia diversificada em serviços, indústria e tecnologia, com forte pressão de mobilidade e habitação.',
+    resumo: 'Grandes centros urbanos com dinâmica socioeconômica e densidade atípicas, concentrando desafios metropolitanos complexos de serviços e habitação.',
     assuntos_impacto: [
       'Geração de emprego formal CLT e renda média familiar',
       'Mobilidade urbana, transporte público e PAC Cidades Sustentáveis',
@@ -210,6 +221,7 @@ const PERFIL_INDICADORES_PRIMARIOS = {
   'Polos de Emprego & Serviços': ['clt', 'mei'],
   'Seguridade & Repasses': ['bf', 'bpc', 'apos'],
   'Funcionalismo Público': ['serv'],
+  'Grandes Cidades Atípicas': ['clt', 'pdm'],
   'Metrópoles & Capitais': ['clt', 'pdm']
 };
 

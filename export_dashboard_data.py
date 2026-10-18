@@ -82,7 +82,8 @@ cluster_nome_map = {
     'Municípios Dependentes de Seguridade e Repasses': 'Seguridade & Repasses',
     'Pequenos Municípios do Funcionalismo Público': 'Funcionalismo Público',
     'Jovens e Dependentes de Apoio Social': 'Jovens & Apoio Social',
-    'Grandes Metrópoles e Capitais (Atípicas)': 'Metrópoles & Capitais'
+    'Grandes Metrópoles e Capitais (Atípicas)': 'Grandes Cidades Atípicas',
+    'Metrópoles & Capitais': 'Grandes Cidades Atípicas'
 }
 
 merged['perfil_final_reclassificado'] = merged['perfil_final_reclassificado'].map(lambda x: cluster_nome_map.get(x, x))
@@ -97,7 +98,7 @@ perfil_cores = {
     'Seguridade & Repasses': '#E05252',            # Vermelho clarinho / Coral
     'Funcionalismo Público': '#C026D3',            # Magenta / Fúcsia Executivo
     'Jovens & Apoio Social': '#F59E0B',            # Amarelo/Ouro vibrante
-    'Metrópoles & Capitais': '#374151'             # Ardósia profundo
+    'Grandes Cidades Atípicas': '#374151'          # Ardósia profundo
 }
 
 # 1. Totais Nacionais
