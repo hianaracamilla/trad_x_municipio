@@ -62,6 +62,59 @@ A interface foi projetada seguindo as melhores práticas internacionais de desig
    - Backgrounds profundos em tons ardósia (`#0B132B`, `#0D1B2A`, `#1E293B`) com efeitos de vidro (*glassmorphism*) e bordas discretas em degradê (`rgba(255, 255, 255, 0.08)`).
 3. **Tipografia Moderna**:
    - Famílias *Outfit* e *Plus Jakarta Sans* (Google Fonts), conferindo legibilidade instantânea em números grandes e textos densos.
+4. **Engenharia de Percepção (Teoria da Gestalt)**:
+   - Agrupamento visual por proximidade, contraste cromático hierárquico e continuidade linear para destacar desvios em relação à mediana nacional e facilitar a assimilação de dados complexos.
+
+---
+
+## 🧭 2.1. Navegação, Cabeçalho Dinâmico e Sinalização de Escopo
+
+### Chip de Filtro Ativo no Cabeçalho (`#header-territory-pill`)
+- Localizado no topo superior fixo (`top-nav`), exibe de forma permanente a localidade filtrada com ícone de mapa e o nome da cidade/estado.
+- Conta com botão integrado `✕ Limpar Filtro` que restaura a visão nacional instantaneamente sem necessidade de recarregar a página.
+
+### Selos de Escopo Analítico em Todos os Gráficos (`chart-scope-badge`)
+Para evitar ambiguidades estatísticas na interpretação dos dados, todos os gráficos possuem badges padronizados que se adaptam em tempo real:
+- **`[Visão Nacional]`** (Verde esmeralda / `#10B981`): Representa dados de abrangência do Brasil consolidado.
+- **`[Visão Estadual / Regional]`** (Azul royal / `#2563EB`): Ativado ao selecionar uma macrorregião ou estado federativo.
+- **`[Visão Municipal]`** (Âmbar / `#F59E0B`): Ativado ao selecionar um município individualizado.
+
+### Rótulos Diretos em Barras e Linhas (Direct Data Labels)
+- Todos os gráficos de barras horizontais (peso eleitoral), barras agrupadas (desempenho eleitoral e abstenções), séries temporais (custo de vida e poder de compra) e gráficos de modais orçamentários contam com rótulos diretos plotados diretamente sobre os elementos visuais, garantindo leitura executiva sem exigir hover do cursor.
+
+---
+
+## 🏛️ 2.2. Resumo das 5 Grandes Prioridades Nacionais & Abertura em Modais
+
+O bloco superior sintetiza as políticas públicas estruturantes do Governo Federal no município ou território ativo:
+
+1. 💊 **Farmácia Popular & Saúde** (Acento superior **Vermelho** `#EF4444`):
+   - Volume de pessoas atendidas e economia familiar gerada pela gratuidade universal de medicamentos para diabetes, hipertensão e asma.
+   - Modal aprofundado com a série histórica do orçamento federal da Saúde e Farmácia Popular (2010 a 2026), com valores nominais e corrigidos pelo IPCA.
+2. 🎓 **Educação Básica & Pé-de-Meia** (Acento superior **Azul** `#2563EB`):
+   - Poupança estudantil para jovens do ensino médio da rede pública e complementação do Fundeb (VAAT).
+3. 👴 **Previdência & Seguridade Social** (Acento superior **Roxo** `#8B5CF6`):
+   - Injeção anual de benefícios do RGPS, superando a arrecadação própria e o FPM na grande maioria dos municípios brasileiros.
+4. 💼 **Mercado de Trabalho CLT & Suporte ao MEI** (Acento superior **Laranja** `#F59E0B`):
+   - Volume total de vínculos formais com carteira assinada (Novo CAGED/RAIS) e estoque de microempreendedores cadastrados.
+   - Modal dedicado com gráfico de evolução histórica conjunta de **CLT Formal (Milhões)** e **MEIs (Milhões)** de 2016 a 2026.
+5. 🌾 **Agricultura Familiar & Merenda Escolar** (Acento superior **Verde** `#10B981`):
+   - Repasses do Programa Nacional de Alimentação Escolar (PNAE) aos pequenos produtores da agricultura familiar, assegurando comida saudável e dinamizando a economia rural local.
+
+> **Comentários Contextuais Dinâmicos:** Os subtítulos e descritivos desses 5 cards adaptam-se automaticamente ao município selecionado (ex: citando a quantidade de alunos com merenda local, economia familiar acumulada ou a representatividade dos empregos formais na localidade).
+
+---
+
+## ⚡ 2.3. Raio-X Municipal Estratégico com Benchmark da Mediana
+
+Estruturado como uma grade de 8 cards nítidos de alta legibilidade, cada card contém:
+- **Ícone Temático & Nome do Indicador** (CLT, MEI, Servidores, Aposentados, Bolsa Família, BPC, Farmácia Popular e Pé-de-Meia);
+- **Grandeza Absoluta Projetada** (ex.: `~37,9 Mil vagas`, `~14,3 Mil MEIs`, `~29,0 Mil famílias`);
+- **Taxa de Intensidade** (ex.: `17,5 / 100 hab`);
+- **Chip de Posicionamento Relativo à Mediana Nacional**:
+  - `▲ Acima (+X.X)`: Destacado em verde suave quando a taxa do município supera a mediana dos 5.571 municípios brasileiros.
+  - `▼ Abaixo (-X.X)`: Destacado em cinza/ardósia neutro quando a taxa está abaixo da mediana nacional.
+- **Range Bullet Track**: Linha contínua do menor ao maior valor do Brasil, com marcador da mediana nacional e ponto em destaque da posição exata da cidade.
 
 ---
 

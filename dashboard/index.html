@@ -67,6 +67,13 @@
         <div class="search-dropdown hidden" id="search-dropdown"></div>
       </div>
 
+      <!-- Sinalização do Filtro Ativo no Cabeçalho (Conforme Solicitado) -->
+      <div class="header-territory-pill" id="header-territory-pill" onclick="resetarFiltroTerritorial()" title="Clique para redefinir filtro e voltar ao Brasil">
+        <span class="territory-pill-icon">📍</span>
+        <span class="territory-pill-text" id="header-territory-text">Brasil (Consolidado)</span>
+        <button class="territory-pill-clear hidden" id="header-territory-clear" title="Limpar filtro">✕</button>
+      </div>
+
       <!-- Action Buttons -->
       <div class="nav-actions">
         <!-- Botão sutil para retrair / expandir a visão do perfil -->
@@ -148,7 +155,10 @@
               </div>
               <p class="chart-subtitle" id="peso-perfil-subtitle">Distribuição do eleitorado apto (TSE) concentrado em cada perfil municipal</p>
             </div>
-            <span class="chart-tag" id="peso-perfil-tag">Eleitorado Apto</span>
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              <span class="chart-scope-badge" id="badge-scope-peso">Visão Nacional</span>
+              <span class="chart-tag" id="peso-perfil-tag">Eleitorado Apto</span>
+            </div>
           </div>
           <div class="chart-container-compact">
             <canvas id="chart-peso-perfil"></canvas>
@@ -162,7 +172,10 @@
               <h4 class="chart-title">Desempenho Eleitoral c/ Abstenções por Perfil</h4>
               <p class="chart-subtitle" id="desempenho-abst-subtitle">Comparativo de votos válidos de Lula, opositor e taxa de abstenção em cada cluster</p>
             </div>
-            <span class="chart-tag" id="desempenho-abst-tag">2026 • 1º Turno</span>
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              <span class="chart-scope-badge" id="badge-scope-desempenho">Visão Nacional</span>
+              <span class="chart-tag" id="desempenho-abst-tag">2026 • 1º Turno</span>
+            </div>
           </div>
           <div class="chart-container-compact">
             <canvas id="chart-desempenho-abstencao"></canvas>
@@ -173,7 +186,7 @@
     </section>
 
     <!-- 2. MIDDLE SECTION: RESUMO DAS GRANDES PRIORIDADES NACIONAIS -->
-    <!-- 4 Cards: Saúde, Educação, Previdência, Trabalho & Renda -->
+    <!-- 5 Cards: Farmácia Popular & Saúde, Educação, Previdência, Trabalho & Renda, Agro & Merenda -->
     <section class="national-metrics-section">
       <div class="section-header-compact">
         <div class="section-title-group">
@@ -184,20 +197,20 @@
       </div>
 
       <div class="metrics-grid">
-        <!-- Saúde -->
+        <!-- Farmácia Popular & Saúde -->
         <div class="metric-card card-saude clickable-card" onclick="abrirModalPrioridade('saude')">
           <div class="metric-card-header">
-            <div class="metric-icon-box bg-emerald">
+            <div class="metric-icon-box bg-red">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
               </svg>
             </div>
-            <span class="metric-category">Saúde Pública</span>
+            <span class="metric-category">Farmácia Popular & Saúde</span>
             <span class="card-arrow-indicator">➔</span>
           </div>
           <div class="metric-main-value" id="card-val-saude">12,96 M</div>
           <div class="metric-label">Pessoas Atendidas na Farmácia Popular</div>
-          <p class="metric-desc">Gratuidade integral de remédios essenciais para diabetes, hipertensão e asma.</p>
+          <p class="metric-desc" id="card-desc-saude">Gratuidade integral de remédios essenciais para diabetes, hipertensão e asma.</p>
           <div class="metric-footer-stats">
             <div class="footer-stat-item">
               <span class="footer-stat-val" id="card-subval-saude-1">R$ 7,73 Bi</span>
@@ -224,7 +237,7 @@
           </div>
           <div class="metric-main-value" id="card-val-educacao">R$ 10,53 Bi</div>
           <div class="metric-label">Investimento Total Pé-de-Meia</div>
-          <p class="metric-desc">Jovens do ensino médio público com poupança e incentivo permanente à conclusão.</p>
+          <p class="metric-desc" id="card-desc-educacao">Jovens do ensino médio público com poupança e incentivo permanente à conclusão.</p>
           <div class="metric-footer-stats">
             <div class="footer-stat-item">
               <span class="footer-stat-val" id="card-subval-educacao-1">4,08 M</span>
@@ -251,7 +264,7 @@
           </div>
           <div class="metric-main-value" id="card-val-previdencia">R$ 606,2 Bi</div>
           <div class="metric-label">Injeção Anual de Benefícios RGPS</div>
-          <p class="metric-desc">Injeção direta na economia local, superando o FPM em 78% das cidades.</p>
+          <p class="metric-desc" id="card-desc-previdencia">Injeção direta na economia local, superando o FPM em 78% das cidades.</p>
           <div class="metric-footer-stats">
             <div class="footer-stat-item">
               <span class="footer-stat-val" id="card-subval-prev-1">35,17 M</span>
@@ -280,7 +293,7 @@
           </div>
           <div class="metric-main-value" id="card-val-trabalho">49,66 M</div>
           <div class="metric-label">Empregos Formais com Carteira (CLT)</div>
-          <p class="metric-desc">Recorde de ocupação formal no país aliado ao suporte a 16,9M de MEIs.</p>
+          <p class="metric-desc" id="card-desc-trabalho">Recorde de ocupação formal no país aliado ao suporte a 16,9M de MEIs.</p>
           <div class="metric-footer-stats">
             <div class="footer-stat-item">
               <span class="footer-stat-val" id="card-subval-trab-1">16,94 M</span>
@@ -307,7 +320,7 @@
           </div>
           <div class="metric-main-value" id="card-val-agro">R$ 1,51 Bi</div>
           <div class="metric-label">Compras da Agricultura Familiar (PNAE)</div>
-          <p class="metric-desc">Repasse direto aos pequenos produtores rurais para garantir comida saudável na merenda.</p>
+          <p class="metric-desc" id="card-desc-agro">Repasse direto aos pequenos produtores rurais para garantir comida saudável na merenda.</p>
           <div class="metric-footer-stats">
             <div class="footer-stat-item">
               <span class="footer-stat-val" id="card-subval-agro-1">40,5 M</span>
@@ -438,7 +451,10 @@
                   <h4 class="chart-title" id="series-chart-title">Custo de Bens Essenciais em Proporção do Salário Mínimo (%)</h4>
                   <p class="chart-subtitle" id="series-chart-subtitle">Quanto da renda mínima é comprometida para adquirir Cesta Básica e Botijão de Gás</p>
                 </div>
-                <span class="chart-tag" id="series-chart-tag">Série Histórica</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span class="chart-tag" id="series-chart-tag">Série Histórica</span>
+                  <span class="chart-scope-badge scope-nacional" id="badge-scope-series">Visão Nacional</span>
+                </div>
               </div>
               <div class="series-chart-wrapper">
                 <canvas id="chart-series-historicas"></canvas>
@@ -601,7 +617,10 @@
     <div class="modal-card modal-card-xl">
       <div class="modal-header">
         <div class="modal-title-group">
-          <span class="modal-eyebrow">ESTUDO ECONOMÉTRICO & CORRELAÇÃO</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="modal-eyebrow">ESTUDO ECONOMÉTRICO & CORRELAÇÃO</span>
+            <span class="chart-scope-badge scope-municipal" id="badge-scope-scatter">Visão 5.571 Cidades</span>
+          </div>
           <h3 class="modal-title">Voto Presidencial vs. Dependência de Políticas Públicas</h3>
           <p class="modal-subtitle">
             Cada bolinha representa 1 município brasileiro · <strong>tamanho = eleitores / população</strong> · <strong>cor = perfil socioeconômico</strong>

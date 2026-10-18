@@ -426,8 +426,14 @@ body {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
+}
+
+@media (min-width: 1200px) {
+  .metrics-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+  }
 }
 
 .metric-card {
@@ -457,10 +463,11 @@ body {
   height: 4px;
 }
 
-.card-saude::before { background: var(--gov-green-brasil); }
+.card-saude::before { background: #EF4444; }
 .card-educacao::before { background: var(--gov-blue-light); }
 .card-previdencia::before { background: #7E3AF2; }
 .card-trabalho::before { background: var(--gov-yellow-ouro); }
+.card-agro::before { background: #10B981; }
 
 .metric-card-header {
   display: flex;
@@ -483,10 +490,97 @@ body {
   height: 20px;
 }
 
-.bg-emerald { background: rgba(16, 185, 129, 0.12); color: var(--gov-green-brasil); }
+.bg-red { background: rgba(239, 68, 68, 0.12); color: #DC2626; }
+.bg-emerald { background: rgba(16, 185, 129, 0.12); color: #059669; }
 .bg-blue { background: rgba(26, 86, 219, 0.12); color: var(--gov-blue-light); }
 .bg-purple { background: rgba(126, 58, 242, 0.12); color: #7E3AF2; }
 .bg-amber { background: rgba(245, 158, 11, 0.12); color: #D97706; }
+
+/* Sinalizador de Território Ativo no Cabeçalho */
+.header-territory-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #F1F5F9;
+  border: 1px solid var(--border-subtle);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gov-blue-dark);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.header-territory-pill:hover {
+  background: #E2E8F0;
+  border-color: var(--border-strong);
+}
+
+.header-territory-pill.active-filter {
+  background: #EFF6FF;
+  border-color: #3B82F6;
+  color: #1D4ED8;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.territory-pill-icon {
+  font-size: 0.85rem;
+}
+
+.territory-pill-clear {
+  background: rgba(0, 0, 0, 0.08);
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: inherit;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.territory-pill-clear:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #DC2626;
+}
+
+/* Badge de Escopo dos Gráficos (Nacional / Estadual / Regional / Municipal) */
+.chart-scope-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: #EEF2FF;
+  color: #1E40AF;
+  border: 1px solid #C7D2FE;
+  letter-spacing: 0.02em;
+}
+
+.chart-scope-badge.scope-estadual {
+  background: #ECFDF5;
+  color: #047857;
+  border-color: #A7F3D0;
+}
+
+.chart-scope-badge.scope-municipal {
+  background: #FEF3C7;
+  color: #92400E;
+  border-color: #FDE68A;
+}
+
+.chart-scope-badge.scope-nacional {
+  background: #EEF2FF;
+  color: #1E40AF;
+  border-color: #C7D2FE;
+}
 
 .metric-category {
   font-size: 0.78rem;
@@ -2849,14 +2943,14 @@ body {
    ========================================================================== */
 .raiox-indicators-mini-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
-  gap: 8px !important;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+  gap: 12px !important;
   overflow-x: visible !important;
   padding-bottom: 0 !important;
-  margin-bottom: 12px !important;
+  margin-bottom: 16px !important;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   .raiox-indicators-mini-grid {
     grid-template-columns: repeat(8, 1fr) !important;
   }
@@ -2865,55 +2959,129 @@ body {
 .raiox-ind-pill {
   min-width: 0 !important;
   max-width: 100% !important;
-  flex-shrink: 1 !important;
-  background: #F8FAFC;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 6px 8px !important;
+  background: #FFFFFF !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 12px !important;
+  padding: 12px 10px !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 2px;
-  transition: all 0.2s ease;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.raiox-ind-pill::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #CBD5E1;
+  transition: background 0.2s ease;
 }
 
 .raiox-ind-pill:hover {
-  border-color: var(--gov-blue-light);
-  background: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-color: var(--gov-blue-light) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .raiox-ind-pill.card-above-median {
-  background: rgba(14, 159, 110, 0.06) !important;
-  border-color: rgba(14, 159, 110, 0.35) !important;
-  box-shadow: 0 1px 4px rgba(14, 159, 110, 0.06);
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, rgba(16, 185, 129, 0.05) 100%) !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12);
 }
 
-.median-pill {
-  font-size: 0.65rem;
+.raiox-ind-pill.card-above-median::before {
+  background: #10B981 !important;
+}
+
+.raiox-ind-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.raiox-ind-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.raiox-ind-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.raiox-ind-title {
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  display: inline-block;
-  width: fit-content;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
 }
 
-.median-pill.above {
+.median-status-chip {
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.median-status-chip.chip-above {
   background: #DEF7EC;
   color: #03543F;
+  border: 1px solid #BCF0DA;
 }
 
-.median-pill.below {
+.median-status-chip.chip-below {
   background: #F1F5F9;
   color: #475569;
+  border: 1px solid #E2E8F0;
+}
+
+.raiox-ind-values-box {
+  margin: 2px 0;
+}
+
+.raiox-ind-main-val {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+  line-height: 1.15;
+}
+
+.raiox-ind-pill.card-above-median .raiox-ind-main-val {
+  color: #047857;
+}
+
+.raiox-ind-rate-sub {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748B;
+  margin-top: 2px;
 }
 
 /* Gráfico de Linha Mínimo ao Máximo com Pontinho */
 .range-bullet-wrap {
-  margin-top: 4px;
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px dashed #E2E8F0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .range-bullet-track {
@@ -2926,12 +3094,13 @@ body {
 
 .range-median-mark {
   position: absolute;
-  top: -3px;
+  top: -4px;
   width: 2px;
-  height: 12px;
-  background: #64748B;
+  height: 14px;
+  background: #475569;
   transform: translateX(-50%);
   border-radius: 1px;
+  z-index: 2;
 }
 
 .range-bullet-dot {
@@ -2943,18 +3112,20 @@ body {
   transform: translate(-50%, -50%);
   background: #1A56DB;
   border: 2px solid #FFFFFF;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   transition: left 0.3s ease;
+  z-index: 3;
 }
 
 .range-bullet-dot.dot-high {
-  background: #0E9F6E !important;
+  background: #10B981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
 }
 
 .range-bullet-sub {
   display: flex;
   justify-content: space-between;
-  font-size: 0.62rem;
+  font-size: 0.60rem;
   color: #64748B;
   font-weight: 600;
 }

@@ -29,6 +29,16 @@
 A pasta [`dashboard/`](dashboard/) abriga a aplicação web executiva completa de visualização e exploração dos dados:
 
 * 🗺️ **Mapa Territorial Interativo (Leaflet + Esri Canvas):** Navegação fluida e transições de câmera suaves em 3 níveis: **Brasil ➔ 5 Regiões ➔ 27 Estados ➔ 5.571 Municípios** com polígonos GeoJSON coloridos por perfil, marcadores municipais e tooltips instantâneos (livre de chaves de API e marcas d'água).
+* 📍 **Sinalizador de Filtro Territorial no Cabeçalho:** O cabeçalho superior (`top-nav`) mantém permanentemente visível a localidade selecionada via chip interativo com botão `✕` para desfazer o filtro e restaurar a visão nacional.
+* 🏷️ **Sinalização de Escopo em Todos os Gráficos:** Cada visualização é rotulada com selos explícitos de abrangência (`[Visão Nacional]`, `[Visão Estadual / Regional]` ou `[Visão Municipal]`), eliminando ambiguidades estatísticas.
+* 📊 **Rótulos Diretos de Dados:** Gráficos de barras e séries temporais contam com data labels visíveis diretamente nos elementos gráficos, sem depender do hover do mouse.
+* 🏛️ **Resumo das 5 Grandes Prioridades Nacionais:** Cards dinâmicos e modais aprofundados para:
+  - 💊 **Farmácia Popular & Saúde:** Atendimento e gratuidade de medicamentos para diabetes, hipertensão e asma;
+  - 🎓 **Educação Básica & Pé-de-Meia:** Investimento do Pé-de-Meia e complementação federal do Fundeb (VAAT);
+  - 💼 **Mercado de Trabalho CLT & Suporte ao MEI:** Vagas com carteira assinada, suporte a microempreendedores e evolução histórica (2016–2026);
+  - 👴 **Previdência & Seguridade Social:** Injeção direta de benefícios RGPS na economia municipal;
+  - 🌾 **Agricultura Familiar & Merenda Escolar:** Repasse do PNAE (mínimo legal de 30% local) para produtores da agricultura familiar.
+* ⚡ **Raio-X Municipal Estratégico com Benchmark da Mediana:** 8 eixos temáticos estruturados segundo a Teoria da Gestalt, com chips de posicionamento relativo (`▲ Acima` ou `▼ Abaixo` da mediana do Brasil) e barras de dispersão contínua (Range Bullet Track).
 * 🗳️ **Seletor de Pleito Eleitoral:** Alternância em 1 clique entre **2026 (1º Turno)**, **2022 (1º Turno)** e **2022 (2º Turno)**, com recálculo instantâneo de todos os gráficos e cards.
 * 🔎 **Busca Preditiva de Municípios:** Autocomplete em milissegundos para localizar qualquer cidade e exibir seu raio-x completo (Saúde, Educação, RGPS, Emprego e Votação).
 * 📈 **Séries Históricas & Poder de Compra (2016–2026):** Gráficos analíticos de Cesta Básica (DIEESE), Botijão de Gás e Gasolina (ANP) em relação ao Salário Mínimo, Emprego CLT, MEIs, Veículos e Habitação.
@@ -67,6 +77,22 @@ Para agrupar os municípios de forma imparcial e sem viés de escala populaciona
 * **5. Cidades da Terceira Idade e Aposentados (722 cidades | 13,0% do Brasil):** A maior proporção de idosos/aposentados do país (22,1/100 hab) e o maior consumo de medicamentos na Farmácia Popular (15,1/100 hab), combinados com baixo Bolsa Família e bom mercado formal.
 * **6. Pequenos Municípios do Funcionalismo Público (573 cidades | 10,3% do Brasil):** Cidades de pequeno porte (média 5.300 hab) onde a presença da administração pública é máxima: **10,7 servidores por 100 habitantes** (1 em cada 10 moradores trabalha no setor público).
 * **7. Grandes Metrópoles e Capitais Atípicas (5 cidades | 0,1% do Brasil):** Cidades com distorções estruturais severas que ultrapassaram a dispersão dos clusters (Duque de Caxias, Boa Vista, Natal, Nova Iguaçu e Aracaju).
+
+---
+
+## 💼 Metodologia de Cálculo: Emprego Formal CLT e Suporte ao MEI
+
+Para assegurar consistência estatística e transparência nos dados do **Mercado de Trabalho**:
+1. **Fontes Primárias Auditadas:**
+   - **Emprego com Carteira Assinada (CLT):** Estoque formal acumulado do **Novo CAGED** e **RAIS** (Ministério do Trabalho e Emprego), vinculado aos códigos municipais do Censo IBGE.
+   - **Microempreendedores Individuais (MEI):** Base da **Receita Federal / DGI** e **Portal do Empreendedor** (estoque de CNPJs ativos do SIMEI com localização na cidade).
+2. **Indicadores de Intensidade Local (`ind.clt` e `ind.mei` por 100 hab):**
+   - Calculados estritamente como percentual da população municipal:
+     $$\text{CLT / 100 hab} = \left(\frac{\text{Vagas CLT Ativas no Município}}{\text{População IBGE}}\right) \times 100$$
+     $$\text{MEI / 100 hab} = \left(\frac{\text{CNPJs MEI Ativos}}{\text{População IBGE}}\right) \times 100$$
+3. **Reconciliação Exata (Card de Prioridades vs. Raio-X Municipal):**
+   - **Visão Brasil (Sem Filtro):** Registra o volume nacional consolidado de **50,4 Milhões de empregos formais CLT** e **16,9 Milhões de MEIs**.
+   - **Visão Filtrada (Município, Estado ou Região):** O volume é agregado pela soma real dos microdados locais ($\sum \text{Pop} \times \text{taxa\_clt} / 100$), assegurando que o número do Card Superior coincida perfeitamente (100% de precisão) com o indicador apresentado no Raio-X da cidade (ex: **Sobral (CE)** com taxa de 17,5% totaliza **37,9 Mil vagas formais CLT** em todas as telas).
 
 ---
 

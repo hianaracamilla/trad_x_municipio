@@ -142,6 +142,29 @@ $$D(M_i, C_k) = \sqrt{\sum_{j=1}^{10} (Z_{M_{ij}} - Z_{C_{kj}})^2}$$
   * Se $D_{min} > 3,02$: A metrópole é um outlier estatístico e **permanece como Metrópole Atípica**.
 * **Resultado:** 48 das 53 metrópoles foram integradas aos perfis de serviços, mercado autônomo ou apoio social, enquanto apenas 5 cidades atípicas (Duque de Caxias, Boa Vista, Natal, Nova Iguaçu e Aracaju) permaneceram isoladas.
 
+### 3.6. Metodologia de Cálculo de Emprego Formal CLT e MEI & Conciliação Micro-Macro
+
+Uma dúvida frequente na leitura de dados econômicos refere-se à origem e cálculo do **Emprego Formal CLT** e dos **Microempreendedores Individuais (MEI)** nos diferentes níveis do sistema:
+
+1. **Fontes Primárias Auditadas:**
+   - **Emprego Formal com Carteira Assinada (CLT):** Ministério do Trabalho e Emprego (MTE) via **Novo CAGED** (estoque acumulado de empregos formais ativos) conjugado com a **RAIS** (Relação Anual de Informações Sociais) vinculados à malha municipal do Censo Demográfico do IBGE.
+   - **Microempreendedores Individuais (MEI):** Receita Federal do Brasil / DGI e **Portal do Empreendedor** (estoque de CNPJs ativos enquadrados no SIMEI com domicílio tributário no município).
+2. **Indicador de Intensidade Municipal (`m.ind.clt` e `m.ind.mei` por 100 hab):**
+   - Para cada um dos 5.571 municípios, o indicador de intensidade relativa é definido como:
+     $$\text{taxa\_clt\_100\_hab} = \left(\frac{\text{Estoque de Vagas CLT no Município}}{\text{População IBGE}}\right) \times 100$$
+     $$\text{taxa\_mei\_100\_hab} = \left(\frac{\text{Estoque de CNPJs MEI Ativos}}{\text{População IBGE}}\right) \times 100$$
+   - *Exemplo Concreto (Sobral - CE):*
+     - População auditada: **216.519 habitantes**.
+     - Taxa CLT municipal: **17,5 por 100 hab**.
+     - Vagas formais CLT ativas = $216.519 \times 17,5\% = \mathbf{37.890\text{ vagas}}$ (exibido como **~37,9 Mil** no Raio-X e nos cards municipais).
+     - Taxa MEI municipal: **6,6 por 100 hab** $\rightarrow 216.519 \times 6,6\% = \mathbf{14.290\text{ MEIs}}$ (exibido como **~14,3 Mil**).
+3. **Conciliação de Escala (Brasil vs. Território Filtrado):**
+   - **Visão Brasil (Sem Filtro):** O total nacional consolidado registra **49,66 Milhões a 50,4 Milhões de empregos com carteira assinada** e **16,9 Milhões de MEIs**.
+   - **Visão Filtrada (Município, Estado ou Região):** Anteriormente, uma fórmula ingênua baseada em proporção populacional nacional produzia distorções no card superior (ex.: projetava 50,4 Mil para Sobral porque supunha a média nacional de 24,5% sobre a população local).
+   - **Ajuste de Precisão Estrita:** O dashboard agrega os vínculos formais e MEIs pela **soma real dos microdados das cidades selecionadas**:
+     $$\text{Vagas CLT Filtro} = \sum_{c \in \text{Cidades}} \left(\text{Pop}_c \times \frac{\text{taxa\_clt}_c}{100}\right)$$
+     Isso garante convergência exata (100% de coerência) entre o Card de Grandes Prioridades, as estatísticas de cabeçalho e os Indicadores Estratégicos do Raio-X.
+
 ---
 
 ## 🗳️ 4. Integração Eleitoral (TSE 2010 a 2026)
@@ -177,6 +200,25 @@ Para permitir que gestores públicos, estrategistas e a sociedade civil naveguem
 - Renderização client-side em **Retina 2x** via `html2canvas`.
 - Exportação nos formatos **Feed (1:1)** e **Stories (9:16)** em 4 temas executivos.
 - Suporte a **Copiar Imagem** direto para a área de transferência (`navigator.clipboard.write`), permitindo colar (`Ctrl+V`) instantaneamente em chats e editores, além de disparo nativo para WhatsApp, Telegram, X/Twitter e LinkedIn.
+
+### 5.4. Sinalização de Escopo Territorial e Rótulos Diretos em Gráficos
+Para garantir transparência analítica imediata e evitar ambiguidades de leitura:
+1. **Badges Dinâmicos de Escopo:** Todos os gráficos do sistema possuem selos padronizados de escopo analítico (`chart-scope-badge`):
+   - `[Visão Nacional]` (Verde esmeralda suave / `#10B981`)
+   - `[Visão Estadual / Regional]` (Azul royal / `#2563EB`)
+   - `[Visão Municipal]` (Laranja âmbar / `#F59E0B`)
+2. **Rótulos Diretos em Pontos e Barras (Direct Data Labels):**
+   - Todos os gráficos de barras horizontais, barras verticais e trajetórias temporais de linhas contam com renderização de rótulos diretos (`afterDatasetsDraw`) de forma que os valores absolutos e percentuais sejam visíveis sem exigir interação de hover pelo usuário.
+3. **Indicador Ativo no Cabeçalho Geral (`#header-territory-pill`):**
+   - O cabeçalho superior (`top-nav`) mantém permanentemente visível a localidade selecionada (com ícone de pino de localização, nome do município/UF e botão `✕` para limpar o filtro com retorno suave ao Brasil).
+
+### 5.5. Engenharia Gestalt dos Indicadores do Raio-X Municipal
+O bloco de **Indicadores Estratégicos** foi reestruturado seguindo princípios da Teoria da Gestalt (proximidade, continuidade e pregnância da forma):
+- **Cards Individuais Estruturados:** Em substituição a pílulas comprimidas, cada um dos 8 eixos (CLT, MEI, Servidores, Aposentados, Bolsa Família, BPC, Farmácia Popular e Pé-de-Meia) é apresentado em card branco contrastante com barra de acento temático de 3px.
+- **Hierarquia Numérica:** Destaque para o volume total projetado em escala executiva (`~37,9 Mil vagas`, `~14,3 Mil MEIs`), seguido da taxa por 100 habitantes (`17,5 / 100 hab`).
+- **Benchmark com a Mediana Nacional:**
+  - Chip colorido com status de posicionamento relativo: `▲ Acima (+X.X)` ou `▼ Abaixo (-X.X)` da mediana dos 5.571 municípios brasileiros.
+  - **Trilha de Dispersão Contínua (Range Bullet Track):** Linha gráfica que conecta o valor mínimo ao valor máximo nacional daquela variável, marcando visualmente o ponto da mediana brasileira e o ponto exato da cidade pesquisada.
 
 ---
 
