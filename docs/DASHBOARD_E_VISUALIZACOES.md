@@ -217,7 +217,7 @@ Isso atualizará automaticamente `dashboard/data/dashboard_data.json` mantendo a
 
 ### 8.1. Comparador Presidencial Histórico Completo (2018 a 2026)
 - **Switcher Quadripartite de Eleições no Cabeçalho**:
-  - `2026 • 1º Turno (Oficial)`: Votação oficial de Lula (51.8%) vs Flávio Bolsonaro (42.1%).
+  - `2026 • 1º Turno (Oficial)`: Votação oficial apurada na base do TSE de 2026 com Lula (45.16% / 45,2%) vs Flávio Bolsonaro (47.03% / 47,0%).
   - `2022 • 2º Turno (Oficial)`: Lula (50.9%) vs Jair Bolsonaro (49.1%).
   - `2022 • 1º Turno (Oficial)`: Lula (48.4%) vs Jair Bolsonaro (43.2%).
   - `2018 • 2º Turno (Oficial - Haddad)`: Fernando Haddad (45.1%) vs Jair Bolsonaro (54.9%).

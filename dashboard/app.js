@@ -944,9 +944,17 @@ function atualizarRaioXIntegrado() {
   const deltaBadge = document.getElementById('raiox-delta-badge');
   const metaInfoEl = document.getElementById('raiox-city-meta-info');
 
+  const getCandPct = (k) => {
+    const el = APP_DATA?.eleicoes_info?.[k];
+    if (!el) return 0;
+    if (el.lula_pct !== undefined) return el.lula_pct;
+    const c = el.candidatos?.find(cand => cand.nome === 'Lula' || cand.nome === 'Fernando Haddad');
+    return c ? c.pct : 0;
+  };
+
   let cand18 = 45.1;
   let cand22 = 50.9;
-  let cand26 = 51.8;
+  let cand26 = 45.2;
 
   if (isBrasil) {
     titleEl.textContent = 'Diagnóstico: Brasil (Consolidado Nacional)';
@@ -959,9 +967,9 @@ function atualizarRaioXIntegrado() {
       metaInfoEl.innerHTML = `👥 População: <strong>203,1 M</strong> &nbsp;|&nbsp; 💼 Empregos CLT: <strong>49,7 M</strong> &nbsp;|&nbsp; 🏪 MEIs: <strong>16,9 M</strong> &nbsp;|&nbsp; 🏛️ Servidores: <strong>13,8 M</strong>`;
     }
 
-    cand18 = APP_DATA.eleicoes_info?.['2018_2t']?.lula_pct || 45.1;
-    cand22 = APP_DATA.eleicoes_info?.['2022_2t']?.lula_pct || 50.9;
-    cand26 = APP_DATA.eleicoes_info?.['2026_1t']?.lula_pct || 51.8;
+    cand18 = getCandPct('2018_2t') || 45.1;
+    cand22 = getCandPct('2022_2t') || 50.9;
+    cand26 = getCandPct('2026_1t') || 45.2;
   } else if (isEstado) {
     const ufId = filtroTerritorial.id;
     const ufObj = APP_DATA.estados[ufId];

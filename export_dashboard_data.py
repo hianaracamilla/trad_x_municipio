@@ -210,6 +210,8 @@ eleicoes_info = {
         "votos_validos": int(merged['votos_validos_2026_1t'].sum()),
         "eleitores_aptos": int(merged['eleitores_aptos_2026'].sum()),
         "abstencao_pct": round(float(merged['abstencao_2026_1t'].sum() / merged['eleitores_aptos_2026'].sum() * 100), 2),
+        "lula_pct": round(float(merged['votos_lula_2026_1t'].sum() / merged['votos_validos_2026_1t'].sum() * 100), 2),
+        "flavio_pct": round(float(merged['votos_flavio_2026_1t'].sum() / merged['votos_validos_2026_1t'].sum() * 100), 2),
         "candidatos": [
             {"nome": "Flávio Bolsonaro", "partido": "PL", "votos": int(merged['votos_flavio_2026_1t'].sum()), "pct": round(float(merged['votos_flavio_2026_1t'].sum() / merged['votos_validos_2026_1t'].sum() * 100), 2), "cor": "#1E40AF"},
             {"nome": "Lula", "partido": "PT", "votos": int(merged['votos_lula_2026_1t'].sum()), "pct": round(float(merged['votos_lula_2026_1t'].sum() / merged['votos_validos_2026_1t'].sum() * 100), 2), "cor": "#B91C1C"},
@@ -225,6 +227,8 @@ eleicoes_info = {
         "votos_validos": int(merged['votos_validos_1t'].sum()),
         "eleitores_aptos": int(merged['eleitores_aptos_2026'].sum()), # proxy aptos
         "abstencao_pct": round(float(merged['taxa_abst_2022'].mean()), 2),
+        "lula_pct": round(float(merged['votos_lula_1t'].sum() / merged['votos_validos_1t'].sum() * 100), 2),
+        "bolsonaro_pct": round(float(merged['votos_bolsonaro_1t'].sum() / merged['votos_validos_1t'].sum() * 100), 2),
         "candidatos": [
             {"nome": "Lula", "partido": "PT", "votos": int(merged['votos_lula_1t'].sum()), "pct": round(float(merged['votos_lula_1t'].sum() / merged['votos_validos_1t'].sum() * 100), 2), "cor": "#B91C1C"},
             {"nome": "Jair Bolsonaro", "partido": "PL", "votos": int(merged['votos_bolsonaro_1t'].sum()), "pct": round(float(merged['votos_bolsonaro_1t'].sum() / merged['votos_validos_1t'].sum() * 100), 2), "cor": "#1E40AF"},
@@ -240,6 +244,8 @@ eleicoes_info = {
         "votos_validos": int(merged['votos_validos_2t'].sum()),
         "eleitores_aptos": int(merged['eleitores_aptos_2026'].sum()),
         "abstencao_pct": round(float(merged['taxa_abst_2022'].mean() * 0.98), 2),
+        "lula_pct": round(float(merged['votos_lula_2t'].sum() / merged['votos_validos_2t'].sum() * 100), 2),
+        "bolsonaro_pct": round(float(merged['votos_bolsonaro_2t'].sum() / merged['votos_validos_2t'].sum() * 100), 2),
         "candidatos": [
             {"nome": "Lula", "partido": "PT", "votos": int(merged['votos_lula_2t'].sum()), "pct": round(float(merged['votos_lula_2t'].sum() / merged['votos_validos_2t'].sum() * 100), 2), "cor": "#B91C1C"},
             {"nome": "Jair Bolsonaro", "partido": "PL", "votos": int(merged['votos_bolsonaro_2t'].sum()), "pct": round(float(merged['votos_bolsonaro_2t'].sum() / merged['votos_validos_2t'].sum() * 100), 2), "cor": "#1E40AF"}
@@ -252,6 +258,9 @@ eleicoes_info = {
         "votos_validos": int(merged['votos_validos_2018_2t'].sum()) if 'votos_validos_2018_2t' in merged.columns else 104838753,
         "eleitores_aptos": int(merged['eleitores_aptos_2026'].sum()),
         "abstencao_pct": 21.3,
+        "haddad_pct": 45.10,
+        "lula_pct": 45.10,
+        "bolsonaro_pct": 54.90,
         "candidatos": [
             {"nome": "Jair Bolsonaro", "partido": "PSL", "votos": int(merged['votos_bolsonaro_2018_2t'].sum()) if 'votos_bolsonaro_2018_2t' in merged.columns else 57797847, "pct": 54.90, "cor": "#1E40AF"},
             {"nome": "Fernando Haddad", "partido": "PT", "votos": int(merged['votos_haddad_2018_2t'].sum()) if 'votos_haddad_2018_2t' in merged.columns else 47040906, "pct": 45.10, "cor": "#B91C1C"}
