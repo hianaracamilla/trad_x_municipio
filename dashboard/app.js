@@ -1951,6 +1951,7 @@ function getValorColuna(m, col) {
     case 'pop': return m.pop || 0;
     case 'lula': return currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
     case 'opositor': return currentElection.includes('2026') ? (eleic?.flavio || 0) : (eleic?.bolsonaro || 0);
+    case 'clt': return m.ind?.clt || 0;
     case 'mei': return m.ind?.mei || 0;
     case 'serv': return m.ind?.serv || 0;
     case 'bpc': return m.ind?.bpc || 0;
@@ -2041,6 +2042,7 @@ function baixarTabelaCSV() {
     'Bolsonaro_2022_1T_Pct',
     'Lula_2022_2T_Pct',
     'Bolsonaro_2022_2T_Pct',
+    'CLT_por_100hab',
     'MEI_por_100hab',
     'Servidores_por_100hab',
     'BPC_por_100hab',
@@ -2071,6 +2073,7 @@ function baixarTabelaCSV() {
       (e22_1t.bolsonaro || 0).toFixed(1).replace('.', ','),
       (e22_2t.lula || 0).toFixed(1).replace('.', ','),
       (e22_2t.bolsonaro || 0).toFixed(1).replace('.', ','),
+      (ind.clt || 0).toFixed(1).replace('.', ','),
       (ind.mei || 0).toFixed(1).replace('.', ','),
       (ind.serv || 0).toFixed(1).replace('.', ','),
       (ind.bpc || 0).toFixed(1).replace('.', ','),
@@ -2142,6 +2145,7 @@ function atualizarTabelaMunicipios(cidadesFiltradas) {
         <td>${formatarNumero(m.pop)}</td>
         <td style="font-weight: 700; color: var(--eleitoral-lula);">${lulaPct.toFixed(1)}%</td>
         <td style="font-weight: 700; color: var(--eleitoral-bolsonaro);">${opositorPct.toFixed(1)}%</td>
+        <td style="font-weight: 600; color: #1A56DB;">${(m.ind?.clt || 0).toFixed(1)}</td>
         <td style="font-weight: 600; color: #0284C7;">${(m.ind?.mei || 0).toFixed(1)}</td>
         <td style="font-weight: 600; color: #7E3AF2;">${(m.ind?.serv || 0).toFixed(1)}</td>
         <td style="font-weight: 600; color: #D97706;">${(m.ind?.bpc || 0).toFixed(1)}</td>
@@ -4540,6 +4544,7 @@ async function abrirModalMunicipio(idIbge) {
 
   const medianas = APP_DATA.totais_nacionais?.medianas_municipais || {};
   const itensIndicadores = [
+    { key: 'clt', label: 'CLT / 100 hab', sub: 'carteiras assinadas', sufixo: '' },
     { key: 'mei', label: 'MEI / 100 hab', sub: 'microempreendedores', sufixo: '' },
     { key: 'serv', label: 'Servidores / 100 hab', sub: 'funcionalismo público', sufixo: '' },
     { key: 'bpc', label: 'BPC / 100 hab', sub: 'beneficiários LOAS', sufixo: '' },
