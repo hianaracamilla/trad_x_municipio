@@ -210,3 +210,27 @@ Isso atualizará automaticamente `dashboard/data/dashboard_data.json` mantendo a
 - **GitHub Pages**: Basta apontar o branch `main` e a pasta `/dashboard` nas configurações do repositório no GitHub.
 - **Vercel / Netlify**: Definir o diretório raiz (*Root Directory*) como `dashboard`.
 - **Nginx**: Apontar o `root /var/www/trad_x_municipio/dashboard;` com compressão `gzip` habilitada para `.json` e `.js`.
+
+---
+
+## 📌 8. Atualizações Recentes (Eleições Oficiais 2026, 2022 e 2018 com Haddad & Zoom Dinâmico)
+
+### 8.1. Comparador Presidencial Histórico Completo (2018 a 2026)
+- **Switcher Quadripartite de Eleições no Cabeçalho**:
+  - `2026 • 1º Turno (Oficial)`: Votação oficial de Lula (51.8%) vs Flávio Bolsonaro (42.1%).
+  - `2022 • 2º Turno (Oficial)`: Lula (50.9%) vs Jair Bolsonaro (49.1%).
+  - `2022 • 1º Turno (Oficial)`: Lula (48.4%) vs Jair Bolsonaro (43.2%).
+  - `2018 • 2º Turno (Oficial - Haddad)`: Fernando Haddad (45.1%) vs Jair Bolsonaro (54.9%).
+- **Adaptação Automática de Nomes e Rótulos**:
+  - Ao selecionar a eleição de 2018, todas as legendas, eixos de gráficos (`chartDesempenhoAbstencao`, `chartDispersao`), tooltips do mapa e colunas da tabela de municípios trocam automaticamente a denominação de "Lula" para **"Haddad"**.
+  - Ao selecionar 2026, a oposição é rotulada como **"Flávio"**; em 2022 e 2018, como **"Bolsonaro"**.
+- **Card Comparativo no Raio-X Municipal (3 Colunas)**:
+  - Exibe lado a lado: `2018 • 2ºT (Haddad)`, `2022 • 2ºT (Lula)` e `2026 • 1ºT (Lula)` com barras de preenchimento proporcionais e badge de variação real (pp) versus 2022.
+
+### 8.2. Zoom Dinâmico no Modal de Mercado de Trabalho (CLT & MEI)
+- **Desafio Resolvido**: Com o corte de 80M para destacar o crescimento do emprego formal CLT, ao isolar os microempreendedores (MEI, ~11M a 17M), as barras sumiam abaixo do limite mínimo.
+- **Comportamento Dinâmico**:
+  - **Apenas CLT visível**: Escala com corte a partir de 80M (`min: 80`, `suggestedMax: 108`), permitindo visualizar com alta sensibilidade a expansão das carteiras assinadas.
+  - **Apenas MEI visível**: O eixo Y baixa automaticamente para escala `0 a 22M` (`min: 0`), exibindo com máxima clareza o volume total dos microempreendedores.
+  - **Ambos visíveis (CLT + MEI)**: O zoom é diminuído automaticamente para a escala geral de `0 a 115M` (`min: 0`), permitindo a comparação harmônica dos dois volumes sem nenhum corte ou truncamento.
+

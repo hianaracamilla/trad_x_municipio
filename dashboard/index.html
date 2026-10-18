@@ -39,15 +39,21 @@
         </div>
       </div>
 
-      <!-- Election Switcher In Header (Apenas Dados Reais TSE) -->
+      <!-- Election Switcher In Header (2026 1T, 2022 2T, 2022 1T, 2018 2T Oficial) -->
       <div class="header-election-switcher">
         <div class="header-toggle-pill-group">
-          <button class="pill-btn active" data-election="2022_2t" id="btn-eleicao-2022-2t">
+          <button class="pill-btn active" data-election="2026_1t" id="btn-eleicao-2026-1t">
             <span class="pill-badge">Oficial</span>
+            2026 • 1ºT
+          </button>
+          <button class="pill-btn" data-election="2022_2t" id="btn-eleicao-2022-2t">
             2022 • 2ºT
           </button>
           <button class="pill-btn" data-election="2022_1t" id="btn-eleicao-2022-1t">
             2022 • 1ºT
+          </button>
+          <button class="pill-btn" data-election="2018_2t" id="btn-eleicao-2018-2t">
+            2018 • 2ºT (Haddad)
           </button>
         </div>
       </div>
@@ -171,7 +177,7 @@
             </div>
             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
               <span class="chart-scope-badge" id="badge-scope-desempenho">Visão Nacional</span>
-              <span class="chart-tag" id="desempenho-abst-tag">2022 • 2º Turno</span>
+              <span class="chart-tag" id="desempenho-abst-tag">2026 • 1º Turno</span>
             </div>
           </div>
           <div class="chart-container-compact">
@@ -355,25 +361,32 @@
               </div>
             </div>
 
-            <!-- Card Comparativo Lula: 2022 (1ºT vs 2ºT Real TSE) -->
+            <!-- Card Comparativo de Votos: 2018 (Haddad) vs 2022 (Lula) vs 2026 (Lula) -->
             <div class="raiox-election-comparison-card" id="raiox-comparison-card">
               <div class="comparison-card-header">
-                <span class="comparison-eyebrow">DESEMPENHO ELEITORAL LULA (TSE 2022)</span>
-                <span class="comparison-badge" id="raiox-delta-badge">+0.0 pp no 2ºT</span>
+                <span class="comparison-eyebrow" id="raiox-comp-eyebrow">HISTÓRICO ELEITORAL (OFICIAL TSE)</span>
+                <span class="comparison-badge" id="raiox-delta-badge">+0.0 pp</span>
               </div>
-              <div class="comparison-bars-grid comparison-bars-grid-2cols">
+              <div class="comparison-bars-grid" style="grid-template-columns: 1fr 1fr 1.1fr;">
                 <div class="comp-col">
-                  <span class="comp-label">2022 • 1º Turno</span>
-                  <div class="comp-val lula-color" id="raiox-lula-22-1t">48.4%</div>
+                  <span class="comp-label">2018 • 2ºT (Haddad)</span>
+                  <div class="comp-val lula-color" id="raiox-cand-18">45.1%</div>
                   <div class="comp-bar-track">
-                    <div class="comp-bar-fill" id="raiox-bar-22-1t" style="width: 48.4%;"></div>
+                    <div class="comp-bar-fill" id="raiox-bar-18" style="width: 45.1%; background: #991B1B;"></div>
                   </div>
                 </div>
-                <div class="comp-col highlight-col-2t">
-                  <span class="comp-label">2022 • 2º Turno (Final)</span>
-                  <div class="comp-val lula-color" id="raiox-lula-22-2t">50.9%</div>
+                <div class="comp-col">
+                  <span class="comp-label">2022 • 2ºT (Lula)</span>
+                  <div class="comp-val lula-color" id="raiox-cand-22">50.9%</div>
                   <div class="comp-bar-track">
-                    <div class="comp-bar-fill" id="raiox-bar-22-2t" style="width: 50.9%;"></div>
+                    <div class="comp-bar-fill" id="raiox-bar-22" style="width: 50.9%; background: #B84A39;"></div>
+                  </div>
+                </div>
+                <div class="comp-col highlight-col-26">
+                  <span class="comp-label">2026 • 1ºT (Lula)</span>
+                  <div class="comp-val lula-color" id="raiox-cand-26">51.8%</div>
+                  <div class="comp-bar-track">
+                    <div class="comp-bar-fill" id="raiox-bar-26" style="width: 51.8%; background: #DC2626;"></div>
                   </div>
                 </div>
               </div>

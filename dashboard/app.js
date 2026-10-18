@@ -9,7 +9,7 @@ let leafletMap = null;
 let geoJsonLayer = null;
 let markersLayer = null;
 
-let currentElection = '2022_2t'; // '2022_2t', '2022_1t' (Apenas Dados Oficiais Reais do TSE)
+let currentElection = '2026_1t'; // '2026_1t', '2022_2t', '2022_1t', '2018_2t' (Dados Oficiais Reais do TSE)
 
 // Estado Central de Filtragem Territorial
 let filtroTerritorial = {
@@ -191,13 +191,19 @@ function configurarEventosGlobais() {
       currentElection = target.getAttribute('data-election');
       
       const titulos = {
-        '2026_1t': '2026 • 1º Turno',
-        '2022_1t': '2022 • 1º Turno',
-        '2022_2t': '2022 • 2º Turno'
+        '2026_1t': '2026 • 1º Turno (Oficial)',
+        '2022_2t': '2022 • 2º Turno (Oficial)',
+        '2022_1t': '2022 • 1º Turno (Oficial)',
+        '2018_2t': '2018 • 2º Turno (Oficial - Haddad)'
       };
       
       const tagEl = document.getElementById('desempenho-abst-tag');
-      if (tagEl) tagEl.textContent = titulos[currentElection];
+      if (tagEl) tagEl.textContent = titulos[currentElection] || titulos['2026_1t'];
+
+      const thLula = document.getElementById('th-lula');
+      if (thLula) {
+        thLula.innerHTML = `${currentElection === '2018_2t' ? 'Haddad %' : 'Lula %'} <span class="sort-icon">⇅</span>`;
+      }
 
       const thOpositor = document.getElementById('th-opositor');
       if (thOpositor) {
@@ -701,11 +707,11 @@ function atualizarTopCharts(cidadesFiltradas) {
 
   cidades.forEach(m => {
     const pf = m.pf;
-    const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : m.e22_2t);
-    const vtot = eleic.vtot || Math.round(m.pop * 0.72);
-    const lulaPct = eleic.lula || 0;
-    const opositorPct = currentElection.includes('2026') ? (eleic.flavio || 0) : (eleic.bolsonaro || 0);
-    const abstPct = eleic.abst || (APP_DATA.perfis[pf]?.eleicoes[currentElection]?.taxa_abstencao || 20);
+    const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : (currentElection === '2018_2t' ? m.e18 : m.e22_2t));
+    const vtot = eleic?.vtot || Math.round(m.pop * 0.72);
+    const lulaPct = currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
+    const opositorPct = currentElection.includes('2026') ? (eleic?.flavio || 0) : (eleic?.bolsonaro || 0);
+    const abstPct = eleic?.abst || (APP_DATA.perfis[pf]?.eleicoes[currentElection]?.taxa_abstencao || 20);
 
     totalEleitoresTerritorio += vtot;
     if (eleitoresPorPerfil[pf] !== undefined) {
@@ -842,6 +848,7 @@ function atualizarTopCharts(cidadesFiltradas) {
   if (chartDesempenhoAbstencao) chartDesempenhoAbstencao.destroy();
 
   const nomeOpositor = currentElection.includes('2026') ? 'Flávio' : 'Bolsonaro';
+  const nomeCand1 = currentElection === '2018_2t' ? 'Haddad' : 'Lula';
 
   chartDesempenhoAbstencao = new Chart(ctxDesemp, {
     type: 'bar',
@@ -849,7 +856,7 @@ function atualizarTopCharts(cidadesFiltradas) {
       labels: labels,
       datasets: [
         {
-          label: 'Lula (%)',
+          label: `${nomeCand1} (%)`,
           data: dadosLula,
           backgroundColor: '#B84A39',
           borderRadius: 4
@@ -937,8 +944,9 @@ function atualizarRaioXIntegrado() {
   const deltaBadge = document.getElementById('raiox-delta-badge');
   const metaInfoEl = document.getElementById('raiox-city-meta-info');
 
-  let lula22_1t = 48.4;
-  let lula22_2t = 50.9;
+  let cand18 = 45.1;
+  let cand22 = 50.9;
+  let cand26 = 51.8;
 
   if (isBrasil) {
     titleEl.textContent = 'Diagnóstico: Brasil (Consolidado Nacional)';
@@ -951,8 +959,9 @@ function atualizarRaioXIntegrado() {
       metaInfoEl.innerHTML = `👥 População: <strong>203,1 M</strong> &nbsp;|&nbsp; 💼 Empregos CLT: <strong>49,7 M</strong> &nbsp;|&nbsp; 🏪 MEIs: <strong>16,9 M</strong> &nbsp;|&nbsp; 🏛️ Servidores: <strong>13,8 M</strong>`;
     }
 
-    lula22_1t = 48.4;
-    lula22_2t = 50.9;
+    cand18 = APP_DATA.eleicoes_info?.['2018_2t']?.lula_pct || 45.1;
+    cand22 = APP_DATA.eleicoes_info?.['2022_2t']?.lula_pct || 50.9;
+    cand26 = APP_DATA.eleicoes_info?.['2026_1t']?.lula_pct || 51.8;
   } else if (isEstado) {
     const ufId = filtroTerritorial.id;
     const ufObj = APP_DATA.estados[ufId];
@@ -971,8 +980,9 @@ function atualizarRaioXIntegrado() {
       metaInfoEl.innerHTML = `👥 População: <strong>${formatarNumero(ufPop)} hab</strong> &nbsp;|&nbsp; 🗳️ Eleitores: <strong>${formatarNumero(ufEleit)}</strong> &nbsp;|&nbsp; 🏙️ Cidades: <strong>${ufObj?.total_municipios || 0}</strong>`;
     }
 
-    lula22_1t = ufObj?.eleicoes?.['2022_1t']?.lula_pct || 0;
-    lula22_2t = ufObj?.eleicoes?.['2022_2t']?.lula_pct || 0;
+    cand18 = ufObj?.eleicoes?.['2018_2t']?.haddad_pct || ufObj?.eleicoes?.['2018_2t']?.lula_pct || 0;
+    cand22 = ufObj?.eleicoes?.['2022_2t']?.lula_pct || 0;
+    cand26 = ufObj?.eleicoes?.['2026_1t']?.lula_pct || 0;
   } else if (isPerfil) {
     const perfilNome = filtroTerritorial.perfil || filtroTerritorial.id.replace('Perfil: ', '');
     const corPerfil = PERFIS_IMPACTO[perfilNome]?.cor || '#C026D3';
@@ -992,12 +1002,16 @@ function atualizarRaioXIntegrado() {
       metaInfoEl.innerHTML = `👥 População: <strong>${formatarNumero(popPerfil)} hab</strong> &nbsp;|&nbsp; 💼 CLT: <strong>${cltTot}</strong> &nbsp;|&nbsp; 🏪 MEIs: <strong>${meiTot}</strong> &nbsp;|&nbsp; 🏛️ Servidores: <strong>${servTot}</strong>`;
     }
 
-    const eleitTot = cidadesPerfil.reduce((acc, c) => acc + (c.e22_2t?.vtot || c.pop * 0.72), 0) || 1;
-    const lula1Tot = cidadesPerfil.reduce((acc, c) => acc + ((c.e22_1t?.lula || 0) * (c.e22_1t?.vtot || c.pop * 0.72)), 0);
-    const lula2Tot = cidadesPerfil.reduce((acc, c) => acc + ((c.e22_2t?.lula || 0) * (c.e22_2t?.vtot || c.pop * 0.72)), 0);
+    const eleit18 = cidadesPerfil.reduce((acc, c) => acc + (c.e18?.vtot || c.pop * 0.72), 0) || 1;
+    const eleit22 = cidadesPerfil.reduce((acc, c) => acc + (c.e22_2t?.vtot || c.pop * 0.72), 0) || 1;
+    const eleit26 = cidadesPerfil.reduce((acc, c) => acc + (c.e26?.vtot || c.pop * 0.72), 0) || 1;
+    const v18Tot = cidadesPerfil.reduce((acc, c) => acc + ((c.e18?.haddad || 0) * (c.e18?.vtot || c.pop * 0.72)), 0);
+    const v22Tot = cidadesPerfil.reduce((acc, c) => acc + ((c.e22_2t?.lula || 0) * (c.e22_2t?.vtot || c.pop * 0.72)), 0);
+    const v26Tot = cidadesPerfil.reduce((acc, c) => acc + ((c.e26?.lula || 0) * (c.e26?.vtot || c.pop * 0.72)), 0);
 
-    lula22_1t = lula1Tot / eleitTot;
-    lula22_2t = lula2Tot / eleitTot;
+    cand18 = v18Tot / eleit18;
+    cand22 = v22Tot / eleit22;
+    cand26 = v26Tot / eleit26;
   } else if (m) {
     titleEl.textContent = `Diagnóstico: ${m.nm} (${m.uf})`;
     const corPerfil = PERFIS_IMPACTO[m.pf]?.cor || '#1A56DB';
@@ -1015,33 +1029,39 @@ function atualizarRaioXIntegrado() {
       metaInfoEl.innerHTML = `👥 População: <strong>${formatarNumero(pop)} hab</strong> &nbsp;|&nbsp; 💼 CLT: <strong>${cltTot}</strong> &nbsp;|&nbsp; 🏪 MEIs: <strong>${meiTot}</strong> &nbsp;|&nbsp; 🏛️ Servidores: <strong>${servTot}</strong>`;
     }
 
-    lula22_1t = m.e22_1t?.lula || 0;
-    lula22_2t = m.e22_2t?.lula || 0;
+    cand18 = m.e18?.haddad || 0;
+    cand22 = m.e22_2t?.lula || 0;
+    cand26 = m.e26?.lula || 0;
   }
 
-  // Delta real entre o 2º Turno e o 1º Turno da Eleição Oficial de 2022
-  const delta = lula22_2t - lula22_1t;
+  // Delta real entre 2026 (1ºT) e 2022 (2ºT)
+  const delta = cand26 - cand22;
   if (deltaBadge) {
     if (delta >= 0) {
-      deltaBadge.textContent = `▲ +${delta.toFixed(1)} pp no 2ºT`;
+      deltaBadge.textContent = `▲ +${delta.toFixed(1)} pp vs 2022`;
       deltaBadge.style.backgroundColor = '#DCFCE7';
       deltaBadge.style.color = '#166534';
     } else {
-      deltaBadge.textContent = `▼ ${Math.abs(delta).toFixed(1)} pp no 2ºT`;
+      deltaBadge.textContent = `▼ ${Math.abs(delta).toFixed(1)} pp vs 2022`;
       deltaBadge.style.backgroundColor = '#FEE2E2';
       deltaBadge.style.color = '#991B1B';
     }
   }
 
-  const el22_1t = document.getElementById('raiox-lula-22-1t');
-  if (el22_1t) el22_1t.textContent = `${lula22_1t.toFixed(1)}%`;
-  const bar22_1t = document.getElementById('raiox-bar-22-1t');
-  if (bar22_1t) bar22_1t.style.width = `${Math.min(100, lula22_1t)}%`;
+  const el18 = document.getElementById('raiox-cand-18');
+  if (el18) el18.textContent = `${cand18.toFixed(1)}%`;
+  const bar18 = document.getElementById('raiox-bar-18');
+  if (bar18) bar18.style.width = `${Math.min(100, cand18)}%`;
 
-  const el22_2t = document.getElementById('raiox-lula-22-2t');
-  if (el22_2t) el22_2t.textContent = `${lula22_2t.toFixed(1)}%`;
-  const bar22_2t = document.getElementById('raiox-bar-22-2t');
-  if (bar22_2t) bar22_2t.style.width = `${Math.min(100, lula22_2t)}%`;
+  const el22 = document.getElementById('raiox-cand-22');
+  if (el22) el22.textContent = `${cand22.toFixed(1)}%`;
+  const bar22 = document.getElementById('raiox-bar-22');
+  if (bar22) bar22.style.width = `${Math.min(100, cand22)}%`;
+
+  const el26 = document.getElementById('raiox-cand-26');
+  if (el26) el26.textContent = `${cand26.toFixed(1)}%`;
+  const bar26 = document.getElementById('raiox-bar-26');
+  if (bar26) bar26.style.width = `${Math.min(100, cand26)}%`;
 
   // Renderização Dinâmica dos Cards com Range Bar, Mediana e Nome não-truncado
   const container = document.getElementById('raiox-indicators-grid');
@@ -1285,12 +1305,14 @@ function atualizarMapaVisual(isInit = false) {
         const eleicao = ufObj.eleicoes[currentElection] || {};
         const opositorNome = currentElection.includes('2026') ? 'Flávio' : 'Bolsonaro';
         const opositorPct = currentElection.includes('2026') ? eleicao.flavio_pct : eleicao.bolsonaro_pct;
+        const cand1Nome = currentElection === '2018_2t' ? 'Haddad' : 'Lula';
+        const cand1Pct = currentElection === '2018_2t' ? (eleicao.haddad_pct || eleicao.lula_pct || 0) : (eleicao.lula_pct || 0);
 
         layer.bindTooltip(`
           <div style="font-size: 0.82rem;">
             <strong>${ufObj.nome} (${uf})</strong><br>
             <strong style="color: ${ufObj.cor_predominante};">● ${ufObj.perfil_predominante}</strong> (${ufObj.perfil_predominante_pct}%)<br>
-            <span>Lula: <strong>${eleicao.lula_pct || 0}%</strong> | ${opositorNome}: <strong>${opositorPct || 0}%</strong></span><br>
+            <span>${cand1Nome}: <strong>${cand1Pct}%</strong> | ${opositorNome}: <strong>${opositorPct || 0}%</strong></span><br>
             <small style="color: #1A56DB; font-weight: 700; margin-top: 4px; display: inline-block;">Clique para filtrar este estado ➔</small>
           </div>
         `, { className: 'leaflet-tooltip-custom', sticky: true });
@@ -1362,9 +1384,9 @@ function atualizarMapaVisual(isInit = false) {
       if (!m.lat || !m.lng) return;
 
       const corPerfil = PERFIS_IMPACTO[m.pf]?.cor || '#4B5563';
-      const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : m.e22_2t);
-      const lulaPct = eleic.lula || 0;
-      const opositorPct = currentElection.includes('2026') ? (eleic.flavio || 0) : (eleic.bolsonaro || 0);
+      const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : (currentElection === '2018_2t' ? m.e18 : m.e22_2t));
+      const lulaPct = currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
+      const opositorPct = currentElection.includes('2026') ? (eleic?.flavio || 0) : (eleic?.bolsonaro || 0);
 
       const raio = Math.min(10, Math.max(4.5, Math.log10(Math.max(1000, m.pop)) * 1.8));
 
@@ -1380,7 +1402,7 @@ function atualizarMapaVisual(isInit = false) {
         <div style="font-size: 0.82rem;">
           <strong>${m.nm}</strong> (${formatarNumero(m.pop)} hab)<br>
           <strong style="color: ${corPerfil};">● ${m.pf}</strong><br>
-          <span>Lula: <strong>${lulaPct.toFixed(1)}%</strong> | ${currentElection.includes('2026') ? 'Flávio' : 'Bolsonaro'}: <strong>${opositorPct.toFixed(1)}%</strong></span><br>
+          <span>${currentElection === '2018_2t' ? 'Haddad' : 'Lula'}: <strong>${lulaPct.toFixed(1)}%</strong> | ${currentElection.includes('2026') ? 'Flávio' : 'Bolsonaro'}: <strong>${opositorPct.toFixed(1)}%</strong></span><br>
           <small style="color: #1A56DB; font-weight: 700; margin-top: 3px; display: inline-block;">Clique para Raio-X ➔</small>
         </div>
       `, { className: 'leaflet-tooltip-custom', sticky: true });
@@ -1439,9 +1461,9 @@ function atualizarMapaVisual(isInit = false) {
 
     cidadesDoPerfil.forEach(m => {
       if (!m.lat || !m.lng) return;
-      const eleic = currentElection === '2022_1t' ? m.e22_1t : m.e22_2t;
-      const lulaPct = eleic.lula || 0;
-      const opositorPct = eleic.bolsonaro || 0;
+      const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : (currentElection === '2018_2t' ? m.e18 : m.e22_2t));
+      const lulaPct = currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
+      const opositorPct = currentElection.includes('2026') ? (eleic?.flavio || 0) : (eleic?.bolsonaro || 0);
       const raio = Math.min(9, Math.max(4, Math.log10(Math.max(1000, m.pop)) * 1.6));
 
       const marker = L.circleMarker([m.lat, m.lng], {
@@ -1456,7 +1478,7 @@ function atualizarMapaVisual(isInit = false) {
         <div style="font-size: 0.82rem;">
           <strong>${m.nm} (${m.uf})</strong> • ${formatarNumero(m.pop)} hab<br>
           <strong style="color: ${corPerfil};">● ${m.pf}</strong><br>
-          <span>Lula: <strong>${lulaPct.toFixed(1)}%</strong> | Bolsonaro: <strong>${opositorPct.toFixed(1)}%</strong></span><br>
+          <span>${currentElection === '2018_2t' ? 'Haddad' : 'Lula'}: <strong>${lulaPct.toFixed(1)}%</strong> | ${currentElection.includes('2026') ? 'Flávio' : 'Bolsonaro'}: <strong>${opositorPct.toFixed(1)}%</strong></span><br>
           <small style="color: #1A56DB; font-weight: 700; margin-top: 3px; display: inline-block;">Clique para abrir Raio-X ➔</small>
         </div>
       `, { className: 'leaflet-tooltip-custom', sticky: true });
@@ -1655,13 +1677,13 @@ function configurarTabelaOrdenavel() {
 }
 
 function getValorColuna(m, col) {
-  const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : m.e22_2t);
+  const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : (currentElection === '2018_2t' ? m.e18 : m.e22_2t));
   switch (col) {
     case 'nm': return m.nm.toLowerCase();
     case 'pf': return m.pf.toLowerCase();
     case 'pop': return m.pop || 0;
-    case 'lula': return eleic.lula || 0;
-    case 'opositor': return currentElection.includes('2026') ? (eleic.flavio || 0) : (eleic.bolsonaro || 0);
+    case 'lula': return currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
+    case 'opositor': return currentElection.includes('2026') ? (eleic?.flavio || 0) : (eleic?.bolsonaro || 0);
     case 'mei': return m.ind?.mei || 0;
     case 'serv': return m.ind?.serv || 0;
     case 'bpc': return m.ind?.bpc || 0;
@@ -1837,9 +1859,9 @@ function atualizarTabelaMunicipios(cidadesFiltradas) {
   }
 
   tbody.innerHTML = fatiadas.map(m => {
-    const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : m.e22_2t);
-    const lulaPct = eleic.lula || 0;
-    const opositorPct = currentElection.includes('2026') ? (eleic.flavio || 0) : (eleic.bolsonaro || 0);
+    const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : (currentElection === '2018_2t' ? m.e18 : m.e22_2t));
+    const lulaPct = currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
+    const opositorPct = currentElection.includes('2026') ? (eleic?.flavio || 0) : (eleic?.bolsonaro || 0);
     const corPerfil = PERFIS_IMPACTO[m.pf]?.cor || '#4B5563';
 
     return `
@@ -2642,6 +2664,7 @@ function atualizarGraficoDispersao() {
 
   const configX = METRICAS_DISPERSAO[currentScatterMetricX] || METRICAS_DISPERSAO.indice_composto;
   const opositorNome = currentElection.includes('2026') ? 'Flávio' : 'Bolsonaro';
+  const cand1Nome = currentElection === '2018_2t' ? 'Haddad' : 'Lula';
 
   let listaMunicipios = APP_DATA.municipios;
   if (currentScatterRegion && currentScatterRegion !== 'todas') {
@@ -2668,8 +2691,8 @@ function atualizarGraficoDispersao() {
     const dataPoints = [];
 
     cidadesDoPerfil.forEach(m => {
-      const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : m.e22_2t);
-      const lulaPct = eleic.lula || 0;
+      const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : (currentElection === '2018_2t' ? m.e18 : m.e22_2t));
+      const lulaPct = currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
       const xVal = configX.getValue(m);
 
       if (xVal !== null && xVal !== undefined && !isNaN(xVal) && !isNaN(lulaPct)) {
@@ -2768,13 +2791,15 @@ function atualizarGraficoDispersao() {
               const pt = item.dataset.data[item.dataIndex];
               if (!pt || !pt.cidade) return `${item.dataset.label}: ${item.parsed.y.toFixed(1)}%`;
               const cid = pt.cidade;
-              const eleic = currentElection === '2026_1t' ? cid.e26 : (currentElection === '2022_1t' ? cid.e22_1t : cid.e22_2t);
+              const eleic = currentElection === '2026_1t' ? cid.e26 : (currentElection === '2022_1t' ? cid.e22_1t : (currentElection === '2018_2t' ? cid.e18 : cid.e22_2t));
+              const cand1Pct = currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
+              const cand2Pct = currentElection.includes('2026') ? (eleic?.flavio || 0) : (eleic?.bolsonaro || 0);
               return [
                 `● Perfil: ${cid.pf}`,
                 `👥 População: ${formatarNumero(cid.pop)} hab`,
                 `📊 ${configX.nome}: ${pt.x.toFixed(1)}${configX.unidade}`,
-                `🗳️ Votos Lula: ${(eleic.lula || 0).toFixed(1)}%`,
-                `🗳️ Votos ${opositorNome}: ${(currentElection.includes('2026') ? (eleic.flavio || 0) : (eleic.bolsonaro || 0)).toFixed(1)}%`,
+                `🗳️ Votos ${cand1Nome}: ${cand1Pct.toFixed(1)}%`,
+                `🗳️ Votos ${opositorNome}: ${cand2Pct.toFixed(1)}%`,
                 `🔍 Clique para ver o Raio-X completo`
               ];
             }
@@ -2800,7 +2825,7 @@ function atualizarGraficoDispersao() {
           max: 100,
           title: {
             display: true,
-            text: `% de Votos em Lula`,
+            text: `% de Votos em ${cand1Nome}`,
             font: { family: 'Inter', size: 12, weight: 700 },
             color: '#1E293B',
             padding: { bottom: 8 }
@@ -3405,7 +3430,52 @@ function renderizarGraficoModalOrcamento(tipo) {
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
+          legend: {
+            position: 'top',
+            labels: { boxWidth: 12, font: { size: 11, weight: '700' } },
+            onClick: function(e, legendItem, legend) {
+              const index = legendItem.datasetIndex;
+              const ci = legend.chart;
+              if (ci.isDatasetVisible(index)) {
+                ci.hide(index);
+                legendItem.hidden = true;
+              } else {
+                ci.show(index);
+                legendItem.hidden = false;
+              }
+
+              // Ajuste Dinâmico do Zoom no Eixo Y conforme visibilidade de CLT e MEI
+              const cltVis = ci.isDatasetVisible(0);
+              const meiVis = ci.isDatasetVisible(1);
+              const yAxis = ci.options.scales.y;
+
+              if (cltVis && !meiVis) {
+                // Apenas CLT: corta no 80M
+                yAxis.min = 80;
+                yAxis.suggestedMin = 80;
+                yAxis.suggestedMax = 108;
+                yAxis.title.text = 'Milhões de Trabalhadores CLT (Corte a partir de 80M)';
+              } else if (!cltVis && meiVis) {
+                // Apenas MEI: baixa o y para a faixa de microempreendedores (0 a 22M)
+                yAxis.min = 0;
+                yAxis.suggestedMin = 0;
+                yAxis.suggestedMax = 22;
+                yAxis.title.text = 'Milhões de Microempreendedores MEI (Escala 0 a 22M)';
+              } else if (cltVis && meiVis) {
+                // Os dois juntos: diminui o zoom do eixo y para comportar ambos (0 a 115M)
+                yAxis.min = 0;
+                yAxis.suggestedMin = 0;
+                yAxis.suggestedMax = 115;
+                yAxis.title.text = 'Milhões de Trabalhadores (CLT & MEI - Escala Geral)';
+              } else {
+                yAxis.min = 0;
+                yAxis.suggestedMin = 0;
+                yAxis.suggestedMax = 100;
+              }
+
+              ci.update();
+            }
+          },
           tooltip: {
             callbacks: {
               label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)} Milhões`
@@ -3415,11 +3485,11 @@ function renderizarGraficoModalOrcamento(tipo) {
         scales: {
           x: { grid: { display: false } },
           y: {
-            min: 80, // Zoom solicitado para o eixo iniciar em 80M
+            min: 80, // Inicia apenas com CLT ativo (corte 80M)
             suggestedMin: 80,
             suggestedMax: 108,
             ticks: { callback: v => `${v} M` },
-            title: { display: true, text: 'Milhões de Trabalhadores (Escala a partir de 80M)', font: { weight: 'bold' } }
+            title: { display: true, text: 'Milhões de Trabalhadores CLT (Corte a partir de 80M)', font: { weight: 'bold' } }
           }
         }
       },
@@ -3891,23 +3961,27 @@ async function abrirModalMunicipio(idIbge) {
       </div>
     </div>
 
-    <!-- Comparativo Eleitoral Lula 2022 vs 2026 -->
+    <!-- Comparativo Eleitoral Histórico: 2018 (Haddad), 2022 (Lula) e 2026 (Lula) -->
     <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
       <div style="font-size: 0.72rem; font-weight: 800; color: #64748B; text-transform: uppercase; margin-bottom: 8px;">
-        Votação de Lula no Município (Histórico TSE)
+        Votação Presidencial Histórica no Município (Oficial TSE)
       </div>
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center;">
         <div style="background: #FFFFFF; padding: 8px; border-radius: 6px; border: 1px solid #CBD5E1;">
-          <span style="font-size: 0.68rem; color: #64748B;">2022 (1ºT)</span>
-          <div style="font-size: 1.15rem; font-weight: 800; color: var(--eleitoral-lula);">${(m.e22_1t?.lula || 0).toFixed(1)}%</div>
+          <span style="font-size: 0.68rem; color: #64748B;">2018 (Haddad)</span>
+          <div style="font-size: 1.1rem; font-weight: 800; color: #991B1B;">${(m.e18?.haddad || 0).toFixed(1)}%</div>
         </div>
         <div style="background: #FFFFFF; padding: 8px; border-radius: 6px; border: 1px solid #CBD5E1;">
-          <span style="font-size: 0.68rem; color: #64748B;">2022 (2ºT)</span>
-          <div style="font-size: 1.15rem; font-weight: 800; color: var(--eleitoral-lula);">${(m.e22_2t?.lula || 0).toFixed(1)}%</div>
+          <span style="font-size: 0.68rem; color: #64748B;">2022 (1ºT Lula)</span>
+          <div style="font-size: 1.1rem; font-weight: 800; color: var(--eleitoral-lula);">${(m.e22_1t?.lula || 0).toFixed(1)}%</div>
+        </div>
+        <div style="background: #FFFFFF; padding: 8px; border-radius: 6px; border: 1px solid #CBD5E1;">
+          <span style="font-size: 0.68rem; color: #64748B;">2022 (2ºT Lula)</span>
+          <div style="font-size: 1.1rem; font-weight: 800; color: var(--eleitoral-lula);">${(m.e22_2t?.lula || 0).toFixed(1)}%</div>
         </div>
         <div style="background: #FEF3C7; padding: 8px; border-radius: 6px; border: 1px solid #F59E0B;">
-          <span style="font-size: 0.68rem; color: #92400E; font-weight: 700;">2026 (Atual)</span>
-          <div style="font-size: 1.15rem; font-weight: 800; color: var(--eleitoral-lula);">${(m.e26?.lula || 0).toFixed(1)}%</div>
+          <span style="font-size: 0.68rem; color: #92400E; font-weight: 700;">2026 (1ºT Lula)</span>
+          <div style="font-size: 1.1rem; font-weight: 800; color: #DC2626;">${(m.e26?.lula || 0).toFixed(1)}%</div>
         </div>
       </div>
     </div>
@@ -4056,14 +4130,15 @@ function fecharEstudioCards() {
 
 function atualizarPreviewCard() {
   const stage = document.getElementById('card-render-stage');
-  const eleicNome = currentElection === '2026_1t' ? 'Eleição 2026' : (currentElection === '2022_1t' ? '2022 (1ºT)' : '2022 (2ºT)');
+  const eleicNome = currentElection === '2026_1t' ? 'Eleição 2026' : (currentElection === '2022_1t' ? '2022 (1ºT)' : (currentElection === '2018_2t' ? '2018 (2ºT)' : '2022 (2ºT)'));
+  const nomeCand1 = currentElection === '2018_2t' ? 'Haddad' : 'Lula';
 
   if (studioConfig.theme === 'municipio') {
     const m = studioConfig.selectedCity || activeRaioXCity || APP_DATA.municipios[0];
     const perfil = PERFIS_IMPACTO[m.pf] || { cor: '#4B5563' };
-    const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : m.e22_2t);
-    const lulaPct = eleic.lula || 0;
-    const opositorPct = currentElection.includes('2026') ? (eleic.flavio || 0) : (eleic.bolsonaro || 0);
+    const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : (currentElection === '2018_2t' ? m.e18 : m.e22_2t));
+    const lulaPct = currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
+    const opositorPct = currentElection.includes('2026') ? (eleic?.flavio || 0) : (eleic?.bolsonaro || 0);
 
     stage.innerHTML = `
       <div class="card-export-header">
@@ -4100,7 +4175,7 @@ function atualizarPreviewCard() {
         </div>
         <div class="card-export-election-bars">
           <div class="card-export-cand-pill">
-            <span style="color: #F87171; font-weight: 700;">Lula</span>
+            <span style="color: #F87171; font-weight: 700;">${nomeCand1}</span>
             <span style="font-weight: 800;">${lulaPct.toFixed(1)}%</span>
           </div>
           <div class="card-export-cand-pill">
@@ -4304,10 +4379,12 @@ async function exportarCardPNG() {
 }
 
 function gerarTextoCompartilhamento() {
-  const eleicNome = currentElection === '2026_1t' ? '2026 (1ºT)' : (currentElection === '2022_1t' ? '2022 (1ºT)' : '2022 (2ºT)');
+  const eleicNome = currentElection === '2026_1t' ? '2026 (1ºT)' : (currentElection === '2022_1t' ? '2022 (1ºT)' : (currentElection === '2018_2t' ? '2018 (2ºT Haddad)' : '2022 (2ºT)'));
   const urlPainel = window.location.href;
   const m = activeRaioXCity || APP_DATA.municipios[0];
-  const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : m.e22_2t);
+  const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : (currentElection === '2018_2t' ? m.e18 : m.e22_2t));
+  const cand1Nome = currentElection === '2018_2t' ? 'Haddad' : 'Lula';
+  const cand1Pct = currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
 
   return `🇧🇷 *Raio-X Municipal: ${m.nm} (${m.uf})*\n` +
     `📌 Perfil: *${m.pf}*\n` +
@@ -4317,7 +4394,7 @@ function gerarTextoCompartilhamento() {
     `🤝 BPC / 100 hab: ${(m.ind?.bpc || 0).toFixed(1)}\n` +
     `💊 Farmácia Popular: ${(m.ind?.fp || 0).toFixed(1)} / 100 hab\n` +
     `🎓 Pé-de-Meia: ${(m.ind?.pdm || 0).toFixed(1)}%\n` +
-    `🗳️ Votação Lula: ${(eleic.lula || 0).toFixed(1)}%\n\n` +
+    `🗳️ Votação ${cand1Nome}: ${cand1Pct.toFixed(1)}%\n\n` +
     `Acesse o painel completo: ${urlPainel}`;
 }
 
@@ -4328,8 +4405,10 @@ function compartilharWhatsApp() {
 function compartilharMunicipioDiretoWhatsApp(idIbge) {
   const m = APP_DATA.municipios.find(c => c.id === idIbge);
   if (!m) return;
-  const eleicNome = currentElection === '2026_1t' ? '2026 (1ºT)' : (currentElection === '2022_1t' ? '2022 (1ºT)' : '2022 (2ºT)');
-  const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : m.e22_2t);
+  const eleicNome = currentElection === '2026_1t' ? '2026 (1ºT)' : (currentElection === '2022_1t' ? '2022 (1ºT)' : (currentElection === '2018_2t' ? '2018 (2ºT Haddad)' : '2022 (2ºT)'));
+  const eleic = currentElection === '2026_1t' ? m.e26 : (currentElection === '2022_1t' ? m.e22_1t : (currentElection === '2018_2t' ? m.e18 : m.e22_2t));
+  const cand1Nome = currentElection === '2018_2t' ? 'Haddad' : 'Lula';
+  const cand1Pct = currentElection === '2018_2t' ? (eleic?.haddad || 0) : (eleic?.lula || 0);
 
   const texto = `🇧🇷 *Raio-X Municipal: ${m.nm} (${m.uf})*\n` +
     `📌 Perfil: *${m.pf}*\n` +
@@ -4337,7 +4416,7 @@ function compartilharMunicipioDiretoWhatsApp(idIbge) {
     `💼 MEIs / 100 hab: ${(m.ind?.mei || 0).toFixed(1)}\n` +
     `🏛️ Servidores / 100 hab: ${(m.ind?.serv || 0).toFixed(1)}\n` +
     `🤝 BPC / 100 hab: ${(m.ind?.bpc || 0).toFixed(1)}\n` +
-    `🗳️ Votação ${eleicNome}: Lula ${(eleic.lula || 0).toFixed(1)}%\n\n` +
+    `🗳️ Votação ${eleicNome}: ${cand1Nome} ${cand1Pct.toFixed(1)}%\n\n` +
     `Acesse o painel: ${window.location.href}`;
 
   window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
