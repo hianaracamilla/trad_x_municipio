@@ -1125,7 +1125,19 @@ function atualizarTopCharts(cidadesFiltradas) {
       plugins: {
         legend: {
           position: 'top',
-          labels: { boxWidth: 12, font: { family: 'Inter', size: 11, weight: 600 } }
+          labels: { boxWidth: 12, font: { family: 'Inter', size: 11, weight: 600 } },
+          onClick: function(e, legendItem, legend) {
+            const index = legendItem.datasetIndex;
+            const ci = legend.chart;
+            if (ci.isDatasetVisible(index)) {
+              ci.hide(index);
+              legendItem.hidden = true;
+            } else {
+              ci.show(index);
+              legendItem.hidden = false;
+            }
+            ci.update();
+          }
         },
         tooltip: {
           callbacks: {
@@ -1161,7 +1173,7 @@ function atualizarTopCharts(cidadesFiltradas) {
         ctx.textBaseline = 'bottom';
         chart.data.datasets.forEach((dataset, datasetIndex) => {
           const meta = chart.getDatasetMeta(datasetIndex);
-          if (meta.hidden) return;
+          if (meta.hidden || (chart.isDatasetVisible && !chart.isDatasetVisible(datasetIndex))) return;
           meta.data.forEach((bar, index) => {
             const val = dataset.data[index];
             if (val === undefined || val === null || val <= 0) return;
@@ -2696,7 +2708,19 @@ function atualizarGraficoSeriesHistoricas() {
       plugins: {
         legend: {
           position: 'top',
-          labels: { boxWidth: 12, font: { family: 'Inter', size: 12, weight: 600 } }
+          labels: { boxWidth: 12, font: { family: 'Inter', size: 12, weight: 600 } },
+          onClick: function(e, legendItem, legend) {
+            const index = legendItem.datasetIndex;
+            const ci = legend.chart;
+            if (ci.isDatasetVisible(index)) {
+              ci.hide(index);
+              legendItem.hidden = true;
+            } else {
+              ci.show(index);
+              legendItem.hidden = false;
+            }
+            ci.update();
+          }
         },
         tooltip: {
           callbacks: {
@@ -2725,7 +2749,7 @@ function atualizarGraficoSeriesHistoricas() {
         if (currentSeriesMetric === 'veiculos') {
           // No gráfico de veículos, desenha a soma total (novos + seminovos) acima da barra empilhada
           const metaTop = chart.getDatasetMeta(chart.data.datasets.length - 1);
-          if (metaTop && !metaTop.hidden) {
+          if (metaTop && !metaTop.hidden && (chart.isDatasetVisible && chart.isDatasetVisible(chart.data.datasets.length - 1))) {
             metaTop.data.forEach((point, index) => {
               const usados = chart.data.datasets[0]?.data[index] || 0;
               const novos = chart.data.datasets[1]?.data[index] || 0;
@@ -2740,7 +2764,7 @@ function atualizarGraficoSeriesHistoricas() {
           // Em todos os gráficos de linha e coluna, exibe o rótulo de dados em cada ponto sem pular
           chart.data.datasets.forEach((dataset, datasetIndex) => {
             const meta = chart.getDatasetMeta(datasetIndex);
-            if (meta.hidden) return;
+            if (meta.hidden || (chart.isDatasetVisible && !chart.isDatasetVisible(datasetIndex))) return;
             meta.data.forEach((point, index) => {
               const val = dataset.data[index];
               if (val === undefined || val === null) return;
@@ -3578,7 +3602,22 @@ function renderizarGraficoModalOrcamento(tipo) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
+          legend: {
+            position: 'top',
+            labels: { boxWidth: 12, font: { size: 11, weight: '700' } },
+            onClick: function(e, legendItem, legend) {
+              const index = legendItem.datasetIndex;
+              const ci = legend.chart;
+              if (ci.isDatasetVisible(index)) {
+                ci.hide(index);
+                legendItem.hidden = true;
+              } else {
+                ci.show(index);
+                legendItem.hidden = false;
+              }
+              ci.update();
+            }
+          },
           tooltip: {
             callbacks: {
               label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw !== null ? ctx.raw.toFixed(2) + ' Milhões' : '—'}`
@@ -3636,7 +3675,22 @@ function renderizarGraficoModalOrcamento(tipo) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
+          legend: {
+            position: 'top',
+            labels: { boxWidth: 12, font: { size: 11, weight: '700' } },
+            onClick: function(e, legendItem, legend) {
+              const index = legendItem.datasetIndex;
+              const ci = legend.chart;
+              if (ci.isDatasetVisible(index)) {
+                ci.hide(index);
+                legendItem.hidden = true;
+              } else {
+                ci.show(index);
+                legendItem.hidden = false;
+              }
+              ci.update();
+            }
+          },
           tooltip: {
             callbacks: {
               label: (ctx) => ` ${ctx.dataset.label}: ${ctx.datasetIndex === 0 ? 'R$ ' + ctx.raw + ' Mi' : ctx.raw + ' mil vagas'}`
@@ -3919,6 +3973,18 @@ function renderizarGraficoModalOrcamento(tipo) {
             boxWidth: 12,
             font: { size: 11, weight: '700' },
             color: '#334155'
+          },
+          onClick: function(e, legendItem, legend) {
+            const index = legendItem.datasetIndex;
+            const ci = legend.chart;
+            if (ci.isDatasetVisible(index)) {
+              ci.hide(index);
+              legendItem.hidden = true;
+            } else {
+              ci.show(index);
+              legendItem.hidden = false;
+            }
+            ci.update();
           }
         },
         tooltip: {
@@ -3969,8 +4035,10 @@ function renderizarGraficoModalOrcamento(tipo) {
         ctx.textBaseline = 'bottom';
         chart.data.datasets.forEach((dataset, datasetIndex) => {
           const meta = chart.getDatasetMeta(datasetIndex);
-          if (meta.hidden) return;
+          if (meta.hidden || (chart.isDatasetVisible && !chart.isDatasetVisible(datasetIndex))) return;
           meta.data.forEach((element, index) => {
+            const val = dataset.data[index];
+            if (val === undefined || val === null || val <= 0) return;
             if (tipo === 'previdencia') {
               ctx.fillStyle = datasetIndex === 0 ? '#7E3AF2' : (datasetIndex === 1 ? '#047857' : '#1E3A8A');
             } else {
