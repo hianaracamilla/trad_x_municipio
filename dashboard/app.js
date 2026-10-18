@@ -3680,8 +3680,8 @@ function gerarBlocoGraficoModalOrcamento(tipo) {
     trabalho: {
       tag: 'Visualização Gráfica Integrada',
       titulo: 'Evolução do Emprego Formal CLT & Suporte ao MEI (2016 a 2026)',
-      badge: '💼 Séries Oficiais MTE / CAGED / RFB',
-      anoRef: 'Série Oficial: 2016 a 2025 (CAGED / MTE / RFB)'
+      badge: '💼 MTE / Novo CAGED / RAIS / RFB',
+      anoRef: 'Série Oficial: 2016 a 2025 (Novo CAGED / RAIS) + 2026 (Projeção)'
     },
     agro: {
       tag: 'Visualização Gráfica Integrada',
@@ -3902,7 +3902,7 @@ function renderizarGraficoModalOrcamento(tipo) {
         datasets: [
           {
             type: 'bar',
-            label: 'Empregos Formais CLT (Milhões de Carteiras)',
+            label: 'Carteiras Assinadas CLT (Milhões de Vínculos Formais)',
             data: cltData,
             backgroundColor: 'rgba(26, 86, 219, 0.85)',
             borderColor: '#1A56DB',
@@ -3947,10 +3947,10 @@ function renderizarGraficoModalOrcamento(tipo) {
               const yAxis = ci.options.scales.y;
 
               if (cltVis && !meiVis) {
-                yAxis.min = 80;
-                yAxis.suggestedMin = 80;
-                yAxis.suggestedMax = 108;
-                yAxis.title.text = 'Milhões de Trabalhadores CLT (Corte a partir de 80M)';
+                yAxis.min = 40;
+                yAxis.suggestedMin = 40;
+                yAxis.suggestedMax = 55;
+                yAxis.title.text = 'Milhões de Carteiras Assinadas CLT (Corte a partir de 40M)';
               } else if (!cltVis && meiVis) {
                 yAxis.min = 0;
                 yAxis.suggestedMin = 0;
@@ -3959,12 +3959,12 @@ function renderizarGraficoModalOrcamento(tipo) {
               } else if (cltVis && meiVis) {
                 yAxis.min = 0;
                 yAxis.suggestedMin = 0;
-                yAxis.suggestedMax = 115;
-                yAxis.title.text = 'Milhões de Trabalhadores (CLT & MEI - Escala Geral)';
+                yAxis.suggestedMax = 58;
+                yAxis.title.text = 'Milhões de Vínculos Formais (CLT & MEI - Escala Geral)';
               } else {
                 yAxis.min = 0;
                 yAxis.suggestedMin = 0;
-                yAxis.suggestedMax = 100;
+                yAxis.suggestedMax = 60;
               }
 
               ci.update();
@@ -3979,11 +3979,11 @@ function renderizarGraficoModalOrcamento(tipo) {
         scales: {
           x: { grid: { display: false } },
           y: {
-            min: 80,
-            suggestedMin: 80,
-            suggestedMax: 108,
+            min: 40,
+            suggestedMin: 40,
+            suggestedMax: 55,
             ticks: { callback: v => `${v} M` },
-            title: { display: true, text: 'Milhões de Trabalhadores CLT (Corte a partir de 80M)', font: { weight: 'bold' } }
+            title: { display: true, text: 'Milhões de Carteiras Assinadas CLT (MTE / Novo CAGED / RAIS)', font: { weight: 'bold' } }
           }
         }
       },
