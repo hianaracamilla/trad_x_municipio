@@ -227,7 +227,6 @@
               </svg>
             </div>
             <span class="metric-category">Farmácia Popular & Saúde</span>
-            <span class="card-corner-year" title="Ano-base de referência dos dados">Ano-base: 2024</span>
             <span class="card-arrow-indicator">➔</span>
           </div>
           <div class="metric-main-value" id="card-val-saude">12,96 M</div>
@@ -243,6 +242,9 @@
               <span class="footer-stat-lbl">Cidades com cobertura</span>
             </div>
           </div>
+          <div class="card-footer-note">
+            <span class="card-footer-year">Ano-base de referência: 2024</span>
+          </div>
         </div>
 
         <!-- Educação -->
@@ -255,7 +257,6 @@
               </svg>
             </div>
             <span class="metric-category">Educação Básica</span>
-            <span class="card-corner-year" title="Ano-base de referência dos dados">Ano-base: 2024/2025</span>
             <span class="card-arrow-indicator">➔</span>
           </div>
           <div class="metric-main-value" id="card-val-educacao">R$ 10,53 Bi</div>
@@ -271,6 +272,9 @@
               <span class="footer-stat-lbl">União no Fundeb (VAAT)</span>
             </div>
           </div>
+          <div class="card-footer-note">
+            <span class="card-footer-year">Ano-base de referência: 2024/2025</span>
+          </div>
         </div>
 
         <!-- Previdência -->
@@ -283,7 +287,6 @@
               </svg>
             </div>
             <span class="metric-category">Previdência & Seguridade</span>
-            <span class="card-corner-year" title="Ano-base de referência dos dados">Ano-base: 2024/2025</span>
             <span class="card-arrow-indicator">➔</span>
           </div>
           <div class="metric-main-value" id="card-val-previdencia">R$ 606,2 Bi</div>
@@ -299,6 +302,9 @@
               <span class="footer-stat-lbl">Aposentadorias ativas</span>
             </div>
           </div>
+          <div class="card-footer-note">
+            <span class="card-footer-year">Ano-base de referência: 2024/2025</span>
+          </div>
         </div>
 
         <!-- Trabalho & Cidadania -->
@@ -313,7 +319,6 @@
               </svg>
             </div>
             <span class="metric-category">Trabalho & Renda</span>
-            <span class="card-corner-year" title="Ano-base de referência dos dados">Ano-base: 2024</span>
             <span class="card-arrow-indicator">➔</span>
           </div>
           <div class="metric-main-value" id="card-val-trabalho">49,66 M</div>
@@ -329,6 +334,9 @@
               <span class="footer-stat-lbl">Repasse mensal Bolsa Família</span>
             </div>
           </div>
+          <div class="card-footer-note">
+            <span class="card-footer-year">Ano-base de referência: 2024</span>
+          </div>
         </div>
 
         <!-- Agricultura Familiar & Merenda Escolar (PNAE) -->
@@ -341,7 +349,6 @@
               </svg>
             </div>
             <span class="metric-category">Agricultura & Merenda</span>
-            <span class="card-corner-year" title="Ano-base de referência dos dados">Ano-base: 2024/2025</span>
             <span class="card-arrow-indicator">➔</span>
           </div>
           <div class="metric-main-value" id="card-val-agro">R$ 1,51 Bi</div>
@@ -356,6 +363,9 @@
               <span class="footer-stat-val" id="card-subval-agro-2">Mín. 30%</span>
               <span class="footer-stat-lbl">Exigência legal da merenda</span>
             </div>
+          </div>
+          <div class="card-footer-note">
+            <span class="card-footer-year">Ano-base de referência: 2024/2025</span>
           </div>
         </div>
       </div>
@@ -560,7 +570,16 @@
               <h4 class="chart-title" id="series-chart-title">Custo de Bens Essenciais em Proporção do Salário Mínimo (%)</h4>
               <p class="chart-subtitle" id="series-chart-subtitle">Quanto da renda mínima é comprometida para adquirir Cesta Básica, Gás e Gasolina</p>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <!-- Seletor Exclusivo de Valores Gastos vs Corrigidos (Orçamento dos Governos) -->
+              <div class="orcamento-mode-toggle" id="orcamento-mode-toggle" style="display: none;">
+                <button type="button" class="orc-toggle-btn active" data-mode="real" id="btn-orc-mode-real" title="Valores reais corrigidos pela inflação (IPCA a preços de 2026)">
+                  📈 Corrigido pela Inflação (Real)
+                </button>
+                <button type="button" class="orc-toggle-btn" data-mode="nominal" id="btn-orc-mode-nominal" title="Valores nominais desembolsados à época (gasto histórico)">
+                  💵 Valores Gastos (Nominal)
+                </button>
+              </div>
               <span class="chart-tag" id="series-chart-tag">Série Histórica</span>
               <span class="chart-scope-badge scope-nacional" id="badge-scope-series">Visão Nacional</span>
             </div>

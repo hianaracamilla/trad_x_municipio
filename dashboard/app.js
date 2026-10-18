@@ -51,6 +51,7 @@ let chartModalOrcamento = null;
 let currentScatterMetricX = 'indice_composto';
 let currentScatterRegion = 'todas';
 let currentSeriesMetric = 'poder_compra';
+let currentOrcamentoMode = 'real'; // 'real' (corrigido IPCA) ou 'nominal' (gastos da época)
 
 // Mapeamento de Códigos IBGE de 2 dígitos (codarea no GeoJSON) para Sigla do Estado
 const codareaToUf = {
@@ -2303,6 +2304,17 @@ function renderizarSeriesHistoricas() {
     });
   });
 
+  // Botões de Alternância entre Valores Gastos (Nominais) e Corrigidos pela Inflação (Real)
+  document.querySelectorAll('.orc-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.orc-toggle-btn').forEach(b => b.classList.remove('active'));
+      const target = e.currentTarget;
+      target.classList.add('active');
+      currentOrcamentoMode = target.getAttribute('data-mode') || 'real';
+      atualizarGraficoSeriesHistoricas();
+    });
+  });
+
   atualizarNumerosMunicipaisSeries(null);
   atualizarGraficoSeriesHistoricas();
 }
@@ -2318,6 +2330,11 @@ function atualizarGraficoSeriesHistoricas() {
   const subtitleEl = document.getElementById('series-chart-subtitle');
   const tagEl = document.getElementById('series-chart-tag');
   const highlightsEl = document.getElementById('series-highlights-grid');
+  const orcToggleEl = document.getElementById('orcamento-mode-toggle');
+
+  if (orcToggleEl) {
+    orcToggleEl.style.display = currentSeriesMetric === 'orcamento_federal' ? 'inline-flex' : 'none';
+  }
 
   let datasets = [];
   let yAxisConfig = {};
@@ -2536,69 +2553,132 @@ function atualizarGraficoSeriesHistoricas() {
     };
 
   } else if (currentSeriesMetric === 'orcamento_federal') {
+    const isReal = currentOrcamentoMode === 'real';
     titleEl.textContent = 'Orçamento Executado dos Governos Federais (2010 – 2026)';
-    subtitleEl.textContent = 'Valores reais atualizados pelo IPCA a preços de 2026 em Saúde, Educação e Farmácia Popular';
-    tagEl.textContent = 'Tesouro Nacional (RTN) / SIAFI';
+    subtitleEl.textContent = isReal
+      ? 'Valores reais atualizados pelo IPCA a preços de 2026 em Saúde, Educação e Farmácia Popular'
+      : 'Valores nominais desembolsados (gastos históricos sem correção pela inflação) em Saúde, Educação e Farmácia Popular';
+    tagEl.textContent = isReal ? 'Tesouro Nacional (RTN) / SIAFI • Corrigido IPCA' : 'Tesouro Nacional (RTN) / SIAFI • Gasto Nominal';
 
     const orcDados = APP_DATA.series_historicas.orcamento_governos || [];
 
-    highlightsHtml = `
-      <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
-        <span class="series-highlight-title">Saúde Pública (Real 2026)</span>
-        <div class="series-highlight-val">R$ 231,0 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Recorde</span></div>
-        <span class="series-highlight-sub">Orçamento executado na Saúde Pública em 2024 a preços de 2026.</span>
-      </div>
-      <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
-        <span class="series-highlight-title">Educação e FUNDEB (Real)</span>
-        <div class="series-highlight-val">R$ 137,8 Bi <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +48%</span></div>
-        <span class="series-highlight-sub">Expansão via Novo FUNDEB e implantação do Pé-de-Meia.</span>
-      </div>
-      <div class="series-highlight-box" style="border-left: 4px solid #DC2626;">
-        <span class="series-highlight-title">Farmácia Popular (Real)</span>
-        <div class="series-highlight-val">R$ 5,4 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +116% vs 2022</span></div>
-        <span class="series-highlight-sub">Orçamento integralmente garantido com gratuidade de 40 medicamentos essenciais.</span>
-      </div>
-      <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
-        <span class="series-highlight-title">Economia das Famílias</span>
-        <div class="series-highlight-val">R$ 7,73 Bi / ano</div>
-        <span class="series-highlight-sub">Gasto do bolso evitado na compra direta de medicamentos contínuos.</span>
-      </div>
-    `;
+    if (isReal) {
+      highlightsHtml = `
+        <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
+          <span class="series-highlight-title">Saúde Pública (Real 2026)</span>
+          <div class="series-highlight-val">R$ 231,0 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Recorde</span></div>
+          <span class="series-highlight-sub">Orçamento executado na Saúde Pública em 2024 a preços de 2026.</span>
+        </div>
+        <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
+          <span class="series-highlight-title">Educação e FUNDEB (Real)</span>
+          <div class="series-highlight-val">R$ 137,8 Bi <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +48%</span></div>
+          <span class="series-highlight-sub">Expansão via Novo FUNDEB e implantação do Pé-de-Meia.</span>
+        </div>
+        <div class="series-highlight-box" style="border-left: 4px solid #DC2626;">
+          <span class="series-highlight-title">Farmácia Popular (Real)</span>
+          <div class="series-highlight-val">R$ 5,4 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +116% vs 2022</span></div>
+          <span class="series-highlight-sub">Orçamento integralmente garantido com gratuidade de 40 medicamentos essenciais.</span>
+        </div>
+        <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
+          <span class="series-highlight-title">Economia das Famílias</span>
+          <div class="series-highlight-val">R$ 7,73 Bi / ano</div>
+          <span class="series-highlight-sub">Gasto do bolso evitado na compra direta de medicamentos contínuos.</span>
+        </div>
+      `;
 
-    datasets = [
-      {
-        label: 'Saúde Real 2026 (R$ Bi)',
-        data: orcDados.map(d => d.saude_real_2026_bi || d.saude_bi),
-        borderColor: '#0E9F6E',
-        backgroundColor: 'rgba(14, 159, 110, 0.1)',
-        borderWidth: 3,
-        tension: 0.25,
-        fill: true,
-        pointRadius: 4
-      },
-      {
-        label: 'Educação Real 2026 (R$ Bi)',
-        data: orcDados.map(d => d.educacao_real_2026_bi || d.educacao_bi),
-        borderColor: '#1A56DB',
-        borderWidth: 3,
-        tension: 0.25,
-        pointRadius: 4
-      },
-      {
-        label: 'Farmácia Popular Real (R$ Bi)',
-        data: orcDados.map(d => d.farmacia_popular_real_2026_bi || d.farmacia_popular_bi),
-        borderColor: '#DC2626',
-        backgroundColor: 'rgba(220, 38, 38, 0.08)',
-        borderWidth: 2.5,
-        tension: 0.25,
-        pointRadius: 4
-      }
-    ];
+      datasets = [
+        {
+          label: 'Saúde Real 2026 (R$ Bi)',
+          data: orcDados.map(d => d.saude_real_2026_bi || d.saude_bi),
+          borderColor: '#0E9F6E',
+          backgroundColor: 'rgba(14, 159, 110, 0.1)',
+          borderWidth: 3,
+          tension: 0.25,
+          fill: true,
+          pointRadius: 4
+        },
+        {
+          label: 'Educação Real 2026 (R$ Bi)',
+          data: orcDados.map(d => d.educacao_real_2026_bi || d.educacao_bi),
+          borderColor: '#1A56DB',
+          borderWidth: 3,
+          tension: 0.25,
+          pointRadius: 4
+        },
+        {
+          label: 'Farmácia Popular Real (R$ Bi)',
+          data: orcDados.map(d => d.farmacia_popular_real_2026_bi || d.farmacia_popular_bi),
+          borderColor: '#DC2626',
+          backgroundColor: 'rgba(220, 38, 38, 0.08)',
+          borderWidth: 2.5,
+          tension: 0.25,
+          pointRadius: 4
+        }
+      ];
 
-    yAxisConfig = {
-      ticks: { callback: v => 'R$ ' + v + ' Bi' },
-      title: { display: true, text: 'R$ Bilhões (Preços de 2026)' }
-    };
+      yAxisConfig = {
+        ticks: { callback: v => 'R$ ' + v + ' Bi' },
+        title: { display: true, text: 'R$ Bilhões (Preços de 2026)' }
+      };
+    } else {
+      highlightsHtml = `
+        <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
+          <span class="series-highlight-title">Saúde Pública (Gasto Nominal)</span>
+          <div class="series-highlight-val">R$ 203,9 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ 4x vs 2010</span></div>
+          <span class="series-highlight-sub">Gasto nominal executado no Ministério da Saúde em 2024 (R$ 228,6 Bi em 2025 vs R$ 50,5 Bi em 2010).</span>
+        </div>
+        <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
+          <span class="series-highlight-title">Educação e FUNDEB (Gasto Nominal)</span>
+          <div class="series-highlight-val">R$ 36,6 Bi <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +108% vs 2010</span></div>
+          <span class="series-highlight-sub">Orçamento direto MEC em 2024 (R$ 41,2 Bi em 2025) somado a R$ 47,5 Bi de complementação Fundeb.</span>
+        </div>
+        <div class="series-highlight-box" style="border-left: 4px solid #DC2626;">
+          <span class="series-highlight-title">Farmácia Popular (Gasto Nominal)</span>
+          <div class="series-highlight-val">R$ 4,72 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Recorde Histórico</span></div>
+          <span class="series-highlight-sub">Execução orçamentária nominal em 2025 (vs R$ 2,74 Bi em 2024 e R$ 0,95 Bi em 2010).</span>
+        </div>
+        <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
+          <span class="series-highlight-title">Economia das Famílias</span>
+          <div class="series-highlight-val">R$ 7,73 Bi / ano</div>
+          <span class="series-highlight-sub">Gasto do bolso evitado na compra direta de medicamentos essenciais.</span>
+        </div>
+      `;
+
+      datasets = [
+        {
+          label: 'Saúde Nominal (R$ Bi)',
+          data: orcDados.map(d => d.saude_bi),
+          borderColor: '#0E9F6E',
+          backgroundColor: 'rgba(14, 159, 110, 0.1)',
+          borderWidth: 3,
+          tension: 0.25,
+          fill: true,
+          pointRadius: 4
+        },
+        {
+          label: 'Educação Nominal (R$ Bi)',
+          data: orcDados.map(d => d.educacao_bi),
+          borderColor: '#1A56DB',
+          borderWidth: 3,
+          tension: 0.25,
+          pointRadius: 4
+        },
+        {
+          label: 'Farmácia Popular Nominal (R$ Bi)',
+          data: orcDados.map(d => d.farmacia_popular_bi),
+          borderColor: '#DC2626',
+          backgroundColor: 'rgba(220, 38, 38, 0.08)',
+          borderWidth: 2.5,
+          tension: 0.25,
+          pointRadius: 4
+        }
+      ];
+
+      yAxisConfig = {
+        ticks: { callback: v => 'R$ ' + v + ' Bi' },
+        title: { display: true, text: 'R$ Bilhões (Gasto Nominal à Época)' }
+      };
+    }
 
   } else if (currentSeriesMetric === 'comercio') {
     titleEl.textContent = 'Vendas do Comércio Varejista Ampliado (2016 – 2025)';
@@ -2725,7 +2805,13 @@ function atualizarGraficoSeriesHistoricas() {
         tooltip: {
           callbacks: {
             title: (items) => `Ano: ${items[0].label}`,
-            label: (item) => ` ${item.dataset.label}: ${item.raw.toLocaleString('pt-BR')}`
+            label: (item) => {
+              if (currentSeriesMetric === 'orcamento_federal') {
+                const modo = currentOrcamentoMode === 'real' ? 'Real 2026' : 'Gasto Nominal';
+                return ` ${item.dataset.label}: R$ ${typeof item.raw === 'number' ? item.raw.toFixed(1) : item.raw} Bi (${modo})`;
+              }
+              return ` ${item.dataset.label}: ${item.raw.toLocaleString('pt-BR')}`;
+            }
           }
         }
       },
