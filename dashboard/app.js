@@ -142,6 +142,77 @@ const PERFIS_IMPACTO = {
   }
 };
 
+// Mapeamento Estratégico de Políticas Públicas e Assuntos por Indicador (Quando Acima da Mediana)
+const MAPA_INDICADORES_PAUTA = {
+  apos: {
+    icone: '👴',
+    nome: 'Aposentadorias RGPS',
+    temaCurto: 'Aposentadorias RGPS',
+    pauta: 'Reajuste do Salário Mínimo e Previdência',
+    sufixo: '/100 hab'
+  },
+  bpc: {
+    icone: '♿',
+    nome: 'BPC / LOAS',
+    temaCurto: 'BPC / LOAS (Idosos & PCD)',
+    pauta: 'Amparo social a idosos e PCDs em vulnerabilidade',
+    sufixo: '/100 hab'
+  },
+  fp: {
+    icone: '💊',
+    nome: 'Farmácia Popular',
+    temaCurto: 'Farmácia Popular',
+    pauta: 'Remédios gratuitos (hipertensão, diabetes e asma)',
+    sufixo: '/100 hab'
+  },
+  bf: {
+    icone: '🤝',
+    nome: 'Bolsa Família',
+    temaCurto: 'Bolsa Família & 1ª Infância',
+    pauta: 'Segurança alimentar e transferência de renda',
+    sufixo: '/100 hab'
+  },
+  pdm: {
+    icone: '🎓',
+    nome: 'Poupança Pé-de-Meia',
+    temaCurto: 'Poupança Pé-de-Meia',
+    pauta: 'Incentivo à conclusão do Ensino Médio público',
+    sufixo: '%'
+  },
+  clt: {
+    icone: '💼',
+    nome: 'Emprego Formal CLT',
+    temaCurto: 'Emprego Formal CLT',
+    pauta: 'Vagas com carteira assinada, salários e qualificação',
+    sufixo: '/100 hab'
+  },
+  mei: {
+    icone: '🏪',
+    nome: 'MEI & Microcrédito',
+    temaCurto: 'MEI & Microcrédito (Acredita)',
+    pauta: 'Crédito produtivo orientado e apoio ao pequeno negócio',
+    sufixo: '/100 hab'
+  },
+  serv: {
+    icone: '🏛️',
+    nome: 'Serviço Público',
+    temaCurto: 'Serviço Público Municipal',
+    pauta: 'Pisos da Educação/Saúde e capacidade fiscal local',
+    sufixo: '/100 hab'
+  }
+};
+
+// Indicadores primários típicos de cada perfil (para identificar alertas que vão além do arquétipo)
+const PERFIL_INDICADORES_PRIMARIOS = {
+  'Jovens & Apoio Social': ['pdm', 'bf'],
+  'Cidades de Aposentados': ['apos', 'fp'],
+  'Polos Agroindustriais': ['clt', 'mei'],
+  'Polos de Emprego & Serviços': ['clt', 'mei'],
+  'Seguridade & Repasses': ['bf', 'bpc', 'apos'],
+  'Funcionalismo Público': ['serv'],
+  'Metrópoles & Capitais': ['clt', 'pdm']
+};
+
 // Inicialização Geral ao carregar a página
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -408,7 +479,7 @@ function aplicarFiltroTerritorial(nivel, id, opcoes = {}) {
   filtroTerritorial.perfil = perfilNomeAtivo;
 
   // 1. Atualiza Cabeçalho e Banner de Contexto (cor, descrição e assuntos de impacto)
-  atualizarBannerPerfilHeader(nivel, tituloTerritorio, perfilNomeAtivo);
+  atualizarBannerPerfilHeader(nivel, tituloTerritorio, perfilNomeAtivo, cidadesTerritorio);
 
   // 2. Atualiza os 4 Cards de Prioridades Nacionais para o território
   atualizarCardsPrioridades(cidadesTerritorio, nivel);
@@ -434,9 +505,24 @@ function aplicarFiltroTerritorial(nivel, id, opcoes = {}) {
 }
 
 /**
- * Atualiza o Cabeçalho com a cor e os temas de impacto do perfil econômico
+ * Função para destacar interativamente um card no Raio-X a partir das pills do cabeçalho
  */
-function atualizarBannerPerfilHeader(nivel, titulo, perfilNome) {
+function destacarIndicadorRaioX(key) {
+  const el = document.getElementById(`raiox-card-${key}`);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.remove('highlight-card-pulse');
+    void el.offsetWidth;
+    el.classList.add('highlight-card-pulse');
+    setTimeout(() => el.classList.remove('highlight-card-pulse'), 3000);
+  }
+}
+window.destacarIndicadorRaioX = destacarIndicadorRaioX;
+
+/**
+ * Atualiza o Cabeçalho com a cor, os temas de impacto do perfil econômico e os alertas de indicadores acima da mediana
+ */
+function atualizarBannerPerfilHeader(nivel, titulo, perfilNome, cidadesTerritorio = []) {
   const banner = document.getElementById('profile-context-banner');
   const dot = document.getElementById('context-profile-dot');
   const nameEl = document.getElementById('context-profile-name');
@@ -465,14 +551,124 @@ function atualizarBannerPerfilHeader(nivel, titulo, perfilNome) {
 
   descEl.textContent = infoPerfil.resumo;
 
-  // Renderiza tópicos de maior impacto
+  // Cálculo e Identificação Dinâmica de Indicadores Acima da Mediana para este Território
+  const medianas = APP_DATA.totais_nacionais?.medianas_municipais || {};
+  let indValores = {};
+
+  if (nivel === 'municipio' && activeRaioXCity?.ind) {
+    indValores = activeRaioXCity.ind;
+  } else if (cidadesTerritorio && cidadesTerritorio.length === 1 && cidadesTerritorio[0]?.ind) {
+    indValores = cidadesTerritorio[0].ind;
+  } else if (nivel === 'brasil' || !cidadesTerritorio || cidadesTerritorio.length === 0) {
+    indValores = APP_DATA.totais_nacionais?.brasil_indicadores || {};
+  } else {
+    // Média ponderada pela população dos municípios que compõem o estado, região ou cluster
+    const totPop = cidadesTerritorio.reduce((acc, c) => acc + (c.pop || 0), 0);
+    if (totPop > 0) {
+      ['clt', 'mei', 'serv', 'apos', 'bf', 'bpc', 'fp', 'pdm'].forEach(k => {
+        const sumVal = cidadesTerritorio.reduce((acc, c) => acc + ((c.pop || 0) * (c.ind?.[k] || 0)), 0);
+        indValores[k] = sumVal / totPop;
+      });
+    } else {
+      indValores = APP_DATA.totais_nacionais?.brasil_indicadores || {};
+    }
+  }
+
+  const primariosPerfil = PERFIL_INDICADORES_PRIMARIOS[perfilNome] || [];
+  const itensAcimaMediana = [];
+
+  ['apos', 'bpc', 'fp', 'bf', 'pdm', 'clt', 'mei', 'serv'].forEach(k => {
+    const stat = medianas[k];
+    if (!stat) return;
+    const val = indValores[k] ?? 0;
+    if (val > stat.mediana) {
+      const diffPct = ((val - stat.mediana) / stat.mediana) * 100;
+      const ehComplementar = !primariosPerfil.includes(k);
+      const cfg = MAPA_INDICADORES_PAUTA[k] || {
+        icone: '📊',
+        nome: k,
+        temaCurto: k.toUpperCase(),
+        pauta: 'Prioridade estratégica local',
+        sufixo: '/100 hab'
+      };
+      itensAcimaMediana.push({
+        key: k,
+        val,
+        mediana: stat.mediana,
+        diffPct,
+        ehComplementar,
+        ...cfg
+      });
+    }
+  });
+
+  // Ordena: primeiro os complementares (que vão além do perfil geral, como aposentados, bpc e farmácia popular em Recife!),
+  // e dentro de cada grupo pelo maior excesso percentual sobre a mediana nacional
+  itensAcimaMediana.sort((a, b) => {
+    if (a.ehComplementar !== b.ehComplementar) {
+      return a.ehComplementar ? -1 : 1;
+    }
+    return b.diffPct - a.diffPct;
+  });
+
+  let labelAcima = 'Alertas Territoriais (Acima da Mediana Nacional):';
+  let escopoNome = 'no Território';
+  if (nivel === 'municipio' && activeRaioXCity) {
+    escopoNome = activeRaioXCity.nm;
+    labelAcima = `Alertas Locais de ${activeRaioXCity.nm} (Acima da Mediana):`;
+  } else if (nivel === 'estado') {
+    escopoNome = filtroTerritorial.nome;
+    labelAcima = `Alertas do Estado (${filtroTerritorial.nome}) • Acima da Mediana:`;
+  } else if (nivel === 'regiao') {
+    escopoNome = filtroTerritorial.nome;
+    labelAcima = `Alertas da Região (${filtroTerritorial.nome}) • Acima da Mediana:`;
+  } else if (nivel === 'perfil') {
+    escopoNome = perfilNome;
+    labelAcima = `Destaques do Cluster ${perfilNome} (Acima da Mediana):`;
+  } else if (nivel === 'brasil') {
+    escopoNome = 'Brasil';
+    labelAcima = 'Prioridades Nacionais (Acima da Mediana dos Municípios):';
+  }
+
+  const pillsAcimaHtml = itensAcimaMediana.length > 0
+    ? itensAcimaMediana.map(item => {
+        const valTxt = item.key === 'pdm' ? `${item.val.toFixed(1)}%` : `${item.val.toFixed(1)}${item.sufixo}`;
+        const medTxt = item.key === 'pdm' ? `${item.mediana}%` : `${item.mediana}${item.sufixo}`;
+        const pillClass = item.ehComplementar ? 'impact-topic-pill pill-above-complementary' : 'impact-topic-pill pill-above-focus';
+        const tagClass = item.ehComplementar ? 'stat-amber' : 'stat-green';
+        const tagIcon = item.ehComplementar ? '⚡' : '▲';
+        const tooltip = `${escopoNome} supera a mediana nacional em ${item.nome} (${valTxt} vs mediana ${medTxt}). Pauta prioritária: ${item.pauta}. Clique para destacar no Raio-X abaixo.`;
+
+        return `
+          <button class="${pillClass}" onclick="destacarIndicadorRaioX('${item.key}')" title="${tooltip}">
+            <span class="pill-title-content">${tagIcon} ${item.icone} <strong>${item.temaCurto}:</strong> ${item.pauta}</span>
+            <span class="pill-stat-tag ${tagClass}">▲ ${valTxt} <span class="pill-med-ref">(med. ${medTxt})</span></span>
+          </button>
+        `;
+      }).join('')
+    : `<span class="impact-topic-pill pill-neutral">ℹ️ Indicadores dentro da faixa mediana dos municípios brasileiros</span>`;
+
+  // Renderiza tópicos de maior impacto em duas linhas perfeitamente organizadas
   impactTopicsEl.innerHTML = `
-    <span class="impact-label" style="color: ${cor};">Assuntos de Maior Impacto:</span>
-    ${infoPerfil.assuntos_impacto.map(t => `
-      <span class="impact-topic-pill" style="border-color: ${cor}40; color: #0F172A;">
-        ${t}
+    <div class="impact-topics-subrow">
+      <span class="impact-label" style="color: ${cor};">📌 Eixo Estrutural (${perfilNome}):</span>
+      <div class="impact-pills-wrap">
+        ${infoPerfil.assuntos_impacto.map(t => `
+          <span class="impact-topic-pill pill-archetype" style="border-color: ${cor}40; color: #0F172A;" title="Tema estrutural característico do perfil ${perfilNome}">
+            ${t}
+          </span>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="impact-topics-subrow impact-above-subrow">
+      <span class="impact-label-above">
+        <span class="pulse-chip-above">▲</span> ${labelAcima}
       </span>
-    `).join('')}
+      <div class="impact-pills-wrap">
+        ${pillsAcimaHtml}
+      </div>
+    </div>
   `;
 
   // Exibe/oculta botão de limpar filtro
@@ -1187,7 +1383,7 @@ function atualizarRaioXIntegrado() {
       : `<span class="median-status-chip chip-below" title="Na ou abaixo da mediana nacional (${med})">▼ Mediana (${med})</span>`;
 
     return `
-      <div class="${cardClass}">
+      <div class="${cardClass}" id="raiox-card-${cfg.key}">
         <div class="raiox-ind-top-row">
           <span class="raiox-ind-icon">${cfg.icon}</span>
           ${badgeHtml}
