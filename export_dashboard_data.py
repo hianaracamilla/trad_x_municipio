@@ -84,7 +84,7 @@ perfil_cores = {
     'Polos Agroindustriais': '#0E9F6E',            # Verde esmeralda dinâmico
     'Cidades de Aposentados': '#7E3AF2',           # Roxo/Lavanda elegante
     'Seguridade & Repasses': '#E05252',            # Vermelho clarinho / Coral
-    'Funcionalismo Público': '#0D9488',            # Teal / Turquesa mineral
+    'Funcionalismo Público': '#C026D3',            # Magenta / Fúcsia Executivo
     'Jovens & Apoio Social': '#F59E0B',            # Amarelo/Ouro vibrante
     'Metrópoles & Capitais': '#374151'             # Ardósia profundo
 }

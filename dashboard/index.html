@@ -39,18 +39,15 @@
         </div>
       </div>
 
-      <!-- Election Switcher In Header (conforme solicitado) -->
+      <!-- Election Switcher In Header (Apenas Dados Reais TSE) -->
       <div class="header-election-switcher">
         <div class="header-toggle-pill-group">
-          <button class="pill-btn active" data-election="2026_1t" id="btn-eleicao-2026-1t">
-            <span class="pill-badge">Atual</span>
-            2026 • 1ºT
+          <button class="pill-btn active" data-election="2022_2t" id="btn-eleicao-2022-2t">
+            <span class="pill-badge">Oficial</span>
+            2022 • 2ºT
           </button>
           <button class="pill-btn" data-election="2022_1t" id="btn-eleicao-2022-1t">
             2022 • 1ºT
-          </button>
-          <button class="pill-btn" data-election="2022_2t" id="btn-eleicao-2022-2t">
-            2022 • 2ºT
           </button>
         </div>
       </div>
@@ -174,7 +171,7 @@
             </div>
             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
               <span class="chart-scope-badge" id="badge-scope-desempenho">Visão Nacional</span>
-              <span class="chart-tag" id="desempenho-abst-tag">2026 • 1º Turno</span>
+              <span class="chart-tag" id="desempenho-abst-tag">2022 • 2º Turno</span>
             </div>
           </div>
           <div class="chart-container-compact">
@@ -358,35 +355,39 @@
               </div>
             </div>
 
-            <!-- Card Comparativo Lula: 2022 (1ºT e 2ºT) vs 2026 -->
+            <!-- Card Comparativo Lula: 2022 (1ºT vs 2ºT Real TSE) -->
             <div class="raiox-election-comparison-card" id="raiox-comparison-card">
               <div class="comparison-card-header">
-                <span class="comparison-eyebrow">COMPARATIVO ELEITORAL LULA</span>
-                <span class="comparison-badge" id="raiox-delta-badge">+0.0 pp</span>
+                <span class="comparison-eyebrow">DESEMPENHO ELEITORAL LULA (TSE 2022)</span>
+                <span class="comparison-badge" id="raiox-delta-badge">+0.0 pp no 2ºT</span>
               </div>
-              <div class="comparison-bars-grid">
+              <div class="comparison-bars-grid comparison-bars-grid-2cols">
                 <div class="comp-col">
                   <span class="comp-label">2022 • 1º Turno</span>
-                  <div class="comp-val lula-color" id="raiox-lula-22-1t">55.2%</div>
+                  <div class="comp-val lula-color" id="raiox-lula-22-1t">48.4%</div>
                   <div class="comp-bar-track">
-                    <div class="comp-bar-fill" id="raiox-bar-22-1t" style="width: 55.2%;"></div>
+                    <div class="comp-bar-fill" id="raiox-bar-22-1t" style="width: 48.4%;"></div>
                   </div>
                 </div>
-                <div class="comp-col">
-                  <span class="comp-label">2022 • 2º Turno</span>
-                  <div class="comp-val lula-color" id="raiox-lula-22-2t">58.4%</div>
+                <div class="comp-col highlight-col-2t">
+                  <span class="comp-label">2022 • 2º Turno (Final)</span>
+                  <div class="comp-val lula-color" id="raiox-lula-22-2t">50.9%</div>
                   <div class="comp-bar-track">
-                    <div class="comp-bar-fill" id="raiox-bar-22-2t" style="width: 58.4%;"></div>
-                  </div>
-                </div>
-                <div class="comp-col highlight-col">
-                  <span class="comp-label">2026 • Projeção</span>
-                  <div class="comp-val lula-color" id="raiox-lula-26">57.1%</div>
-                  <div class="comp-bar-track">
-                    <div class="comp-bar-fill gold-bar" id="raiox-bar-26" style="width: 57.1%;"></div>
+                    <div class="comp-bar-fill" id="raiox-bar-22-2t" style="width: 50.9%;"></div>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Explicação Didática da Mediana -->
+            <div class="raiox-median-callout">
+              <div class="median-callout-header">
+                <span class="median-callout-icon">💡</span>
+                <span class="median-callout-title">O que é a Mediana e como ela é calculada?</span>
+              </div>
+              <p class="median-callout-text">
+                A <strong>mediana</strong> representa o valor central exato entre todos os 5.571 municípios do Brasil (percentil 50). Exatamente 50% das cidades do país têm taxa menor e 50% têm taxa maior. Ao contrário da média simples, a mediana <strong>não é distorcida pelas grandes capitais</strong> e reflete a realidade do interior. Cartões com <strong style="color: #166534;">▲ Acima</strong> indicam que o município supera a marca central brasileira.
+              </p>
             </div>
 
             <!-- Indicadores Chave do Território (Grid com Range Bullets e Medianas) -->
@@ -492,7 +493,7 @@
             🍞 Poder de Compra
           </button>
           <button class="series-tab-btn" data-metric="veiculos" id="tab-btn-veiculos">
-            🚗 Veículos (Empilhado)
+            🚗 Veículos
           </button>
           <button class="series-tab-btn" data-metric="habitacao" id="tab-btn-habitacao">
             🏠 Habitação & Crédito
@@ -535,6 +536,61 @@
 
       </div>
     </section>
+
+    <!-- ==================== RODAPÉ INSTITUCIONAL & FONTES ==================== -->
+    <footer class="institutional-footer">
+      <div class="footer-container">
+        <div class="footer-top-grid">
+          <div class="footer-col-main">
+            <div class="footer-brand">
+              <span class="footer-logo">🇧🇷</span>
+              <span class="footer-brand-name">Diagnóstico Municipal & Eleitoral Brasil</span>
+            </div>
+            <p class="footer-desc">
+              Plataforma analítica e independente de inteligência territorial integrando os 5.571 municípios brasileiros. Cruzamento de dados administrativos oficiais de transferências de renda, emprego formal, saúde, educação, previdência e histórico eleitoral do TSE.
+            </p>
+            <div class="footer-links-group">
+              <a href="https://github.com/hianaracamilla/trad_x_municipio" target="_blank" rel="noopener noreferrer" class="footer-link-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                Repositório dos Estudos no GitHub
+              </a>
+              <a href="https://github.com/hianaracamilla/trad_x_municipio/blob/main/docs/DASHBOARD_E_VISUALIZACOES.md" target="_blank" rel="noopener noreferrer" class="footer-link-btn">
+                📄 Documentação Técnica do Painel
+              </a>
+            </div>
+          </div>
+
+          <div class="footer-col-sources">
+            <h5 class="footer-col-title">Fontes Oficiais dos Dados</h5>
+            <div class="footer-sources-columns">
+              <ul class="footer-sources-list">
+                <li><strong>TSE:</strong> Resultados Eleitorais Oficiais (2010 a 2022).</li>
+                <li><strong>IBGE:</strong> Censo Demográfico 2022 e Estimativas Populacionais (2024-2025).</li>
+                <li><strong>MTE / Novo CAGED:</strong> Empregos Formais CLT e Salários de Admissão.</li>
+                <li><strong>Receita Federal:</strong> Microempreendedores Individuais (MEI) Formalizados.</li>
+                <li><strong>MDS / CadÚnico:</strong> Bolsa Família, BPC/LOAS e Auxílio Gás dos Municípios.</li>
+                <li><strong>MS / DATASUS:</strong> Programa Farmácia Popular do Brasil e APS.</li>
+              </ul>
+              <ul class="footer-sources-list">
+                <li><strong>MEC / FNDE:</strong> Programa Pé-de-Meia, Novo FUNDEB e Merenda Escolar (PNAE).</li>
+                <li><strong>INSS / RGPS:</strong> Benefícios Previdenciários e Aposentadorias Rurais e Urbanas.</li>
+                <li><strong>Banco Central (BCB):</strong> Faturamento do Varejo Ampliado, Crédito e Séries Macroeconômicas.</li>
+                <li><strong>ABECIP & FipeZAP:</strong> Financiamento Habitacional Poupança SBPE.</li>
+                <li><strong>FENABRAVE & ANFAVEA:</strong> Emplacamento de Novos e Transferências de Veículos.</li>
+                <li><strong>DIEESE & ANP:</strong> Cesta Básica Nacional, GLP Gás e Preço de Combustíveis.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom-row">
+          <span>Desenvolvido com rigor metodológico e transparência científica • 5.571 Municípios Brasileiros</span>
+          <span>© 2025 Trad x Município • Código Aberto no GitHub</span>
+        </div>
+      </div>
+    </footer>
 
   </main>
 
@@ -671,12 +727,8 @@
         <!-- Rodapé explicativo -->
         <div class="scatter-footer-notes">
           <div class="footnote-item">
-            <span class="footnote-line black-line"></span>
-            <span><strong>Linha preta:</strong> Voto esperado pela presença das políticas públicas (regressão linear). Acima: votação de Lula superior à tendência estatística. Abaixo: votação inferior.</span>
-          </div>
-          <div class="footnote-item">
-            <span class="footnote-line dashed-line"></span>
-            <span><strong>Linha pontilhada:</strong> Patamar de 50% dos votos válidos.</span>
+            <span class="footnote-line dark-solid-line"></span>
+            <span><strong>Linha escura contínua (50%):</strong> Patamar da maioria absoluta dos votos válidos (vitória eleitoral em 2º turno).</span>
           </div>
           <div class="footnote-item tip">
             <span>💡 <em>Dica: Passe o mouse para ver os detalhes da cidade e clique em qualquer bolinha para abrir o Raio-X detalhado.</em></span>

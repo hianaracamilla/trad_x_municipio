@@ -9,7 +9,7 @@ let leafletMap = null;
 let geoJsonLayer = null;
 let markersLayer = null;
 
-let currentElection = '2026_1t'; // '2026_1t', '2022_1t', '2022_2t'
+let currentElection = '2022_2t'; // '2022_2t', '2022_1t' (Apenas Dados Oficiais Reais do TSE)
 
 // Estado Central de Filtragem Territorial
 let filtroTerritorial = {
@@ -119,7 +119,7 @@ const PERFIS_IMPACTO = {
     ]
   },
   'Funcionalismo Público': {
-    cor: '#0D9488',
+    cor: '#C026D3', // Magenta / Fúcsia Executivo (totalmente distinto de Polos Agroindustriais #0E9F6E)
     icone: '🏛️',
     resumo: 'Cidades pequenas onde a prefeitura e os serviços públicos municipais/estaduais são os maiores empregadores e sustentadores da renda.',
     assuntos_impacto: [
@@ -374,6 +374,14 @@ function aplicarFiltroTerritorial(nivel, id, opcoes = {}) {
     tituloTerritorio = `Estado de ${ufObj ? ufObj.nome : id} (${id}): ${ufObj ? ufObj.total_municipios : 0} Municípios`;
     cidadesTerritorio = APP_DATA.municipios.filter(m => m.uf === id);
     activeRaioXCity = null; // Mostra consolidado estadual no Raio-X
+  } else if (nivel === 'perfil') {
+    const perfilNome = id;
+    filtroTerritorial.nome = `Perfil: ${perfilNome}`;
+    perfilNomeAtivo = perfilNome;
+    cidadesTerritorio = APP_DATA.municipios.filter(m => m.pf === perfilNome);
+    const popPerfil = cidadesTerritorio.reduce((acc, c) => acc + (c.pop || 0), 0);
+    tituloTerritorio = `Cluster ${perfilNome}: ${cidadesTerritorio.length} Municípios (${formatarGrandeza(popPerfil)} hab)`;
+    activeRaioXCity = null;
   } else if (nivel === 'municipio') {
     const m = APP_DATA.municipios.find(c => c.id === id);
     if (m) {
@@ -490,6 +498,9 @@ function atualizarBannerPerfilHeader(nivel, titulo, perfilNome) {
   } else if (nivel === 'estado') {
     scopeLabel = `Visão Estadual (${filtroTerritorial.nome})`;
     scopeClass = 'chart-scope-badge scope-estadual';
+  } else if (nivel === 'perfil') {
+    scopeLabel = `Visão Agrupada (${filtroTerritorial.nome})`;
+    scopeClass = 'chart-scope-badge scope-regional';
   } else if (nivel === 'municipio') {
     scopeLabel = `Visão Municipal (${activeRaioXCity?.nm || filtroTerritorial.nome})`;
     scopeClass = 'chart-scope-badge scope-municipal';
@@ -761,12 +772,30 @@ function atualizarTopCharts(cidadesFiltradas) {
       indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
+      onClick: (event, elements) => {
+        if (elements && elements.length > 0) {
+          const index = elements[0].index;
+          const perfilSelecionado = perfisOrdenados[index];
+          if (perfilSelecionado) {
+            aplicarFiltroTerritorial('perfil', perfilSelecionado);
+          }
+        }
+      },
+      onHover: (event, chartElement) => {
+        const target = event.native?.target || event.chart?.canvas;
+        if (target) {
+          target.style.cursor = chartElement && chartElement.length > 0 ? 'pointer' : 'default';
+        }
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
             title: (items) => perfisOrdenados[items[0].dataIndex],
-            label: (item) => ` Peso Eleitoral: ${item.raw.toFixed(1)}% do eleitorado apto`
+            label: (item) => [
+              ` Peso Eleitoral: ${item.raw.toFixed(1)}% do eleitorado apto`,
+              ` 👉 Clique para filtrar todos os municípios deste perfil`
+            ]
           }
         }
       },
@@ -857,9 +886,13 @@ function atualizarTopCharts(cidadesFiltradas) {
       scales: {
         y: {
           beginAtZero: true,
-          suggestedMax: 105,
-          ticks: { callback: v => v + '%' },
-          title: { display: true, text: 'Percentual (%)' }
+          min: 0,
+          max: 100,
+          ticks: {
+            stepSize: 20,
+            callback: v => v + '%'
+          },
+          title: { display: true, text: '% dos Votos e Abstenção' }
         },
         x: {
           ticks: { font: { size: 9 }, maxRotation: 30 }
@@ -896,6 +929,7 @@ function atualizarTopCharts(cidadesFiltradas) {
 function atualizarRaioXIntegrado() {
   const isBrasil = !activeRaioXCity && (filtroTerritorial.nivel === 'brasil' || !filtroTerritorial.id);
   const isEstado = !activeRaioXCity && (filtroTerritorial.nivel === 'estado');
+  const isPerfil = !activeRaioXCity && (filtroTerritorial.nivel === 'perfil');
   const m = activeRaioXCity;
 
   const titleEl = document.getElementById('raiox-current-city-title');
@@ -905,7 +939,6 @@ function atualizarRaioXIntegrado() {
 
   let lula22_1t = 48.4;
   let lula22_2t = 50.9;
-  let lula26 = 51.8;
 
   if (isBrasil) {
     titleEl.textContent = 'Diagnóstico: Brasil (Consolidado Nacional)';
@@ -918,9 +951,8 @@ function atualizarRaioXIntegrado() {
       metaInfoEl.innerHTML = `👥 População: <strong>203,1 M</strong> &nbsp;|&nbsp; 💼 Empregos CLT: <strong>49,7 M</strong> &nbsp;|&nbsp; 🏪 MEIs: <strong>16,9 M</strong> &nbsp;|&nbsp; 🏛️ Servidores: <strong>13,8 M</strong>`;
     }
 
-    deltaBadge.textContent = '▲ +0.9 pp vs 2022';
-    deltaBadge.style.backgroundColor = '#DCFCE7';
-    deltaBadge.style.color = '#166534';
+    lula22_1t = 48.4;
+    lula22_2t = 50.9;
   } else if (isEstado) {
     const ufId = filtroTerritorial.id;
     const ufObj = APP_DATA.estados[ufId];
@@ -941,18 +973,31 @@ function atualizarRaioXIntegrado() {
 
     lula22_1t = ufObj?.eleicoes?.['2022_1t']?.lula_pct || 0;
     lula22_2t = ufObj?.eleicoes?.['2022_2t']?.lula_pct || 0;
-    lula26 = ufObj?.eleicoes?.['2026_1t']?.lula_pct || 0;
+  } else if (isPerfil) {
+    const perfilNome = filtroTerritorial.perfil || filtroTerritorial.id.replace('Perfil: ', '');
+    const corPerfil = PERFIS_IMPACTO[perfilNome]?.cor || '#C026D3';
+    const cidadesPerfil = APP_DATA.municipios.filter(c => c.pf === perfilNome);
+    const popPerfil = cidadesPerfil.reduce((acc, c) => acc + (c.pop || 0), 0);
+    const cltTot = formatarGrandeza(cidadesPerfil.reduce((acc, c) => acc + ((c.pop || 0) * (c.ind?.clt || 0) / 100), 0));
+    const meiTot = formatarGrandeza(cidadesPerfil.reduce((acc, c) => acc + ((c.pop || 0) * (c.ind?.mei || 0) / 100), 0));
+    const servTot = formatarGrandeza(cidadesPerfil.reduce((acc, c) => acc + ((c.pop || 0) * (c.ind?.serv || 0) / 100), 0));
 
-    const delta = lula26 - lula22_2t;
-    if (delta >= 0) {
-      deltaBadge.textContent = `▲ +${delta.toFixed(1)} pp vs 2022`;
-      deltaBadge.style.backgroundColor = '#DCFCE7';
-      deltaBadge.style.color = '#166534';
-    } else {
-      deltaBadge.textContent = `▼ ${delta.toFixed(1)} pp vs 2022`;
-      deltaBadge.style.backgroundColor = '#FEE2E2';
-      deltaBadge.style.color = '#991B1B';
+    titleEl.textContent = `Diagnóstico: Cluster ${perfilNome}`;
+    tagEl.textContent = `${cidadesPerfil.length} Cidades • Consolidado do Perfil`;
+    tagEl.style.backgroundColor = `${corPerfil}18`;
+    tagEl.style.color = corPerfil;
+    tagEl.style.border = `1px solid ${corPerfil}40`;
+
+    if (metaInfoEl) {
+      metaInfoEl.innerHTML = `👥 População: <strong>${formatarNumero(popPerfil)} hab</strong> &nbsp;|&nbsp; 💼 CLT: <strong>${cltTot}</strong> &nbsp;|&nbsp; 🏪 MEIs: <strong>${meiTot}</strong> &nbsp;|&nbsp; 🏛️ Servidores: <strong>${servTot}</strong>`;
     }
+
+    const eleitTot = cidadesPerfil.reduce((acc, c) => acc + (c.e22_2t?.vtot || c.pop * 0.72), 0) || 1;
+    const lula1Tot = cidadesPerfil.reduce((acc, c) => acc + ((c.e22_1t?.lula || 0) * (c.e22_1t?.vtot || c.pop * 0.72)), 0);
+    const lula2Tot = cidadesPerfil.reduce((acc, c) => acc + ((c.e22_2t?.lula || 0) * (c.e22_2t?.vtot || c.pop * 0.72)), 0);
+
+    lula22_1t = lula1Tot / eleitTot;
+    lula22_2t = lula2Tot / eleitTot;
   } else if (m) {
     titleEl.textContent = `Diagnóstico: ${m.nm} (${m.uf})`;
     const corPerfil = PERFIS_IMPACTO[m.pf]?.cor || '#1A56DB';
@@ -972,28 +1017,31 @@ function atualizarRaioXIntegrado() {
 
     lula22_1t = m.e22_1t?.lula || 0;
     lula22_2t = m.e22_2t?.lula || 0;
-    lula26 = m.e26?.lula || 0;
+  }
 
-    const delta = lula26 - lula22_2t;
+  // Delta real entre o 2º Turno e o 1º Turno da Eleição Oficial de 2022
+  const delta = lula22_2t - lula22_1t;
+  if (deltaBadge) {
     if (delta >= 0) {
-      deltaBadge.textContent = `▲ +${delta.toFixed(1)} pp vs 2022`;
+      deltaBadge.textContent = `▲ +${delta.toFixed(1)} pp no 2ºT`;
       deltaBadge.style.backgroundColor = '#DCFCE7';
       deltaBadge.style.color = '#166534';
     } else {
-      deltaBadge.textContent = `▼ ${delta.toFixed(1)} pp vs 2022`;
+      deltaBadge.textContent = `▼ ${Math.abs(delta).toFixed(1)} pp no 2ºT`;
       deltaBadge.style.backgroundColor = '#FEE2E2';
       deltaBadge.style.color = '#991B1B';
     }
   }
 
-  document.getElementById('raiox-lula-22-1t').textContent = `${lula22_1t.toFixed(1)}%`;
-  document.getElementById('raiox-bar-22-1t').style.width = `${Math.min(100, lula22_1t)}%`;
+  const el22_1t = document.getElementById('raiox-lula-22-1t');
+  if (el22_1t) el22_1t.textContent = `${lula22_1t.toFixed(1)}%`;
+  const bar22_1t = document.getElementById('raiox-bar-22-1t');
+  if (bar22_1t) bar22_1t.style.width = `${Math.min(100, lula22_1t)}%`;
 
-  document.getElementById('raiox-lula-22-2t').textContent = `${lula22_2t.toFixed(1)}%`;
-  document.getElementById('raiox-bar-22-2t').style.width = `${Math.min(100, lula22_2t)}%`;
-
-  document.getElementById('raiox-lula-26').textContent = `${lula26.toFixed(1)}%`;
-  document.getElementById('raiox-bar-26').style.width = `${Math.min(100, lula26)}%`;
+  const el22_2t = document.getElementById('raiox-lula-22-2t');
+  if (el22_2t) el22_2t.textContent = `${lula22_2t.toFixed(1)}%`;
+  const bar22_2t = document.getElementById('raiox-bar-22-2t');
+  if (bar22_2t) bar22_2t.style.width = `${Math.min(100, lula22_2t)}%`;
 
   // Renderização Dinâmica dos Cards com Range Bar, Mediana e Nome não-truncado
   const container = document.getElementById('raiox-indicators-grid');
@@ -1373,6 +1421,55 @@ function atualizarMapaVisual(isInit = false) {
       `).openPopup();
     }
     renderizarPainelLateralTerritorio('municipio', m);
+  } else if (filtroTerritorial.nivel === 'perfil') {
+    const perfilNome = filtroTerritorial.perfil || filtroTerritorial.id.replace('Perfil: ', '');
+    const corPerfil = PERFIS_IMPACTO[perfilNome]?.cor || '#C026D3';
+    const cidadesDoPerfil = APP_DATA.municipios.filter(m => m.pf === perfilNome);
+
+    geoJsonLayer.addData(GEOJSON_ESTADOS);
+    geoJsonLayer.eachLayer(layer => {
+      layer.setStyle({
+        fillColor: '#F8FAFC',
+        weight: 0.8,
+        opacity: 0.4,
+        color: '#CBD5E1',
+        fillOpacity: 0.08
+      });
+    });
+
+    cidadesDoPerfil.forEach(m => {
+      if (!m.lat || !m.lng) return;
+      const eleic = currentElection === '2022_1t' ? m.e22_1t : m.e22_2t;
+      const lulaPct = eleic.lula || 0;
+      const opositorPct = eleic.bolsonaro || 0;
+      const raio = Math.min(9, Math.max(4, Math.log10(Math.max(1000, m.pop)) * 1.6));
+
+      const marker = L.circleMarker([m.lat, m.lng], {
+        radius: raio,
+        fillColor: corPerfil,
+        fillOpacity: 0.85,
+        color: '#FFFFFF',
+        weight: 1
+      });
+
+      marker.bindTooltip(`
+        <div style="font-size: 0.82rem;">
+          <strong>${m.nm} (${m.uf})</strong> • ${formatarNumero(m.pop)} hab<br>
+          <strong style="color: ${corPerfil};">● ${m.pf}</strong><br>
+          <span>Lula: <strong>${lulaPct.toFixed(1)}%</strong> | Bolsonaro: <strong>${opositorPct.toFixed(1)}%</strong></span><br>
+          <small style="color: #1A56DB; font-weight: 700; margin-top: 3px; display: inline-block;">Clique para abrir Raio-X ➔</small>
+        </div>
+      `, { className: 'leaflet-tooltip-custom', sticky: true });
+
+      marker.on('click', () => {
+        aplicarFiltroTerritorial('municipio', m.id);
+      });
+
+      markersLayer.addLayer(marker);
+    });
+
+    leafletMap.flyToBounds([[-33.75, -73.98], [5.27, -34.79]], { duration: 0.8 });
+    renderizarPainelLateralTerritorio('perfil', { perfil: perfilNome, count: cidadesDoPerfil.length });
   }
 }
 
@@ -1436,6 +1533,20 @@ function renderizarPainelLateralTerritorio(tipo, obj) {
         </button>
       </div>
     `;
+  } else if (tipo === 'perfil') {
+    const perfilNome = obj.perfil;
+    const corPerfil = PERFIS_IMPACTO[perfilNome]?.cor || '#C026D3';
+    panel.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <strong style="color: var(--gov-blue-dark); font-size: 0.88rem;">${filtroTerritorial.nome}</strong> • 
+          <span style="color: var(--text-muted); font-size: 0.8rem;">${obj.count} municípios mapeados</span>
+        </div>
+        <span style="font-size: 0.78rem; font-weight: 700; color: ${corPerfil};">
+          ● Exibindo todas as cidades deste perfil socioeconômico
+        </span>
+      </div>
+    `;
   }
 }
 
@@ -1456,6 +1567,11 @@ function atualizarBreadcrumb() {
     html += `
       <span class="crumb-separator">/</span>
       <button class="crumb-btn active">Região ${filtroTerritorial.id}</button>
+    `;
+  } else if (filtroTerritorial.nivel === 'perfil') {
+    html += `
+      <span class="crumb-separator">/</span>
+      <button class="crumb-btn active">${filtroTerritorial.nome}</button>
     `;
   } else if (filtroTerritorial.nivel === 'estado') {
     const uf = filtroTerritorial.id;
@@ -1565,6 +1681,9 @@ function getMunicipiosFiltradosTabela() {
     cidades = cidades.filter(m => m.uf === filtroTerritorial.id);
   } else if (filtroTerritorial.nivel === 'municipio') {
     cidades = cidades.filter(m => m.id === filtroTerritorial.id);
+  } else if (filtroTerritorial.nivel === 'perfil') {
+    const perfilNome = filtroTerritorial.perfil || filtroTerritorial.id.replace('Perfil: ', '');
+    cidades = cidades.filter(m => m.pf === perfilNome);
   }
 
   // Filtro por Região selecionada no modal
@@ -1874,7 +1993,7 @@ function atualizarNumerosMunicipaisSeries(cidade) {
     </div>
     <div class="mun-series-item">
       <div class="mun-series-lbl">Funcionalismo Público</div>
-      <div class="mun-series-val" style="color: #0D9488;">${(m.ind?.serv || 0).toFixed(1)} / 100</div>
+      <div class="mun-series-val" style="color: #C026D3;">${(m.ind?.serv || 0).toFixed(1)} / 100</div>
       <span style="font-size: 0.72rem; color: #64748B;">Servidores por 100 hab</span>
     </div>
   `;
@@ -2030,7 +2149,7 @@ function atualizarGraficoSeriesHistoricas() {
     yAxisConfig = {
       stacked: true,
       ticks: { callback: v => v + ' M' },
-      title: { display: true, text: 'Milhões de Veículos (Empilhado)' }
+      title: { display: true, text: 'Milhões de Veículos' }
     };
 
   } else if (currentSeriesMetric === 'habitacao') {
@@ -2041,23 +2160,18 @@ function atualizarGraficoSeriesHistoricas() {
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
         <span class="series-highlight-title">Imóveis Financiados SBPE</span>
-        <div class="series-highlight-val">182 mil <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +61,8% vs 2022</span></div>
-        <span class="series-highlight-sub">Evoluiu de 112,5 mil unidades em 2022 para mais de 180 mil ao ano em 2026.</span>
+        <div class="series-highlight-val">194,8 mil <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +25,3% vs 2022</span></div>
+        <span class="series-highlight-sub">Evoluiu de 155,5 mil unidades em 2022 para o pico de 194,8 mil em 2024 (e 179,1 mil em 2025).</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
         <span class="series-highlight-title">Crédito Habitacional PF</span>
-        <div class="series-highlight-val">R$ 230 Bi</div>
-        <span class="series-highlight-sub">Volume total anual de empréstimos imobiliários concedidos via SBPE.</span>
+        <div class="series-highlight-val">R$ 187 Bi <span style="font-size: 0.8rem; color: #7E3AF2; font-weight: 700;">SBPE Poupança</span></div>
+        <span class="series-highlight-sub">Volume financeiro de empréstimos concedidos aos adquirentes residenciais (ABECIP).</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
-        <span class="series-highlight-title">Aluguel Médio Residencial</span>
-        <div class="series-highlight-val">R$ 2.670 <span style="font-size: 0.8rem; color: #4B5563; font-weight: 700;">FipeZAP</span></div>
-        <span class="series-highlight-sub">Valor de referência para imóvel padrão (60m²) nas capitais monitoradas.</span>
-      </div>
-      <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
-        <span class="series-highlight-title">Faturamento do Comércio</span>
-        <div class="series-highlight-val">R$ 2,48 Tri <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +25,3% vs 2022</span></div>
-        <span class="series-highlight-sub">Faturamento anual do comércio varejista ampliado (BCB Série 28544 / IBGE).</span>
+        <span class="series-highlight-title">Expansão Habitacional Popular</span>
+        <div class="series-highlight-val">Recorde MCMV</div>
+        <span class="series-highlight-sub">Novo Minha Casa Minha Vida ampliou subsídios e faixas de renda com recursos do FGTS.</span>
       </div>
     `;
 
@@ -2199,37 +2313,30 @@ function atualizarGraficoSeriesHistoricas() {
     };
 
   } else if (currentSeriesMetric === 'comercio') {
-    titleEl.textContent = 'Vendas do Comércio Varejista Ampliado (2016 – 2026)';
+    titleEl.textContent = 'Vendas do Comércio Varejista Ampliado (2016 – 2025)';
     subtitleEl.textContent = 'Volume total de faturamento do varejo brasileiro incluindo veículos, motos e materiais de construção';
     tagEl.textContent = 'Banco Central (Série 28544) / IBGE (PMC)';
 
+    const dadosComercio = dados.filter(d => d.ano <= 2025);
+    labels = dadosComercio.map(d => d.ano);
+
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
-        <span class="series-highlight-title">Faturamento Varejista Ampliado</span>
-        <div class="series-highlight-val">R$ 2,48 Tri <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +25,3% vs 2022</span></div>
-        <span class="series-highlight-sub">Evoluiu de R$ 1,98 Tri em 2022 para R$ 2,48 Tri ao ano em 2026.</span>
+        <span class="series-highlight-title">Faturamento Varejista Ampliado (2025)</span>
+        <div class="series-highlight-val">R$ 2,38 Tri <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +20,2% vs 2022</span></div>
+        <span class="series-highlight-sub">Evoluiu de R$ 1,98 Tri em 2022 para R$ 2,38 Tri ao ano em 2025.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
         <span class="series-highlight-title">Massa de Renda Circulante</span>
         <div class="series-highlight-val">R$ 330 Bi/mês <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">Recorde</span></div>
         <span class="series-highlight-sub">Aumento da massa salarial real impulsiona o consumo de bens duráveis e semiduráveis.</span>
       </div>
-      <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
-        <span class="series-highlight-title">Hipermercados e Alimentação</span>
-        <div class="series-highlight-val">~42% do Varejo</div>
-        <span class="series-highlight-sub">Principal componente de despesa básica das famílias nos municípios.</span>
-      </div>
-      <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
-        <span class="series-highlight-title">Inadimplência de Famílias</span>
-        <div class="series-highlight-val">Em Queda <span style="font-size: 0.8rem; color: #166534; font-weight: 700;">Desenrola</span></div>
-        <span class="series-highlight-sub">Efeito da recuperação de crédito e renegociação de dívidas ativas.</span>
-      </div>
     `;
 
     datasets = [
       {
         label: 'Varejo Ampliado (R$ Trilhões)',
-        data: dados.map(d => d.comercio_varejo_rs_tri),
+        data: dadosComercio.map(d => d.comercio_varejo_rs_tri),
         borderColor: '#1A56DB',
         backgroundColor: 'rgba(26, 86, 219, 0.1)',
         borderWidth: 3,
@@ -2338,19 +2445,43 @@ function atualizarGraficoSeriesHistoricas() {
         ctx.font = 'bold 9px Inter, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        chart.data.datasets.forEach((dataset, datasetIndex) => {
-          const meta = chart.getDatasetMeta(datasetIndex);
-          if (meta.hidden) return;
-          const step = Math.ceil(dataset.data.length / 6);
-          meta.data.forEach((point, index) => {
-            if (index % step !== 0 && index !== dataset.data.length - 1) return;
-            const val = dataset.data[index];
-            if (val === undefined || val === null) return;
-            ctx.fillStyle = dataset.borderColor || '#1E293B';
-            const text = typeof val === 'number' ? (val >= 100 ? Math.round(val) : val.toFixed(1)) : val;
-            ctx.fillText(`${text}`, point.x, point.y - 5);
+
+        if (currentSeriesMetric === 'veiculos') {
+          // No gráfico de veículos, desenha a soma total (novos + seminovos) acima da barra empilhada
+          const metaTop = chart.getDatasetMeta(chart.data.datasets.length - 1);
+          if (metaTop && !metaTop.hidden) {
+            metaTop.data.forEach((point, index) => {
+              const usados = chart.data.datasets[0]?.data[index] || 0;
+              const novos = chart.data.datasets[1]?.data[index] || 0;
+              const total = usados + novos;
+              if (total <= 0) return;
+              ctx.fillStyle = '#0F172A';
+              ctx.font = 'bold 10px Inter, sans-serif';
+              ctx.fillText(`${total.toFixed(2)} M`, point.x, point.y - 6);
+            });
+          }
+        } else {
+          // Em todos os gráficos de linha e coluna, exibe o rótulo de dados em cada ponto sem pular
+          chart.data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            if (meta.hidden) return;
+            meta.data.forEach((point, index) => {
+              const val = dataset.data[index];
+              if (val === undefined || val === null) return;
+              ctx.fillStyle = dataset.borderColor || dataset.backgroundColor || '#1E293B';
+              let text = '';
+              if (typeof val === 'number') {
+                if (val >= 1000) text = formatarNumero(Math.round(val));
+                else if (val >= 100) text = Math.round(val).toString();
+                else text = val.toFixed(1);
+              } else {
+                text = val;
+              }
+              const yOffset = datasetIndex > 0 ? (datasetIndex * 11) + 5 : 5;
+              ctx.fillText(`${text}`, point.x, point.y - yOffset);
+            });
           });
-        });
+        }
         ctx.restore();
       }
     }]
@@ -2575,40 +2706,19 @@ function atualizarGraficoDispersao() {
     maxX = Math.ceil(Math.max(...xVals));
   }
 
-  // Linha 50% dos votos
+  // Linha 50% dos votos (Escurecida e destacada conforme solicitado)
   datasets.push({
     type: 'line',
-    label: 'Patamar 50% dos Votos',
+    label: 'Patamar 50% dos Votos (Maioria Absoluta)',
     data: [{ x: minX, y: 50 }, { x: maxX, y: 50 }],
-    borderColor: '#94A3B8',
-    borderWidth: 1.5,
-    borderDash: [6, 6],
+    borderColor: '#0F172A',
+    borderWidth: 2.2,
+    borderDash: [5, 5],
     pointRadius: 0,
     pointHoverRadius: 0,
     fill: false,
     order: 0
   });
-
-  // Linha de Regressão Linear
-  const reg = calcularRegressaoLinear(todosPontos);
-  if (reg) {
-    const yMin = Math.max(0, Math.min(100, reg.slope * minX + reg.intercept));
-    const yMax = Math.max(0, Math.min(100, reg.slope * maxX + reg.intercept));
-    datasets.push({
-      type: 'line',
-      label: 'Voto Esperado (Tendência Linear)',
-      data: [
-        { x: minX, y: Math.round(yMin * 100) / 100 },
-        { x: maxX, y: Math.round(yMax * 100) / 100 }
-      ],
-      borderColor: '#0F172A',
-      borderWidth: 2.8,
-      pointRadius: 0,
-      pointHoverRadius: 0,
-      fill: false,
-      order: 1
-    });
-  }
 
   if (chartDispersao) {
     chartDispersao.destroy();

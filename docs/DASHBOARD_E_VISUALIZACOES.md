@@ -110,9 +110,13 @@ O bloco superior sintetiza as políticas públicas estruturantes do Governo Fede
 
 ## ⚡ 2.3. Raio-X Municipal Estratégico com Granularidade Dinâmica & Mediana
 
+- **Eleições Oficiais TSE (Sem Projeções)**: O bloco comparativo do Raio-X e o seletor geral utilizam **exclusivamente dados reais apurados pelo Tribunal Superior Eleitoral (TSE)** para as eleições de 2022 (1º Turno e 2º Turno Oficial). O badge de variação destaca o ganho real de votos entre os dois turnos (`▲ +2.5 pp no 2ºT`).
+- **Explicação Didática da Mediana Nacional**:
+  - A mediana representa o valor central exato entre todos os 5.571 municípios do Brasil (percentil 50). Exatamente 50% das cidades do país têm taxa menor e 50% têm taxa maior. Ao contrário da média simples, a mediana **não é distorcida pelas grandes capitais** e reflete com fidelidade a realidade do interior. Cartões destacados com **▲ Acima** indicam que o município supera a marca central brasileira.
 - **Granularidade Padrão**: Inicia por padrão no nível **Brasil (Consolidado Nacional)** (203,1M hab, 49,7M CLT, 16,9M MEI, 13,8M Servidores).
 - **Adaptação por Filtro**:
   - Ao selecionar um **Estado**, exibe automaticamente o diagnóstico estadual consolidado daquela UF.
+  - Ao selecionar um **Perfil Socioeconômico** (clicando no gráfico de Peso Eleitoral), agrupa e consolida todos os municípios pertencentes àquele cluster.
   - Ao selecionar ou buscar um **Município**, exibe o diagnóstico municipal específico.
 - **Diagramação dos 8 Indicadores**:
   - Cada card conta com o ícone e chip de mediana na linha superior, e o **nome completo do indicador em linha dedicada abaixo** (`.raiox-ind-title-row`), eliminando qualquer risco de truncamento ou sobreposição.
@@ -121,38 +125,57 @@ O bloco superior sintetiza as políticas públicas estruturantes do Governo Fede
 
 ---
 
-## 📐 2.4. Nova Arquitetura de Layout Inferior
+## 🎨 2.4. Paleta Oficial dos 7 Perfis Socioeconômicos
+Para assegurar contraste visual imediato no mapa e nos gráficos, cada cluster municipal possui cor exclusiva:
+- 🏬 **Polos de Emprego & Serviços**: Azul Institucional (`#1A56DB`)
+- 🌾 **Polos Agroindustriais**: Verde Esmeralda Dinâmico (`#0E9F6E`)
+- 👴 **Cidades de Aposentados**: Roxo / Lavanda Elegante (`#7E3AF2`)
+- 🤝 **Seguridade & Repasses**: Coral / Vermelho Suave (`#E05252`)
+- 🏛️ **Funcionalismo Público**: **Magenta / Fúcsia Executivo** (`#C026D3` — totalmente diferenciado do verde do agro)
+- 🎒 **Jovens & Apoio Social**: Ouro / Âmbar Vibrante (`#F59E0B`)
+- 🏙️ **Metrópoles & Capitais**: Ardósia Profundo (`#374151`)
 
-A seção inferior da aplicação foi reorganizada para garantir perfeita coerência de leitura visual (Gestalt):
-1. **Grade Dividida (50% / 50%)**:
+---
+
+## 📐 2.5. Arquitetura de Layout, Gráficos de Topo & Correlação
+
+1. **Top Charts Interligados**:
+   - **Peso Eleitoral por Perfil**: Ordenado do maior para o menor com rótulos internos em porcentagem. **Interativo**: clicar na barra de qualquer perfil filtra imediatamente todo o dashboard para o agrupamento daquele cluster socioeconômico.
+   - **Desempenho Eleitoral c/ Abstenções**: Gráfico de barras verticais com votos de Lula, oposição e abstenção em amarelo ouro. Eixo Y fixado rigorosamente com **máxima em 100%**.
+2. **Modal de Correlação (Voto Presidencial vs. Políticas Públicas)**:
+   - Exclui qualquer reta de regressão linear para manter o foco descritivo puro dos dados.
+   - **Linha de 50% dos votos destacada e escurecida** (`#0F172A`, 2.2px) para sinalizar o patamar da maioria absoluta necessária à vitória eleitoral.
+3. **Grade Dividida (50% / 50%)**:
    - **Coluna Esquerda**: Raio-X Municipal Estratégico (Diagnóstico Territorial).
    - **Coluna Direita**: Mapeamento Geoespacial Interativo do Brasil (Leaflet / Esri Canvas).
-2. **Seção Inferior em Largura Total (Full Width)**:
+4. **Seção Inferior em Largura Total (Full Width)**:
    - **Evolução do Poder de Compra, Consumo & Atividade Econômica** disposta em largura completa logo abaixo da grade territorial.
 
 ---
 
-## 📈 5. Painel de Séries Temporais & Atividade Econômica (2016–2026)
+## 📈 3. Painel de Séries Temporais & Atividade Econômica (2016–2025/2026)
 
-Módulo histórico completo com **7 abas analíticas**:
+Módulo histórico completo com **rótulos diretos em todos os pontos e colunas** (sem omissão de pontos intermediários):
 
-1. **🛒 Custo de Bens Essenciais (% do Salário Mínimo)**:
-   - Cesta Básica oficial (DIEESE) — caiu de 62,9% (2022) para 54,5% (2026).
-   - Botijão de Gás GLP 13kg (ANP) — caiu de 9,1% (2022) para 6,7% (2026).
-   - **1 Litro de Gasolina Comum (ANP)** — caiu de 0,53% (2022) para 0,41% (2026).
-   - Salário Mínimo nominal com ganho real acima da inflação (+25,2% vs 2022).
-2. **🚗 Venda e Transferência de Veículos (Barras Empilhadas)**:
-   - Gráfico de barras empilhadas com licenciamentos de novos (0 km) e transferências de usados e seminovos (+23,8% vs 2022).
-3. **🏡 Financiamento Habitacional SBPE**:
-   - Evolução de unidades financiadas pela poupança SBPE com **comparativo direto contra 2022**: evoluiu de 112,5 mil unidades (2022) para 182 mil unidades em 2026 (**▲ +61,8% vs 2022**).
+1. **🍞 Custo de Bens Essenciais (% do Salário Mínimo)**:
+   - Cesta Básica oficial (DIEESE), Botijão de Gás GLP 13kg (ANP) e Gasolina Comum com rótulos em cada ano da série.
+2. **🚗 Venda e Transferência de Veículos**:
+   - Rótulo superior exibe a **soma total de novos e seminovos** em cada ano (sem a palavra empilhado), evidenciando a recuperação do mercado automotivo.
+3. **🏠 Financiamento Habitacional SBPE & Crédito**:
+   - Dados alinhados com a série oficial da ABECIP: 155,5 mil unidades em 2022 saltando para o pico de 194,8 mil em 2024 (**▲ +25,3% vs 2022**) e 179,1 mil em 2025. Destaque para o volume de crédito habitacional PF (R$ 187 Bi) e o novo Minha Casa Minha Vida.
 4. **💼 Mercado Formal de Trabalho & Empreendedorismo (CLT & MEI)**:
-   - Focado exclusivamente no emprego com carteira assinada CLT (102,7M) e Microempreendedores Individuais MEI (16,94M), registrando o recorde histórico de 119,6M de brasileiros formalizados.
-5. **🏛️ Orçamento Executado dos Governos Federais**:
-   - Séries reais corrigidas a preços de 2026 para Saúde, Educação e **Farmácia Popular** (em substituição ao PAC), destacando a retomada orçamentária no Lula 3 (+116% na Farmácia Popular vs 2022).
-6. **🛍️ Vendas do Comércio Varejista Ampliado**:
-   - Volume total de faturamento do comércio (Banco Central Série 28544 / IBGE PMC), atingindo R$ 2,48 Trilhões em 2026 (**▲ +25,3% vs 2022**).
-7. **✈️ Gastos de Brasileiros em Viagens no Exterior**:
-   - Despesas de residentes e turistas brasileiros no exterior (Banco Central Série 22742), registrando US$ 18,7 Bilhões em 2026 (**▲ +53,3% vs 2022**).
+   - Carteira assinada CLT (102,7M) e Microempreendedores Individuais MEI (16,94M), registrando o recorde histórico de 119,6M formalizados.
+5. **🛍️ Vendas do Comércio Varejista Ampliado (2016 a 2025)**:
+   - Calculado até o ano consolidado de **2025** (R$ 2,38 Tri correntes, alta de +20,2% sobre 2022). Cartões focados em faturamento total e massa de renda circulante (R$ 330 Bi/mês).
+6. **✈️ Gastos de Brasileiros em Viagens no Exterior**:
+   - Despesas de turistas no exterior (Banco Central Série 22742), registrando US$ 18,7 Bilhões em 2026.
+7. **🏛️ Orçamento Executado dos Governos Federais**:
+   - Séries reais corrigidas a preços de 2026 para Saúde, Educação e Farmácia Popular (+116% vs 2022).
+
+---
+
+## 🏛️ 4. Rodapé Institucional e Fontes Transparentes
+A aplicação encerra com um rodapé técnico detalhado contendo a relação das 12 fontes oficiais de dados integradas (TSE, IBGE, MTE/CAGED, RFB, MDS/CadÚnico, DATASUS, MEC/FNDE, INSS/RGPS, BCB, ABECIP, FENABRAVE e DIEESE/ANP), além de links diretos para o repositório do estudo no GitHub (`https://github.com/hianaracamilla/trad_x_municipio`) e documentação.
 
 ---
 

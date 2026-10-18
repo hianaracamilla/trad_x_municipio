@@ -3337,3 +3337,194 @@ body {
   }
 }
 
+/* 2-Column Raio-X Comparison Grid */
+.comparison-bars-grid-2cols {
+  grid-template-columns: 1fr 1fr !important;
+}
+
+.comp-col.highlight-col-2t {
+  background: #FFFFFF;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(184, 74, 57, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Raio-X Median Explanation Callout */
+.raiox-median-callout {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-left: 3px solid #0284C7;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.median-callout-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.median-callout-icon {
+  font-size: 0.85rem;
+}
+
+.median-callout-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.median-callout-text {
+  font-size: 0.73rem;
+  line-height: 1.38;
+  color: #475569;
+  margin: 0;
+}
+
+/* Dark Solid Line for 50% Scatter Plot Footnote */
+.footnote-line.dark-solid-line {
+  background: #0F172A;
+  height: 3px;
+  width: 24px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* Institutional Footer */
+.institutional-footer {
+  background: #0F172A;
+  color: #F8FAFC;
+  padding: 36px 28px 24px;
+  margin-top: 40px;
+  border-radius: 16px;
+}
+
+.footer-container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.footer-top-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1.9fr;
+  gap: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.footer-logo {
+  font-size: 1.4rem;
+}
+
+.footer-brand-name {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.footer-desc {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #94A3B8;
+  margin-bottom: 16px;
+}
+
+.footer-links-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #E2E8F0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.footer-link-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.footer-col-sources {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-col-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #38BDF8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.footer-sources-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.footer-sources-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-sources-list li {
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: #CBD5E1;
+}
+
+.footer-sources-list li strong {
+  color: #F8FAFC;
+}
+
+.footer-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 18px;
+  font-size: 0.74rem;
+  color: #64748B;
+}
+
+@media (max-width: 900px) {
+  .footer-top-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .footer-sources-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
