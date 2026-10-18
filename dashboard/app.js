@@ -3213,24 +3213,85 @@ function fecharModalMetodologia() {
   document.getElementById('modal-metodologia').classList.add('hidden');
 }
 
+/**
+ * Obtém o escopo territorial ativo para aplicação nos Modais de Prioridades
+ */
+function obterEscopoTerritorialModal() {
+  const nivel = filtroTerritorial.nivel || 'brasil';
+  const isBrasil = (nivel === 'brasil' || !filtroTerritorial.id) && !activeRaioXCity;
+  let nomeTerritorio = 'Brasil (Consolidado)';
+  let cidades = (APP_DATA && APP_DATA.municipios) ? APP_DATA.municipios : [];
+
+  if (activeRaioXCity) {
+    cidades = [activeRaioXCity];
+    nomeTerritorio = `${activeRaioXCity.nm} (${activeRaioXCity.uf})`;
+  } else if (nivel === 'regiao') {
+    cidades = cidades.filter(m => m.reg === filtroTerritorial.id);
+    nomeTerritorio = `Região ${filtroTerritorial.id}`;
+  } else if (nivel === 'estado') {
+    cidades = cidades.filter(m => m.uf === filtroTerritorial.id);
+    const ufObj = APP_DATA?.estados?.[filtroTerritorial.id];
+    nomeTerritorio = ufObj ? `${ufObj.nome} (${filtroTerritorial.id})` : filtroTerritorial.id;
+  } else if (nivel === 'perfil') {
+    const pfKey = filtroTerritorial.perfil || filtroTerritorial.id.replace('Perfil: ', '');
+    cidades = cidades.filter(m => m.pf === pfKey);
+    nomeTerritorio = filtroTerritorial.nome || `Perfil: ${pfKey}`;
+  } else if (nivel === 'municipio') {
+    const m = cidades.find(c => c.id === filtroTerritorial.id);
+    if (m) {
+      cidades = [m];
+      nomeTerritorio = `${m.nm} (${m.uf})`;
+    }
+  }
+
+  return {
+    isBrasil,
+    nivel: activeRaioXCity ? 'municipio' : nivel,
+    nomeTerritorio,
+    cidades,
+    totalCidades: cidades.length
+  };
+}
+
 function gerarTabelaHistoricoOrcamento(tipo) {
+  const escopo = obterEscopoTerritorialModal();
+  const nomeLoc = escopo.isBrasil ? 'Brasil (Consolidado Nacional)' : escopo.nomeTerritorio;
+
   if (tipo === 'saude') {
-    const sde = (activeRaioXCity && activeRaioXCity.sde) ? activeRaioXCity.sde : (APP_DATA.saude_nacional || {});
-    const isMun = !!activeRaioXCity;
-    const nomeLoc = isMun ? `${activeRaioXCity.nm} (${activeRaioXCity.uf})` : 'Brasil (Consolidado Nacional)';
+    let sde = {};
+    if (escopo.isBrasil) {
+      sde = APP_DATA.saude_nacional || {};
+    } else if (escopo.totalCidades === 1) {
+      sde = escopo.cidades[0].sde || {};
+    } else {
+      sde = escopo.cidades.reduce((acc, c) => {
+        const cs = c.sde || {};
+        acc.hip = (acc.hip || 0) + (cs.hip || 0);
+        acc.amb = (acc.amb || 0) + (cs.amb || 0);
+        acc.diab = (acc.diab || 0) + (cs.diab || 0);
+        acc.asma = (acc.asma || 0) + (cs.asma || 0);
+        acc.tot = (acc.tot || 0) + (cs.tot || 0);
+        acc.ac = (acc.ac || 0) + (cs.ac || 0);
+        acc.quim = (acc.quim || 0) + (cs.quim || 0);
+        acc.rad = (acc.rad || 0) + (cs.rad || 0);
+        acc.b_min = (acc.b_min || 0) + (cs.b_min || 0);
+        acc.b_med = (acc.b_med || 0) + (cs.b_med || 0);
+        return acc;
+      }, {});
+    }
 
-    const hipTot = sde.fp_so_hipertensao || sde.hip || 4962509;
-    const ambTot = sde.fp_hipertensao_e_diabetes || sde.amb || 3239501;
-    const diabTot = sde.fp_so_diabetes || sde.diab || 1808126;
-    const asmaTot = sde.fp_asma || sde.asma || 875033;
-    const fpTotal = sde.fp_total || sde.tot || 12957809;
+    const hipTot = sde.fp_so_hipertensao || sde.hip || 0;
+    const ambTot = sde.fp_hipertensao_e_diabetes || sde.amb || 0;
+    const diabTot = sde.fp_so_diabetes || sde.diab || 0;
+    const asmaTot = sde.fp_asma || sde.asma || 0;
+    const fpTotal = sde.fp_total || sde.tot || (hipTot + ambTot + diabTot + asmaTot) || 12957809;
 
-    const acTot = sde.alto_custo || sde.ac || 3284659;
-    const quimTot = sde.quimioterapia || sde.quim || 361331;
-    const radTot = sde.radioterapia || sde.rad || 8987;
+    const acTot = sde.alto_custo || sde.ac || 0;
+    const quimTot = sde.quimioterapia || sde.quim || 0;
+    const radTot = sde.radioterapia || sde.rad || 0;
 
-    const bMin = sde.bolso_minimo || sde.b_min || 4661567780;
-    const bMed = sde.bolso_mediano || sde.b_med || 7732862870;
+    const bMin = sde.bolso_minimo || sde.b_min || Math.round(fpTotal * 360);
+    const bMed = sde.bolso_mediano || sde.b_med || Math.round(fpTotal * 600);
 
     return `
       <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E2E8F0;">
@@ -3243,7 +3304,7 @@ function gerarTabelaHistoricoOrcamento(tipo) {
           </span>
         </div>
         <p style="font-size: 0.78rem; color: #64748B; margin-bottom: 14px; line-height: 1.4;">
-          Decomposição oficial de pacientes beneficiados pelo programa Farmácia Popular por patologia crônica e linhas de cuidado de alta complexidade do SUS (Oncologia e Medicamentos Especializados).
+          Decomposição oficial de pacientes beneficiados pelo programa Farmácia Popular por patologia crônica e linhas de cuidado de alta complexidade do SUS em ${nomeLoc}.
         </p>
 
         <!-- Banner de Economia no Bolso das Famílias -->
@@ -3251,10 +3312,10 @@ function gerarTabelaHistoricoOrcamento(tipo) {
           <div>
             <span style="font-size: 0.72rem; font-weight: 800; color: #166534; text-transform: uppercase;">💰 Gasto do Bolso Evitado (Economia Familiar Direta)</span>
             <div style="font-size: 1.25rem; font-weight: 800; color: #14532D; margin-top: 2px;">
-              ${isMun ? `R$ ${(bMed / 1000000).toFixed(2)} Milhões / ano` : `R$ ${(bMed / 1000000000).toFixed(2)} Bilhões / ano`}
+              ${formatarGrandeza(bMed, true)} / ano
             </div>
             <span style="font-size: 0.74rem; color: #166534;">
-              Estimativa mediana do valor que as famílias deixaram de pagar em farmácias privadas para tratar hipertensão, diabetes e asma. Faixa conservadora: ${isMun ? `R$ ${(bMin / 1000000).toFixed(2)} Mi` : `R$ ${(bMin / 1000000000).toFixed(2)} Bi`}.
+              Estimativa mediana do valor que as famílias de ${nomeLoc} deixaram de pagar em farmácias privadas para tratar hipertensão, diabetes e asma. Faixa conservadora: ${formatarGrandeza(bMin, true)}.
             </span>
           </div>
           <div style="background: #FFFFFF; border-radius: 8px; padding: 8px 14px; text-align: center; border: 1px solid #BBF7D0;">
@@ -3272,7 +3333,7 @@ function gerarTabelaHistoricoOrcamento(tipo) {
                 <th>Pacientes Atendidos</th>
                 <th>% do Total FP</th>
                 <th>Itens / Cobertura</th>
-                <th>Impacto no Município</th>
+                <th>Impacto no Território</th>
               </tr>
             </thead>
             <tbody>
@@ -3343,18 +3404,49 @@ function gerarTabelaHistoricoOrcamento(tipo) {
     const etiNac = APP_DATA.eti_nacional || { total_fomento: 2134201430, total_matriculas: 406400, total_redes: 4107 };
     const etiUfList = APP_DATA.eti_por_uf || [];
 
-    const linhasEti = etiUfList.map((uf, idx) => {
-      const isTop5 = idx < 5 ? 'style="font-weight: 700;"' : '';
-      return `
-        <tr ${isTop5}>
-          <td style="font-weight: 700;">${uf.nome} (${uf.uf})</td>
-          <td style="font-weight: 700; color: #1A56DB;">R$ ${(uf.fomento / 1000000).toFixed(2)} Mi</td>
-          <td style="font-weight: 700; color: #047857;">${formatarNumero(uf.matriculas)} vagas</td>
-          <td>R$ ${Math.round(uf.fomento / (uf.matriculas || 1)).toLocaleString('pt-BR')}</td>
-          <td><span class="gov-badge gov-lula">Pactuação 2024–2026</span></td>
-        </tr>
-      `;
-    }).join('');
+    // Se um estado estiver filtrado, exibe as cidades desse estado
+    let linhasTabela = '';
+    let cabecalhoCol1 = 'Unidade Federativa (UF)';
+    let bannerFomento = `R$ ${(etiNac.total_fomento / 1000000000).toFixed(2)} Bilhões Pactuados`;
+    let bannerSub = `Total de <strong>${formatarNumero(etiNac.total_matriculas)} matrículas integrais</strong> financiadas em <strong>${formatarNumero(etiNac.total_redes)} redes municipais</strong> de todo o Brasil.`;
+
+    if (!escopo.isBrasil && escopo.nivel === 'estado') {
+      cabecalhoCol1 = `Municípios de ${escopo.nomeTerritorio}`;
+      const cidadesEti = escopo.cidades.filter(c => (c.eti?.fom || 0) > 0 || (c.eti?.mat || 0) > 0)
+        .sort((a,b) => (b.eti?.fom || 0) - (a.eti?.fom || 0));
+      const totalFomEst = cidadesEti.reduce((s, c) => s + (c.eti?.fom || 0), 0);
+      const totalMatEst = cidadesEti.reduce((s, c) => s + (c.eti?.mat || 0), 0);
+      bannerFomento = `${formatarGrandeza(totalFomEst, true)} Pactuados`;
+      bannerSub = `Total de <strong>${formatarNumero(totalMatEst)} matrículas integrais</strong> financiadas em <strong>${formatarNumero(cidadesEti.length)} redes municipais</strong> do estado.`;
+
+      linhasTabela = (cidadesEti.length > 0 ? cidadesEti.slice(0, 20) : escopo.cidades.slice(0, 20)).map((c, idx) => {
+        const isTop5 = idx < 5 ? 'style="font-weight: 700;"' : '';
+        const fom = c.eti?.fom || 0;
+        const mat = c.eti?.mat || 0;
+        return `
+          <tr ${isTop5}>
+            <td style="font-weight: 700;">${c.nm} (${c.uf})</td>
+            <td style="font-weight: 700; color: #1A56DB;">${fom > 0 ? formatarGrandeza(fom, true) : '—'}</td>
+            <td style="font-weight: 700; color: #047857;">${mat > 0 ? formatarNumero(mat) + ' vagas' : '—'}</td>
+            <td>${mat > 0 ? 'R$ ' + Math.round(fom / mat).toLocaleString('pt-BR') : '—'}</td>
+            <td><span class="gov-badge gov-lula">Pactuação ETI</span></td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      linhasTabela = etiUfList.map((uf, idx) => {
+        const isTop5 = idx < 5 ? 'style="font-weight: 700;"' : '';
+        return `
+          <tr ${isTop5}>
+            <td style="font-weight: 700;">${uf.nome} (${uf.uf})</td>
+            <td style="font-weight: 700; color: #1A56DB;">R$ ${(uf.fomento / 1000000).toFixed(2)} Mi</td>
+            <td style="font-weight: 700; color: #047857;">${formatarNumero(uf.matriculas)} vagas</td>
+            <td>R$ ${Math.round(uf.fomento / (uf.matriculas || 1)).toLocaleString('pt-BR')}</td>
+            <td><span class="gov-badge gov-lula">Pactuação 2024–2026</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
 
     return `
       <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E2E8F0;">
@@ -3370,15 +3462,15 @@ function gerarTabelaHistoricoOrcamento(tipo) {
           Dados oficiais da pactuação de novas matrículas e repasses federais diretos da União às redes municipais de educação para expansão da jornada integral (mínimo de 7 horas diárias).
         </p>
 
-        <!-- Banner de Destaques Nacionais do Programa ETI -->
+        <!-- Banner de Destaques do Programa ETI -->
         <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 1px solid #93C5FD; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
           <div>
             <span style="font-size: 0.72rem; font-weight: 800; color: #1E40AF; text-transform: uppercase;">Aporte Federal Direto às Redes Municipais</span>
             <div style="font-size: 1.25rem; font-weight: 800; color: #1E3A8A; margin-top: 2px;">
-              R$ ${(etiNac.total_fomento / 1000000000).toFixed(2)} Bilhões Pactuados
+              ${bannerFomento}
             </div>
             <span style="font-size: 0.74rem; color: #1E40AF;">
-              Total de <strong>${formatarNumero(etiNac.total_matriculas)} matrículas integrais</strong> financiadas em <strong>${formatarNumero(etiNac.total_redes)} redes municipais</strong> de todo o Brasil.
+              ${bannerSub}
             </span>
           </div>
           <div style="background: #FFFFFF; border-radius: 8px; padding: 8px 14px; text-align: center; border: 1px solid #BFDBFE;">
@@ -3391,7 +3483,7 @@ function gerarTabelaHistoricoOrcamento(tipo) {
           <table class="budget-history-table">
             <thead>
               <tr>
-                <th>Unidade Federativa (UF)</th>
+                <th>${cabecalhoCol1}</th>
                 <th>Fomento Rede Municipal (R$)</th>
                 <th>Matrículas ETI Pactuadas</th>
                 <th>Aporte Médio / Matrícula</th>
@@ -3399,7 +3491,7 @@ function gerarTabelaHistoricoOrcamento(tipo) {
               </tr>
             </thead>
             <tbody>
-              ${linhasEti}
+              ${linhasTabela}
             </tbody>
           </table>
         </div>
@@ -3436,10 +3528,10 @@ function gerarTabelaHistoricoOrcamento(tipo) {
     return `
       <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E2E8F0;">
         <h4 style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: var(--gov-blue-dark); margin-bottom: 4px;">
-          🏛️ Evolução Histórica: Empregos Formais CLT e MEIs Cadastrados (2016 a 2026)
+          🏛️ Evolução Histórica Nacional: Empregos Formais CLT e MEIs Cadastrados (2016 a 2026)
         </h4>
         <p style="font-size: 0.78rem; color: #64748B; margin-bottom: 12px; line-height: 1.4;">
-          Trajetória oficial da força de trabalho formalizada no Brasil: evolução do contingente com carteira assinada (CLT) e avanço dos Microempreendedores Individuais (MEI).
+          Trajetória oficial da força de trabalho formalizada no Brasil: evolução do contingente com carteira assinada (CLT) e avanço dos Microempreendedores Individuais (MEI) sob a política de valorização do Salário Mínimo.
         </p>
         <div class="budget-history-table-wrap">
           <table class="budget-history-table">
@@ -3473,8 +3565,8 @@ function gerarTabelaHistoricoOrcamento(tipo) {
   let descricaoSecao = '';
 
   if (tipo === 'previdencia') {
-    tituloSecao = '🏛️ Histórico dos Benefícios Previdenciários (RGPS) e Aposentadoria Rural (2010 a 2026)';
-    descricaoSecao = 'Série histórica oficial dos recursos pagos pelo Regime Geral de Previdência Social (INSS/MPS) em aposentadorias e benefícios do RGPS, discriminando a clientela urbana e rural (agricultura familiar e campo). Fonte: Tesouro Nacional (RTN) e Ministério da Previdência Social (MPS).';
+    tituloSecao = '🏛️ Histórico Oficial Federal: Benefícios Previdenciários (RGPS) e Aposentadoria Rural (2010 a 2026)';
+    descricaoSecao = 'Série histórica oficial dos recursos federais pagos pelo Regime Geral de Previdência Social (INSS/MPS) em aposentadorias e benefícios do RGPS, discriminando a clientela urbana e rural (agricultura familiar e campo). Fonte: Tesouro Nacional (RTN) e Ministério da Previdência Social (MPS).';
     colunas = `
       <th>Ano</th>
       <th>Governo</th>
@@ -3486,7 +3578,7 @@ function gerarTabelaHistoricoOrcamento(tipo) {
       <th>Status</th>
     `;
   } else if (tipo === 'agro') {
-    tituloSecao = '🏛️ Histórico do Orçamento Federal: Agricultura Familiar, PNAE Merenda & CONAB (2010 a 2026)';
+    tituloSecao = '🏛️ Histórico Oficial Federal: Agricultura Familiar, PNAE Merenda & CONAB (2010 a 2026)';
     descricaoSecao = 'Trajetória dos repasses e compras diretas de pequenos produtores rurais. Destaque para o PNAE (Lei nº 11.947/2009 que exige no mínimo 30% da merenda comprada da agricultura familiar) e recuperação da CONAB.';
     colunas = `
       <th>Ano</th>
@@ -3566,36 +3658,40 @@ function gerarTabelaHistoricoOrcamento(tipo) {
 }
 
 function gerarBlocoGraficoModalOrcamento(tipo) {
+  const escopo = obterEscopoTerritorialModal();
+  const isBrasil = escopo.isBrasil;
+  const locNome = escopo.nomeTerritorio;
+
   const configs = {
     saude: {
-      tag: 'Visualização Gráfica Integrada',
-      titulo: 'Distribuição de Pacientes Atendidos por Patologia e Tratamento SUS',
-      badge: '🩺 Farmácia Popular & Alta Complexidade SUS',
-      anoRef: 'Ano-base: 2024 (Consolidado DATASUS)'
+      tag: isBrasil ? 'Visualização Gráfica Integrada' : `Visualização Local • ${locNome}`,
+      titulo: isBrasil ? 'Distribuição de Pacientes Atendidos por Patologia e Tratamento SUS' : `Pacientes Atendidos por Linha de Cuidado SUS • ${locNome}`,
+      badge: isBrasil ? '🩺 Farmácia Popular & Alta Complexidade SUS' : `🩺 ${locNome} (${formatarNumero(escopo.totalCidades)} ${escopo.totalCidades === 1 ? 'cidade' : 'cidades'})`,
+      anoRef: isBrasil ? 'Ano-base: 2024 (Consolidado DATASUS)' : 'Ref: 2024 (SUS / DATASUS / MS)'
     },
     educacao: {
-      tag: 'Visualização Gráfica Integrada',
-      titulo: 'Fomento Federal e Matrículas em Tempo Integral (Programa ETI)',
-      badge: '🎓 MEC / FNDE • Programa ETI 2024–2026',
+      tag: isBrasil ? 'Visualização Gráfica Integrada' : `Visualização Territorial • ${locNome}`,
+      titulo: isBrasil ? 'Fomento Federal e Matrículas em Tempo Integral (Programa ETI)' : (escopo.totalCidades === 1 ? `Indicadores de Educação Básica e Pé-de-Meia • ${locNome}` : `Destaques em Tempo Integral (ETI) • ${locNome}`),
+      badge: isBrasil ? '🎓 MEC / FNDE • Programa ETI 2024–2026' : `🎓 Educação Básica • ${locNome}`,
       anoRef: 'Ano-base: 2024/2025 (MEC / ETI & Pé-de-Meia)'
     },
     previdencia: {
-      tag: 'Visualização Gráfica Integrada',
-      titulo: 'Valores Pagos pelo Governo em Aposentadorias e Benefícios RGPS (Total e Rural)',
-      badge: '🏛️ Previdência Social & Tesouro Nacional (RGPS)',
-      anoRef: 'Série Oficial: 2010 a 2025 (RTN/MPS) + 2026 (Projeção LOA)'
+      tag: isBrasil ? 'Visualização Gráfica Integrada' : `Visualização Territorial • ${locNome}`,
+      titulo: isBrasil ? 'Valores Pagos pelo Governo em Aposentadorias e Benefícios RGPS (Total e Rural)' : (escopo.totalCidades === 1 ? `Injeção de Benefícios Previdenciários vs FPM • ${locNome}` : `Maiores Injeções Previdenciárias RGPS • ${locNome}`),
+      badge: isBrasil ? '🏛️ Previdência Social & Tesouro Nacional (RGPS)' : `🏛️ RGPS / MPS • ${locNome}`,
+      anoRef: isBrasil ? 'Série Oficial: 2010 a 2025 (RTN/MPS) + 2026 (Projeção LOA)' : 'Ano-base: 2024/2025 (MPS / DATAPREV)'
     },
     trabalho: {
-      tag: 'Visualização Gráfica Integrada',
-      titulo: 'Evolução do Emprego Formal CLT & Suporte ao MEI (2016 a 2026)',
-      badge: '💼 Séries Oficiais MTE / CAGED / RFB',
-      anoRef: 'Série Oficial: 2016 a 2025 (CAGED / MTE / RFB)'
+      tag: isBrasil ? 'Visualização Gráfica Integrada' : `Visualização Territorial • ${locNome}`,
+      titulo: isBrasil ? 'Evolução do Emprego Formal CLT & Suporte ao MEI (2016 a 2026)' : (escopo.totalCidades === 1 ? `Distribuição da Força de Trabalho & Renda • ${locNome}` : `Empregos Formais CLT e MEIs • ${locNome}`),
+      badge: isBrasil ? '💼 Séries Oficiais MTE / CAGED / RFB' : `💼 Mercado de Trabalho • ${locNome}`,
+      anoRef: isBrasil ? 'Série Oficial: 2016 a 2025 (CAGED / MTE / RFB)' : 'Ref: 2024 (CAGED / MTE / RFB)'
     },
     agro: {
-      tag: 'Visualização Gráfica Integrada',
-      titulo: 'Compras da Agricultura Familiar para Alimentação Escolar (PNAE) e CONAB',
-      badge: '🌱 FNDE / PNAE / CONAB (2010 a 2026)',
-      anoRef: 'Série Oficial: 2010 a 2025 (PNAE / FNDE / CONAB)'
+      tag: isBrasil ? 'Visualização Gráfica Integrada' : `Visualização Territorial • ${locNome}`,
+      titulo: isBrasil ? 'Compras da Agricultura Familiar para Alimentação Escolar (PNAE) e CONAB' : (escopo.totalCidades === 1 ? `Alimentação Escolar e Compras da Agricultura Familiar • ${locNome}` : `Repasses PNAE e Demanda Agricultura Familiar • ${locNome}`),
+      badge: isBrasil ? '🌱 FNDE / PNAE / CONAB' : `🌱 Merenda PNAE • ${locNome}`,
+      anoRef: isBrasil ? 'Série Oficial: 2010 a 2025 (PNAE / FNDE / CONAB)' : 'Ref: 2024/2025 (FNDE / PNAE)'
     }
   };
   const cfg = configs[tipo] || configs.saude;
@@ -3632,17 +3728,39 @@ function renderizarGraficoModalOrcamento(tipo) {
   }
 
   const ctx = canvas.getContext('2d');
+  const escopo = obterEscopoTerritorialModal();
 
   // Caso 1: Saúde Pública (Farmácia Popular & Alta Complexidade SUS)
   if (tipo === 'saude') {
-    const sde = (activeRaioXCity && activeRaioXCity.sde) ? activeRaioXCity.sde : (APP_DATA.saude_nacional || {});
-    const hipTot = Math.round((sde.fp_so_hipertensao || sde.hip || 4962509) / 10000) / 100;
-    const ambTot = Math.round((sde.fp_hipertensao_e_diabetes || sde.amb || 3239501) / 10000) / 100;
-    const acTot = Math.round((sde.alto_custo || sde.ac || 3284659) / 10000) / 100;
-    const diabTot = Math.round((sde.fp_so_diabetes || sde.diab || 1808126) / 10000) / 100;
-    const asmaTot = Math.round((sde.fp_asma || sde.asma || 875033) / 10000) / 100;
-    const quimTot = Math.round((sde.quimioterapia || sde.quim || 361331) / 10000) / 100;
-    const radTot = Math.round((sde.radioterapia || sde.rad || 8987) / 10000) / 100;
+    let sde = {};
+    if (escopo.isBrasil) {
+      sde = APP_DATA.saude_nacional || {};
+    } else if (escopo.totalCidades === 1) {
+      sde = escopo.cidades[0].sde || {};
+    } else {
+      sde = escopo.cidades.reduce((acc, c) => {
+        const cs = c.sde || {};
+        acc.hip = (acc.hip || 0) + (cs.hip || 0);
+        acc.amb = (acc.amb || 0) + (cs.amb || 0);
+        acc.diab = (acc.diab || 0) + (cs.diab || 0);
+        acc.asma = (acc.asma || 0) + (cs.asma || 0);
+        acc.ac = (acc.ac || 0) + (cs.ac || 0);
+        acc.quim = (acc.quim || 0) + (cs.quim || 0);
+        acc.rad = (acc.rad || 0) + (cs.rad || 0);
+        return acc;
+      }, {});
+    }
+
+    const isGrandezaMilhoes = escopo.isBrasil || (sde.hip > 500000);
+    const divisor = isGrandezaMilhoes ? 1000000 : 1;
+
+    const hipTot = Math.round(((sde.fp_so_hipertensao || sde.hip || 0) / divisor) * 100) / 100;
+    const ambTot = Math.round(((sde.fp_hipertensao_e_diabetes || sde.amb || 0) / divisor) * 100) / 100;
+    const diabTot = Math.round(((sde.fp_so_diabetes || sde.diab || 0) / divisor) * 100) / 100;
+    const asmaTot = Math.round(((sde.fp_asma || sde.asma || 0) / divisor) * 100) / 100;
+    const acTot = Math.round(((sde.alto_custo || sde.ac || 0) / divisor) * 100) / 100;
+    const quimTot = Math.round(((sde.quimioterapia || sde.quim || 0) / divisor) * 100) / 100;
+    const radTot = Math.round(((sde.radioterapia || sde.rad || 0) / divisor) * 100) / 100;
 
     const labels = [
       'Hipertensão isolada',
@@ -3654,9 +3772,7 @@ function renderizarGraficoModalOrcamento(tipo) {
       'Radioterapia Oncológica'
     ];
 
-    // Dataset 1: Farmácia Popular (Atenção Básica) - Aberto por padrão
     const dataFP = [hipTot, ambTot, diabTot, asmaTot, null, null, null];
-    // Dataset 2: SUS Alta Complexidade & Oncologia - Fechado por padrão (hidden: true)
     const dataSUS = [null, null, null, null, acTot, quimTot, radTot];
 
     chartModalOrcamento = new Chart(ctx, {
@@ -3665,7 +3781,7 @@ function renderizarGraficoModalOrcamento(tipo) {
         labels: labels,
         datasets: [
           {
-            label: 'Farmácia Popular (Milhões de Pacientes)',
+            label: `Farmácia Popular (${isGrandezaMilhoes ? 'Milhões de Pacientes' : 'Pacientes Atendidos'})`,
             data: dataFP,
             backgroundColor: 'rgba(14, 159, 110, 0.85)',
             borderColor: '#0E9F6E',
@@ -3673,13 +3789,13 @@ function renderizarGraficoModalOrcamento(tipo) {
             borderRadius: 4
           },
           {
-            label: 'Alta Complexidade SUS (Milhões de Atendimentos)',
+            label: `Alta Complexidade SUS (${isGrandezaMilhoes ? 'Milhões de Atendimentos' : 'Atendimentos'})`,
             data: dataSUS,
             backgroundColor: 'rgba(30, 58, 138, 0.85)',
             borderColor: '#1E3A8A',
             borderWidth: 1.5,
             borderRadius: 4,
-            hidden: true // Fechado por padrão, mantendo apenas 1 dado aberto
+            hidden: true
           }
         ]
       },
@@ -3706,19 +3822,17 @@ function renderizarGraficoModalOrcamento(tipo) {
           },
           tooltip: {
             callbacks: {
-              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw !== null ? ctx.raw.toFixed(2) + ' Milhões' : '—'}`
+              label: (c) => ` ${c.dataset.label}: ${c.raw !== null ? (isGrandezaMilhoes ? c.raw.toFixed(2) + ' Milhões' : formatarNumero(c.raw) + ' pessoas') : '—'}`
             }
           }
         },
         scales: {
           x: {
             beginAtZero: true,
-            ticks: { callback: v => `${v} M` },
-            title: { display: true, text: 'Milhões de Pacientes / Procedimentos', font: { weight: 'bold' } }
+            ticks: { callback: v => isGrandezaMilhoes ? `${v} M` : formatarNumero(v) },
+            title: { display: true, text: isGrandezaMilhoes ? 'Milhões de Pacientes / Procedimentos' : 'Número de Pacientes / Procedimentos Atendidos', font: { weight: 'bold' } }
           },
-          y: {
-            grid: { display: false }
-          }
+          y: { grid: { display: false } }
         }
       }
     });
@@ -3727,34 +3841,64 @@ function renderizarGraficoModalOrcamento(tipo) {
 
   // Caso 2: Educação Básica & Programa Escola em Tempo Integral (ETI)
   if (tipo === 'educacao') {
-    const etiTop10 = (APP_DATA.eti_por_uf || []).slice(0, 10);
-    const labels = etiTop10.map(d => `${d.nome} (${d.uf})`);
-    const fomData = etiTop10.map(d => Math.round(d.fomento / 1000000));
-    const matData = etiTop10.map(d => Math.round(d.matriculas / 1000));
+    let labels = [];
+    let ds1Label = '';
+    let ds2Label = '';
+    let ds1Data = [];
+    let ds2Data = [];
+
+    if (escopo.isBrasil) {
+      const etiTop10 = (APP_DATA.eti_por_uf || []).slice(0, 10);
+      labels = etiTop10.map(d => `${d.nome} (${d.uf})`);
+      ds1Label = 'Fomento Federal Rede Municipal (R$ Milhões)';
+      ds1Data = etiTop10.map(d => Math.round(d.fomento / 1000000));
+      ds2Label = 'Matrículas Tempo Integral (Milhares de Alunos)';
+      ds2Data = etiTop10.map(d => Math.round(d.matriculas / 1000));
+    } else if (escopo.totalCidades === 1) {
+      const c = escopo.cidades[0];
+      const pdmJ = Math.round((c.pop || 0) * 0.03 * (c.ind?.pdm || 60) / 100);
+      const etiM = c.eti?.mat || 0;
+      const alunosRede = Math.round((c.pop || 0) * 0.1995);
+      labels = ['Estudantes Pé-de-Meia', 'Matrículas Tempo Integral (ETI)', 'Alunos da Rede Pública'];
+      ds1Label = `Estudantes Beneficiados em ${c.nm}`;
+      ds1Data = [pdmJ, etiM, alunosRede];
+    } else {
+      const topCidades = escopo.cidades.slice().sort((a,b) => ((b.eti?.mat || 0) + (b.pop||0)*0.01) - ((a.eti?.mat || 0) + (a.pop||0)*0.01)).slice(0, 10);
+      labels = topCidades.map(c => `${c.nm} (${c.uf})`);
+      ds1Label = 'Matrículas Tempo Integral ETI';
+      ds1Data = topCidades.map(c => c.eti?.mat || Math.round((c.pop||0)*0.015));
+      ds2Label = 'Estudantes Pé-de-Meia';
+      ds2Data = topCidades.map(c => Math.round((c.pop || 0) * 0.03 * (c.ind?.pdm || 60) / 100));
+    }
+
+    const datasetsEdu = [
+      {
+        label: ds1Label,
+        data: ds1Data,
+        backgroundColor: 'rgba(26, 86, 219, 0.85)',
+        borderColor: '#1A56DB',
+        borderWidth: 1.5,
+        borderRadius: 4
+      }
+    ];
+
+    if (ds2Data && ds2Data.length > 0) {
+      datasetsEdu.push({
+        label: ds2Label,
+        data: ds2Data,
+        backgroundColor: 'rgba(245, 158, 11, 0.85)',
+        borderColor: '#D97706',
+        borderWidth: 1.5,
+        borderRadius: 4,
+        hidden: true
+      });
+    }
 
     chartModalOrcamento = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: labels,
-        datasets: [
-          {
-            label: 'Fomento Federal Rede Municipal (R$ Milhões)',
-            data: fomData,
-            backgroundColor: 'rgba(26, 86, 219, 0.85)',
-            borderColor: '#1A56DB',
-            borderWidth: 1.5,
-            borderRadius: 4
-          },
-          {
-            label: 'Matrículas Tempo Integral (Milhares de Alunos)',
-            data: matData,
-            backgroundColor: 'rgba(245, 158, 11, 0.85)',
-            borderColor: '#D97706',
-            borderWidth: 1.5,
-            borderRadius: 4,
-            hidden: true // Fechado por padrão, apenas 1 dado aberto
-          }
-        ]
+        datasets: datasetsEdu
       },
       options: {
         indexAxis: 'y',
@@ -3779,19 +3923,17 @@ function renderizarGraficoModalOrcamento(tipo) {
           },
           tooltip: {
             callbacks: {
-              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.datasetIndex === 0 ? 'R$ ' + ctx.raw + ' Mi' : ctx.raw + ' mil vagas'}`
+              label: (c) => ` ${c.dataset.label}: ${formatarNumero(c.raw)}`
             }
           }
         },
         scales: {
           x: {
             beginAtZero: true,
-            ticks: { callback: v => `${v}` },
-            title: { display: true, text: 'R$ Milhões / Milhares de Vagas ETI', font: { weight: 'bold' } }
+            ticks: { callback: v => formatarNumero(v) },
+            title: { display: true, text: 'Vagas e Estudantes Contemplados', font: { weight: 'bold' } }
           },
-          y: {
-            grid: { display: false }
-          }
+          y: { grid: { display: false } }
         }
       }
     });
@@ -3800,10 +3942,173 @@ function renderizarGraficoModalOrcamento(tipo) {
 
   // Caso 3: Mercado de Trabalho Formal CLT & Suporte ao MEI
   if (tipo === 'trabalho') {
-    const nacList = APP_DATA?.series_historicas?.nacional || [];
-    const labels = nacList.map(d => String(d.ano)); // Apenas o ano no eixo X
-    const cltData = nacList.map(d => d.clt_milhoes);
-    const meiData = nacList.map(d => d.meis_milhoes);
+    if (escopo.isBrasil) {
+      const nacList = APP_DATA?.series_historicas?.nacional || [];
+      const labels = nacList.map(d => String(d.ano));
+      const cltData = nacList.map(d => d.clt_milhoes);
+      const meiData = nacList.map(d => d.meis_milhoes);
+
+      chartModalOrcamento = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Empregos Formais CLT (Milhões de Carteiras)',
+              data: cltData,
+              backgroundColor: 'rgba(26, 86, 219, 0.85)',
+              borderColor: '#1A56DB',
+              borderWidth: 1.5,
+              borderRadius: 4,
+              order: 1
+            },
+            {
+              type: 'bar',
+              label: 'Microempreendedores MEI (Milhões de Formalizados)',
+              data: meiData,
+              backgroundColor: 'rgba(245, 158, 11, 0.85)',
+              borderColor: '#D97706',
+              borderWidth: 1.5,
+              borderRadius: 4,
+              order: 2,
+              hidden: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 12, font: { size: 11, weight: '700' } },
+              onClick: function(e, legendItem, legend) {
+                const index = legendItem.datasetIndex;
+                const ci = legend.chart;
+                if (ci.isDatasetVisible(index)) {
+                  ci.hide(index);
+                  legendItem.hidden = true;
+                } else {
+                  ci.show(index);
+                  legendItem.hidden = false;
+                }
+                const cltVis = ci.isDatasetVisible(0);
+                const meiVis = ci.isDatasetVisible(1);
+                const yAxis = ci.options.scales.y;
+                if (cltVis && !meiVis) {
+                  yAxis.min = 80;
+                  yAxis.suggestedMin = 80;
+                  yAxis.suggestedMax = 108;
+                  yAxis.title.text = 'Milhões de Trabalhadores CLT (Corte a partir de 80M)';
+                } else if (!cltVis && meiVis) {
+                  yAxis.min = 0;
+                  yAxis.suggestedMin = 0;
+                  yAxis.suggestedMax = 22;
+                  yAxis.title.text = 'Milhões de Microempreendedores MEI (Escala 0 a 22M)';
+                } else if (cltVis && meiVis) {
+                  yAxis.min = 0;
+                  yAxis.suggestedMin = 0;
+                  yAxis.suggestedMax = 115;
+                  yAxis.title.text = 'Milhões de Trabalhadores (CLT & MEI - Escala Geral)';
+                } else {
+                  yAxis.min = 0;
+                  yAxis.suggestedMin = 0;
+                  yAxis.suggestedMax = 100;
+                }
+                ci.update();
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` ${c.dataset.label}: ${c.raw.toFixed(2)} Milhões`
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              min: 80,
+              suggestedMin: 80,
+              suggestedMax: 108,
+              ticks: { callback: v => `${v} M` },
+              title: { display: true, text: 'Milhões de Trabalhadores CLT (Corte a partir de 80M)', font: { weight: 'bold' } }
+            }
+          }
+        },
+        plugins: [{
+          id: 'cltMeiLabels',
+          afterDatasetsDraw(chart) {
+            const { ctx } = chart;
+            ctx.save();
+            ctx.font = 'bold 9px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+              const meta = chart.getDatasetMeta(datasetIndex);
+              if (meta.hidden) return;
+              meta.data.forEach((bar, index) => {
+                const val = dataset.data[index];
+                if (val === undefined || val === null || val <= 0) return;
+                ctx.fillStyle = '#1E293B';
+                ctx.fillText(`${val.toFixed(1)}M`, bar.x, bar.y - 3);
+              });
+            });
+            ctx.restore();
+          }
+        }]
+      });
+      return;
+    }
+
+    if (escopo.totalCidades === 1) {
+      const c = escopo.cidades[0];
+      const clt = Math.round((c.pop || 0) * (c.ind?.clt || 0) / 100);
+      const mei = Math.round((c.pop || 0) * (c.ind?.mei || 0) / 100);
+      const bf = Math.round((c.pop || 0) * (c.ind?.bf || 0) / 100);
+      const serv = Math.round((c.pop || 0) * (c.ind?.serv || 0) / 100);
+
+      chartModalOrcamento = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Carteira Assinada (CLT)', 'Microempreendedores (MEI)', 'Famílias Bolsa Família', 'Servidores Públicos'],
+          datasets: [{
+            label: `Pessoas / Postos em ${c.nm}`,
+            data: [clt, mei, bf, serv],
+            backgroundColor: ['#1A56DB', '#D97706', '#0E9F6E', '#7E3AF2'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` ${formatarNumero(c.raw)} pessoas`
+              }
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: { callback: v => formatarGrandeza(v) },
+              title: { display: true, text: 'Quantidade de Vagas / Vínculos Ativos', font: { weight: 'bold' } }
+            },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+      return;
+    }
+
+    const topCidades = escopo.cidades.slice().sort((a,b) => ((b.pop||0)*(b.ind?.clt||0)) - ((a.pop||0)*(a.ind?.clt||0))).slice(0, 10);
+    const labels = topCidades.map(c => `${c.nm} (${c.uf})`);
+    const cltData = topCidades.map(c => Math.round((c.pop||0)*(c.ind?.clt||0)/100));
+    const meiData = topCidades.map(c => Math.round((c.pop||0)*(c.ind?.mei||0)/100));
 
     chartModalOrcamento = new Chart(ctx, {
       type: 'bar',
@@ -3811,409 +4116,583 @@ function renderizarGraficoModalOrcamento(tipo) {
         labels: labels,
         datasets: [
           {
-            type: 'bar',
-            label: 'Empregos Formais CLT (Milhões de Carteiras)',
+            label: 'Empregos Formais CLT',
             data: cltData,
             backgroundColor: 'rgba(26, 86, 219, 0.85)',
             borderColor: '#1A56DB',
             borderWidth: 1.5,
-            borderRadius: 4,
-            order: 1
+            borderRadius: 4
           },
           {
-            type: 'bar',
-            label: 'Microempreendedores MEI (Milhões de Formalizados)',
+            label: 'Microempreendedores MEI',
             data: meiData,
             backgroundColor: 'rgba(245, 158, 11, 0.85)',
             borderColor: '#D97706',
             borderWidth: 1.5,
             borderRadius: 4,
-            order: 2,
-            hidden: true // Fechado por padrão, apenas 1 dado aberto
+            hidden: true
           }
         ]
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: {
             position: 'top',
-            labels: { boxWidth: 12, font: { size: 11, weight: '700' } },
-            onClick: function(e, legendItem, legend) {
-              const index = legendItem.datasetIndex;
-              const ci = legend.chart;
-              if (ci.isDatasetVisible(index)) {
-                ci.hide(index);
-                legendItem.hidden = true;
-              } else {
-                ci.show(index);
-                legendItem.hidden = false;
-              }
-
-              // Ajuste Dinâmico do Zoom no Eixo Y conforme visibilidade de CLT e MEI
-              const cltVis = ci.isDatasetVisible(0);
-              const meiVis = ci.isDatasetVisible(1);
-              const yAxis = ci.options.scales.y;
-
-              if (cltVis && !meiVis) {
-                // Apenas CLT: corta no 80M
-                yAxis.min = 80;
-                yAxis.suggestedMin = 80;
-                yAxis.suggestedMax = 108;
-                yAxis.title.text = 'Milhões de Trabalhadores CLT (Corte a partir de 80M)';
-              } else if (!cltVis && meiVis) {
-                // Apenas MEI: baixa o y para a faixa de microempreendedores (0 a 22M)
-                yAxis.min = 0;
-                yAxis.suggestedMin = 0;
-                yAxis.suggestedMax = 22;
-                yAxis.title.text = 'Milhões de Microempreendedores MEI (Escala 0 a 22M)';
-              } else if (cltVis && meiVis) {
-                // Os dois juntos: diminui o zoom do eixo y para comportar ambos (0 a 115M)
-                yAxis.min = 0;
-                yAxis.suggestedMin = 0;
-                yAxis.suggestedMax = 115;
-                yAxis.title.text = 'Milhões de Trabalhadores (CLT & MEI - Escala Geral)';
-              } else {
-                yAxis.min = 0;
-                yAxis.suggestedMin = 0;
-                yAxis.suggestedMax = 100;
-              }
-
-              ci.update();
-            }
+            labels: { boxWidth: 12, font: { size: 11, weight: '700' } }
           },
           tooltip: {
             callbacks: {
-              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)} Milhões`
+              label: (c) => ` ${c.dataset.label}: ${formatarNumero(c.raw)} pessoas`
             }
           }
         },
         scales: {
-          x: { grid: { display: false } },
-          y: {
-            min: 80, // Inicia apenas com CLT ativo (corte 80M)
-            suggestedMin: 80,
-            suggestedMax: 108,
-            ticks: { callback: v => `${v} M` },
-            title: { display: true, text: 'Milhões de Trabalhadores CLT (Corte a partir de 80M)', font: { weight: 'bold' } }
-          }
+          x: {
+            beginAtZero: true,
+            ticks: { callback: v => formatarGrandeza(v) },
+            title: { display: true, text: 'Vagas Formais e Empreendedores Ativos', font: { weight: 'bold' } }
+          },
+          y: { grid: { display: false } }
         }
-      },
-      plugins: [{
-        id: 'cltMeiLabels',
-        afterDatasetsDraw(chart) {
-          const { ctx } = chart;
-          ctx.save();
-          ctx.font = 'bold 9px Inter, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          chart.data.datasets.forEach((dataset, datasetIndex) => {
-            const meta = chart.getDatasetMeta(datasetIndex);
-            if (meta.hidden) return;
-            meta.data.forEach((bar, index) => {
-              const val = dataset.data[index];
-              if (val === undefined || val === null || val <= 0) return;
-              ctx.fillStyle = '#1E293B';
-              ctx.fillText(`${val.toFixed(1)}M`, bar.x, bar.y - 3);
-            });
-          });
-          ctx.restore();
-        }
-      }]
+      }
     });
     return;
   }
 
   // Casos 4 e 5: Previdência e Agro
   const lista = APP_DATA?.series_historicas?.orcamento_governos || [];
-  if (lista.length === 0) return;
-
-  const labels = lista.map(d => String(d.ano)); // Apenas o ano no eixo X, sem presidente
-
-  // Cores temáticas das barras por Governo
-  const barColors = lista.map(d => {
-    if (d.governo.includes('Lula 2')) return 'rgba(239, 68, 68, 0.75)';
-    if (d.governo.includes('Dilma')) return 'rgba(220, 38, 38, 0.75)';
-    if (d.governo.includes('Temer')) return 'rgba(100, 116, 139, 0.75)';
-    if (d.governo.includes('Bolsonaro')) return 'rgba(37, 99, 235, 0.75)';
-    if (d.governo.includes('Lula 3')) return 'rgba(185, 28, 28, 0.85)';
-    return 'rgba(75, 85, 99, 0.75)';
-  });
-
-  const borderColors = lista.map(d => {
-    if (d.governo.includes('Lula 2')) return '#EF4444';
-    if (d.governo.includes('Dilma')) return '#DC2626';
-    if (d.governo.includes('Temer')) return '#64748B';
-    if (d.governo.includes('Bolsonaro')) return '#2563EB';
-    if (d.governo.includes('Lula 3')) return '#B91C1C';
-    return '#4B5563';
-  });
-
-  let datasetsOrc = [];
 
   if (tipo === 'previdencia') {
-    const aposData = lista.map(d => d.aposentadorias_total_bi || (d.previdencia_total_bi ? Math.round(d.previdencia_total_bi * 0.675 * 10) / 10 : 0));
-    const ruralData = lista.map(d => d.previdencia_rural_bi || 0);
-    const totalRgpsData = lista.map(d => d.previdencia_total_bi || 0);
+    if (escopo.isBrasil) {
+      if (lista.length === 0) return;
+      const labels = lista.map(d => String(d.ano));
+      const aposData = lista.map(d => d.aposentadorias_total_bi || (d.previdencia_total_bi ? Math.round(d.previdencia_total_bi * 0.675 * 10) / 10 : 0));
+      const ruralData = lista.map(d => d.previdencia_rural_bi || 0);
+      const totalRgpsData = lista.map(d => d.previdencia_total_bi || 0);
 
-    datasetsOrc = [
-      {
+      chartModalOrcamento = new Chart(ctx, {
         type: 'bar',
-        label: 'Aposentadorias Pagas pelo Governo (R$ Bi)',
-        data: aposData,
-        backgroundColor: 'rgba(126, 58, 242, 0.85)',
-        borderColor: '#7E3AF2',
-        borderWidth: 1.5,
-        borderRadius: 4,
-        order: 2,
-        yAxisID: 'y'
-      },
-      {
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Aposentadorias Pagas pelo Governo (R$ Bi)',
+              data: aposData,
+              backgroundColor: 'rgba(126, 58, 242, 0.85)',
+              borderColor: '#7E3AF2',
+              borderWidth: 1.5,
+              borderRadius: 4,
+              order: 2,
+              yAxisID: 'y'
+            },
+            {
+              type: 'bar',
+              label: 'Aposentadoria & Benefício Rural (R$ Bi)',
+              data: ruralData,
+              backgroundColor: 'rgba(16, 185, 129, 0.85)',
+              borderColor: '#059669',
+              borderWidth: 1.5,
+              borderRadius: 4,
+              order: 3,
+              yAxisID: 'y'
+            },
+            {
+              type: 'line',
+              label: 'Total Geral RGPS (Apos. + Pensões) (R$ Bi)',
+              data: totalRgpsData,
+              borderColor: '#1E40AF',
+              backgroundColor: 'rgba(30, 64, 175, 0.05)',
+              borderWidth: 2.5,
+              pointBackgroundColor: '#1E40AF',
+              pointBorderColor: '#FFFFFF',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              tension: 0.2,
+              order: 1,
+              yAxisID: 'y',
+              hidden: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 12, font: { size: 11, weight: '700' }, color: '#334155' }
+            },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` ${c.dataset.label}: R$ ${c.raw !== null ? c.raw.toFixed(1) : '0'} Bi`
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              beginAtZero: true,
+              ticks: { callback: v => `R$ ${v} Bi` },
+              title: { display: true, text: 'Valores em R$ Bilhões', font: { weight: 'bold' } }
+            }
+          }
+        }
+      });
+      return;
+    }
+
+    if (escopo.totalCidades === 1) {
+      const c = escopo.cidades[0];
+      const benef = (c.pop || 0) * (c.ind?.apos || 0) / 100;
+      const valorTotMi = (benef * 17235) / 1000000;
+      const valorRuralMi = (valorTotMi * (121.4 / 606.2));
+      const fpmEstMi = ((c.pop || 0) * 850) / 1000000;
+
+      chartModalOrcamento = new Chart(ctx, {
         type: 'bar',
-        label: 'Aposentadoria & Benefício Rural (R$ Bi)',
-        data: ruralData,
-        backgroundColor: 'rgba(16, 185, 129, 0.85)',
-        borderColor: '#059669',
-        borderWidth: 1.5,
-        borderRadius: 4,
-        order: 3,
-        yAxisID: 'y'
+        data: {
+          labels: ['Injeção Previdência RGPS Total', 'Aposentadorias Rurais', 'Estimativa de Repasses FPM'],
+          datasets: [{
+            label: `Valores Anuais em ${c.nm} (R$ Milhões)`,
+            data: [Math.round(valorTotMi * 10) / 10, Math.round(valorRuralMi * 10) / 10, Math.round(fpmEstMi * 10) / 10],
+            backgroundColor: ['#7E3AF2', '#059669', '#3B82F6'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` R$ ${c.raw.toFixed(1)} Milhões / ano`
+              }
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: { callback: v => `R$ ${v} Mi` },
+              title: { display: true, text: 'R$ Milhões Anuais Injetados na Cidade', font: { weight: 'bold' } }
+            },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+      return;
+    }
+
+    const topCidades = escopo.cidades.slice().sort((a,b) => ((b.pop||0)*(b.ind?.apos||0)) - ((a.pop||0)*(a.ind?.apos||0))).slice(0, 10);
+    const labels = topCidades.map(c => `${c.nm} (${c.uf})`);
+    const prevDataMi = topCidades.map(c => Math.round(((c.pop||0)*(c.ind?.apos||0)/100)*17235 / 1000000 * 10)/10);
+    const ruralDataMi = prevDataMi.map(v => Math.round(v * (121.4 / 606.2) * 10)/10);
+
+    chartModalOrcamento = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Injeção Previdência Total (R$ Mi/ano)',
+            data: prevDataMi,
+            backgroundColor: 'rgba(126, 58, 242, 0.85)',
+            borderColor: '#7E3AF2',
+            borderWidth: 1.5,
+            borderRadius: 4
+          },
+          {
+            label: 'Benefícios Rurais (R$ Mi/ano)',
+            data: ruralDataMi,
+            backgroundColor: 'rgba(16, 185, 129, 0.85)',
+            borderColor: '#059669',
+            borderWidth: 1.5,
+            borderRadius: 4,
+            hidden: true
+          }
+        ]
       },
-      {
-        type: 'line',
-        label: 'Total Geral RGPS (Apos. + Pensões) (R$ Bi)',
-        data: totalRgpsData,
-        borderColor: '#1E40AF',
-        backgroundColor: 'rgba(30, 64, 175, 0.05)',
-        borderWidth: 2.5,
-        pointBackgroundColor: '#1E40AF',
-        pointBorderColor: '#FFFFFF',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        tension: 0.2,
-        order: 1,
-        yAxisID: 'y',
-        hidden: true // Fechado por padrão, abre Aposentadorias e Rural lado a lado
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
+          tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: R$ ${c.raw.toFixed(1)} Mi` } }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: { callback: v => `R$ ${v} Mi` },
+            title: { display: true, text: 'R$ Milhões Anuais Injetados pelo RGPS', font: { weight: 'bold' } }
+          },
+          y: { grid: { display: false } }
+        }
       }
-    ];
-  } else if (tipo === 'agro') {
-    const agroNom = lista.map(d => d.pnae_compras_agricultura_familiar_bi || 0.45);
-    const agroReal = lista.map(d => {
-      const nom = d.pnae_compras_agricultura_familiar_bi || 0.45;
-      const fator = d.ano <= 2014 ? 1.75 : d.ano <= 2018 ? 1.45 : d.ano <= 2022 ? 1.22 : 1.05;
-      return Math.round(nom * fator * 100) / 100;
     });
-
-    datasetsOrc = [
-      {
-        type: 'bar',
-        label: 'Compras da Agricultura Familiar PNAE (Nominal)',
-        data: agroNom,
-        backgroundColor: barColors,
-        borderColor: borderColors,
-        borderWidth: 1.5,
-        borderRadius: 4,
-        order: 2,
-        yAxisID: 'y'
-      },
-      {
-        type: 'line',
-        label: 'Compras Agricultura Familiar (Corrigido IPCA 2026)',
-        data: agroReal,
-        borderColor: '#1E3A8A',
-        backgroundColor: 'rgba(30, 58, 138, 0.05)',
-        borderWidth: 3,
-        pointBackgroundColor: '#1E3A8A',
-        pointBorderColor: '#FFFFFF',
-        pointBorderWidth: 2,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        tension: 0.25,
-        order: 1,
-        yAxisID: 'y',
-        hidden: true // Fechado por padrão, apenas 1 dado aberto
-      }
-    ];
+    return;
   }
 
-  chartModalOrcamento = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: datasetsOrc
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false
-      },
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: {
-            boxWidth: 12,
-            font: { size: 11, weight: '700' },
-            color: '#334155'
-          },
-          onClick: function(e, legendItem, legend) {
-            const index = legendItem.datasetIndex;
-            const ci = legend.chart;
-            if (ci.isDatasetVisible(index)) {
-              ci.hide(index);
-              legendItem.hidden = true;
-            } else {
-              ci.show(index);
-              legendItem.hidden = false;
+  if (tipo === 'agro') {
+    if (escopo.isBrasil) {
+      if (lista.length === 0) return;
+      const labels = lista.map(d => String(d.ano));
+      const barColors = lista.map(d => {
+        if (d.governo.includes('Lula 2')) return 'rgba(239, 68, 68, 0.75)';
+        if (d.governo.includes('Dilma')) return 'rgba(220, 38, 38, 0.75)';
+        if (d.governo.includes('Temer')) return 'rgba(100, 116, 139, 0.75)';
+        if (d.governo.includes('Bolsonaro')) return 'rgba(37, 99, 235, 0.75)';
+        if (d.governo.includes('Lula 3')) return 'rgba(185, 28, 28, 0.85)';
+        return 'rgba(75, 85, 99, 0.75)';
+      });
+
+      const agroNom = lista.map(d => d.pnae_compras_agricultura_familiar_bi || 0.45);
+      const agroReal = lista.map(d => {
+        const nom = d.pnae_compras_agricultura_familiar_bi || 0.45;
+        const fator = d.ano <= 2014 ? 1.75 : d.ano <= 2018 ? 1.45 : d.ano <= 2022 ? 1.22 : 1.05;
+        return Math.round(nom * fator * 100) / 100;
+      });
+
+      chartModalOrcamento = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Compras da Agricultura Familiar PNAE (Nominal)',
+              data: agroNom,
+              backgroundColor: barColors,
+              borderWidth: 1.5,
+              borderRadius: 4,
+              order: 2,
+              yAxisID: 'y'
+            },
+            {
+              type: 'line',
+              label: 'Compras Agricultura Familiar (Corrigido IPCA 2026)',
+              data: agroReal,
+              borderColor: '#1E3A8A',
+              backgroundColor: 'rgba(30, 58, 138, 0.05)',
+              borderWidth: 3,
+              pointBackgroundColor: '#1E3A8A',
+              tension: 0.25,
+              order: 1,
+              yAxisID: 'y',
+              hidden: true
             }
-            ci.update();
-          }
+          ]
         },
-        tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.95)',
-          padding: 12,
-          titleFont: { size: 12, weight: 'bold' },
-          bodyFont: { size: 11 },
-          callbacks: {
-            label: function(context) {
-              const val = context.parsed.y !== null ? context.parsed.y.toFixed(2) : '0.00';
-              return ` ${context.dataset.label}: R$ ${val} Bi`;
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
+            tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: R$ ${c.raw.toFixed(2)} Bi` } }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              beginAtZero: true,
+              ticks: { callback: v => `R$ ${v} Bi` },
+              title: { display: true, text: 'Valores em R$ Bilhões', font: { weight: 'bold' } }
             }
           }
         }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: {
-            font: { size: 10, weight: '600' },
-            color: '#64748B'
-          }
+      });
+      return;
+    }
+
+    if (escopo.totalCidades === 1) {
+      const c = escopo.cidades[0];
+      const alunos = (c.pop || 0) * 0.1995;
+      const repasseMil = (alunos * 37.28) / 1000;
+      const agroFamMil = repasseMil * 0.35;
+
+      chartModalOrcamento = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Repasse Total Merenda PNAE', 'Compra Agricultura Familiar (Mín 30%)'],
+          datasets: [{
+            label: `Valores Anuais em ${c.nm} (R$ Mil)`,
+            data: [Math.round(repasseMil * 10) / 10, Math.round(agroFamMil * 10) / 10],
+            backgroundColor: ['#1A56DB', '#059669'],
+            borderRadius: 6
+          }]
         },
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(226, 232, 240, 0.6)' },
-          ticks: {
-            font: { size: 10 },
-            color: '#64748B',
-            callback: v => `R$ ${v} Bi`
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` R$ ${c.raw.toFixed(1)} Mil / ano`
+              }
+            }
           },
-          title: {
-            display: true,
-            text: 'Valores em R$ Bilhões',
-            font: { size: 10, weight: 'bold' },
-            color: '#64748B'
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: { callback: v => `R$ ${v} Mil` },
+              title: { display: true, text: 'R$ Milhares Anuais do PNAE', font: { weight: 'bold' } }
+            },
+            y: { grid: { display: false } }
           }
         }
+      });
+      return;
+    }
+
+    const topCidades = escopo.cidades.slice().sort((a,b) => (b.pop||0) - (a.pop||0)).slice(0, 10);
+    const labels = topCidades.map(c => `${c.nm} (${c.uf})`);
+    const pnaeDataMil = topCidades.map(c => Math.round(((c.pop||0)*0.1995*37.28)/1000));
+    const agroDataMil = pnaeDataMil.map(v => Math.round(v * 0.35));
+
+    chartModalOrcamento = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Repasse Total PNAE Merenda (R$ Mil/ano)',
+            data: pnaeDataMil,
+            backgroundColor: 'rgba(26, 86, 219, 0.85)',
+            borderColor: '#1A56DB',
+            borderWidth: 1.5,
+            borderRadius: 4
+          },
+          {
+            label: 'Compras Agricultura Familiar (R$ Mil/ano)',
+            data: agroDataMil,
+            backgroundColor: 'rgba(16, 185, 129, 0.85)',
+            borderColor: '#059669',
+            borderWidth: 1.5,
+            borderRadius: 4,
+            hidden: true
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
+          tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: R$ ${formatarNumero(c.raw)} Mil` } }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: { callback: v => `R$ ${v} Mil` },
+            title: { display: true, text: 'R$ Milhares Anuais PNAE / Agricultura Familiar', font: { weight: 'bold' } }
+          },
+          y: { grid: { display: false } }
+        }
       }
-    },
-    plugins: [{
-      id: 'barLabelsModalOrcamento',
-      afterDatasetsDraw(chart) {
-        const { ctx } = chart;
-        ctx.save();
-        ctx.font = 'bold 9px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        chart.data.datasets.forEach((dataset, datasetIndex) => {
-          const meta = chart.getDatasetMeta(datasetIndex);
-          if (meta.hidden || (chart.isDatasetVisible && !chart.isDatasetVisible(datasetIndex))) return;
-          meta.data.forEach((element, index) => {
-            const val = dataset.data[index];
-            if (val === undefined || val === null || val <= 0) return;
-            if (tipo === 'previdencia') {
-              ctx.fillStyle = datasetIndex === 0 ? '#7E3AF2' : (datasetIndex === 1 ? '#047857' : '#1E3A8A');
-            } else {
-              ctx.fillStyle = datasetIndex === 0 ? '#0F172A' : '#1E3A8A';
-            }
-            ctx.fillText(`${val.toFixed(0)}B`, element.x, element.y - 4);
-          });
-        });
-        ctx.restore();
-      }
-    }]
-  });
+    });
+    return;
+  }
 }
 
 /**
  * Abre o Modal de Análise Aprofundada da Prioridade Nacional
+ * Integra dinamicamente os valores de acordo com o filtro territorial ativo (município, estado, região, cluster ou Brasil)
  */
 function abrirModalPrioridade(tipo) {
   const modal = document.getElementById('modal-prioridade-detalhe');
   const catEl = document.getElementById('prio-modal-category');
   const titleEl = document.getElementById('prio-modal-title');
   const bodyEl = document.getElementById('prio-modal-body');
+  const scopeBadge = document.getElementById('prio-modal-scope-badge');
 
   if (!modal || !catEl || !titleEl || !bodyEl) return;
 
-  const configs = {
-    saude: {
-      categoria: 'SAÚDE PÚBLICA & ASSISTÊNCIA FARMACÊUTICA',
-      titulo: 'Farmácia Popular do Brasil: Cobertura, Economia e Saúde Integral',
-      descricao: 'O Programa Farmácia Popular garante medicamentos 100% gratuitos para diabetes, hipertensão, asma e osteoporose, além de anticoncepcionais e fraldas geriátricas com copagamento reduzido.',
-      destaques: [
-        { label: 'Pessoas Atendidas no Brasil', valor: '12,96 Milhões', ano: 'Ref: 2024' },
-        { label: 'Economia Anual para Famílias', valor: 'R$ 7,73 Bilhões', ano: 'Ref: 2024' },
-        { label: 'Municípios com Cobertura Ativa', valor: '5.571 Cidades (100%)', ano: 'Ref: 2024/2025' },
-        { label: 'Medicamentos Gratuitos Disponíveis', valor: '40+ Itens Essenciais', ano: 'Ref: Vigente' }
-      ],
-      impactoPolitico: 'Impacto direto no orçamento familiar das classes C, D e E, liberando até 25% da renda de idosos e aposentados que antes era gasta com remédios contínuos.'
-    },
-    educacao: {
-      categoria: 'EDUCAÇÃO BÁSICA & JUVENTUDE',
-      titulo: 'Poupança Pé-de-Meia & Expansão do Novo FUNDEB',
-      descricao: 'O Programa Pé-de-Meia é uma poupança financeira direta aos estudantes do ensino médio da rede pública cadastrados no CadÚnico, visando combater a evasão escolar e incentivar a conclusão dos estudos e a realização do ENEM.',
-      destaques: [
-        { label: 'Estudantes Beneficiados', valor: '4,08 Milhões de Jovens', ano: 'Ref: 2024' },
-        { label: 'Investimento Federal Total', valor: 'R$ 10,53 Bilhões', ano: 'Ref: 2024/2025' },
-        { label: 'Complementação VAAT da União', valor: 'R$ 46,07 Bilhões', ano: 'Ref: 2024/2025' },
-        { label: 'Incentivo Total por Estudante', valor: 'Até R$ 9.200 no Ciclo', ano: 'Ref: Lei 14.818' }
-      ],
-      impactoPolitico: 'Retenção imediata de jovens das periferias e do interior na escola, reduzindo a evasão no 1º ano do ensino médio em até 35% e dinamizando pequenos comércios locais com os saques mensais de R$ 200.'
-    },
-    previdencia: {
-      categoria: 'PREVIDÊNCIA SOCIAL & SEGURIDADE',
-      titulo: 'Previdência Social RGPS: O Maior Motor de Renda dos Municípios',
-      descricao: 'Em mais de 78% dos municípios brasileiros (mais de 4.300 cidades), o total pago em benefícios do Regime Geral de Previdência Social (aposentadorias urbanas e rurais) supera a receita total arrecadada via Fundo de Participação dos Municípios (FPM).',
-      destaques: [
-        { label: 'Aposentadorias Pagas (RGPS)', valor: 'R$ 606,2 Bilhões', ano: 'Ref: 2024/2025' },
-        { label: 'Aposentadoria / Benefício Rural', valor: 'R$ 121,4 a 218,8 Bi', ano: 'Ref: 2024/2025' },
-        { label: 'Total de Benefícios Mantidos', valor: '35,17 Milhões', ano: 'Ref: 2024/2025' },
-        { label: 'Cidades onde RGPS > FPM', valor: '4.345 Municípios (78%)', ano: 'Ref: 2023/2024' }
-      ],
-      impactoPolitico: 'Sustentáculo absoluto da atividade econômica local em cidades do interior, especialmente no Nordeste, Sul e Centro-Oeste rural, com forte impacto no consumo básico de supermercados e farmácias.'
-    },
-    trabalho: {
-      categoria: 'TRABALHO, EMPREGO & RENDA',
-      titulo: 'Mercado de Trabalho Formal CLT & Suporte ao MEI',
-      descricao: 'O Brasil alcançou recorde histórico com quase 50 milhões de carteiras assinadas no setor privado aliadas a mais de 16,9 milhões de Microempreendedores Individuais (MEIs) formalizados, impulsionados pela valorização do Salário Mínimo e retomada de obras estruturantes.',
-      destaques: [
-        { label: 'Empregos Formais CLT Ativos', valor: '49,66 Milhões', ano: 'Ref: 2024' },
-        { label: 'MEIs Cadastrados', valor: '16,94 Milhões', ano: 'Ref: 2024' },
-        { label: 'Repasse Mensal Bolsa Família', valor: 'R$ 11,96 Bi / mês', ano: 'Ref: 2024' },
-        { label: 'Taxa de Desemprego Nacional', valor: 'Mínima Histórica (< 7%)', ano: 'Ref: 2024/2025' }
-      ],
-      impactoPolitico: 'Sensação palpável de melhora na renda familiar, segurança de direitos trabalhistas e acesso a crédito produtivo, gerando otimismo econômico nas classes trabalhadoras urbanas.'
-    },
-    agro: {
-      categoria: 'AGRICULTURA FAMILIAR & MERENDA ESCOLAR',
-      titulo: 'PNAE Merenda Escolar, Compras da Agricultura Familiar & CONAB',
-      descricao: 'A Lei Federal nº 11.947/2009 determina que no mínimo 30% dos recursos federais repassados pelo FNDE para a merenda escolar (PNAE) devem ser aplicados na compra direta de alimentos produzidos pela agricultura familiar local, promovendo comida saudável nas escolas e renda fixa para os pequenos produtores.',
-      destaques: [
-        { label: 'Compras Agricultura Familiar (PNAE)', valor: 'R$ 1,51 Bilhão', ano: 'Ref: 2024/2025' },
-        { label: 'Alunos Atendidos com Merenda', valor: '40,5 Milhões', ano: 'Ref: 2024/2025' },
-        { label: 'Exigência Legal Mínima', valor: 'No mínimo 30% Local', ano: 'Ref: Lei 11.947' },
-        { label: 'Orçamento Executado CONAB', valor: 'R$ 1,84 Bilhão', ano: 'Ref: 2024' }
-      ],
-      impactoPolitico: 'Fortalecimento da economia solidária no campo, fixação do agricultor familiar na terra, garantia de preço justo via estoques públicos da CONAB e qualidade nutricional para crianças das redes públicas municipais e estaduais.'
-    }
-  };
+  const escopo = obterEscopoTerritorialModal();
 
-  const cfg = configs[tipo] || configs.saude;
+  if (scopeBadge) {
+    if (escopo.isBrasil) {
+      scopeBadge.textContent = '📍 Brasil (Consolidado) • 5.571 Cidades';
+      scopeBadge.style.background = '#EEF2FF';
+      scopeBadge.style.color = '#1E40AF';
+      scopeBadge.style.borderColor = '#CBD5E1';
+    } else {
+      scopeBadge.textContent = `📍 Filtro Ativo: ${escopo.nomeTerritorio} (${formatarNumero(escopo.totalCidades)} ${escopo.totalCidades === 1 ? 'cidade' : 'cidades'})`;
+      scopeBadge.style.background = '#FEF3C7';
+      scopeBadge.style.color = '#92400E';
+      scopeBadge.style.borderColor = '#FCD34D';
+    }
+  }
+
+  let cfg = null;
+
+  if (escopo.isBrasil) {
+    const configsNacionais = {
+      saude: {
+        categoria: 'SAÚDE PÚBLICA & ASSISTÊNCIA FARMACÊUTICA',
+        titulo: 'Farmácia Popular do Brasil: Cobertura, Economia e Saúde Integral',
+        descricao: 'O Programa Farmácia Popular garante medicamentos 100% gratuitos para diabetes, hipertensão, asma e osteoporose, além de anticoncepcionais e fraldas geriátricas com copagamento reduzido.',
+        destaques: [
+          { label: 'Pessoas Atendidas no Brasil', valor: '12,96 Milhões', ano: 'Ref: 2024' },
+          { label: 'Economia Anual para Famílias', valor: 'R$ 7,73 Bilhões', ano: 'Ref: 2024' },
+          { label: 'Municípios com Cobertura Ativa', valor: '5.571 Cidades (100%)', ano: 'Ref: 2024/2025' },
+          { label: 'Medicamentos Gratuitos Disponíveis', valor: '40+ Itens Essenciais', ano: 'Ref: Vigente' }
+        ],
+        impactoPolitico: 'Impacto direto no orçamento familiar das classes C, D e E, liberando até 25% da renda de idosos e aposentados que antes era gasta com remédios contínuos.'
+      },
+      educacao: {
+        categoria: 'EDUCAÇÃO BÁSICA & JUVENTUDE',
+        titulo: 'Poupança Pé-de-Meia & Expansão do Novo FUNDEB',
+        descricao: 'O Programa Pé-de-Meia é uma poupança financeira direta aos estudantes do ensino médio da rede pública cadastrados no CadÚnico, visando combater a evasão escolar e incentivar a conclusão dos estudos e a realização do ENEM.',
+        destaques: [
+          { label: 'Estudantes Beneficiados', valor: '4,08 Milhões de Jovens', ano: 'Ref: 2024' },
+          { label: 'Investimento Federal Total', valor: 'R$ 10,53 Bilhões', ano: 'Ref: 2024/2025' },
+          { label: 'Complementação VAAT da União', valor: 'R$ 46,07 Bilhões', ano: 'Ref: 2024/2025' },
+          { label: 'Incentivo Total por Estudante', valor: 'Até R$ 9.200 no Ciclo', ano: 'Ref: Lei 14.818' }
+        ],
+        impactoPolitico: 'Retenção imediata de jovens das periferias e do interior na escola, reduzindo a evasão no 1º ano do ensino médio em até 35% e dinamizando pequenos comércios locais com os saques mensais de R$ 200.'
+      },
+      previdencia: {
+        categoria: 'PREVIDÊNCIA SOCIAL & SEGURIDADE',
+        titulo: 'Previdência Social RGPS: O Maior Motor de Renda dos Municípios',
+        descricao: 'Em mais de 78% dos municípios brasileiros (mais de 4.300 cidades), o total pago em benefícios do Regime Geral de Previdência Social (aposentadorias urbanas e rurais) supera a receita total arrecadada via Fundo de Participação dos Municípios (FPM).',
+        destaques: [
+          { label: 'Aposentadorias Pagas (RGPS)', valor: 'R$ 606,2 Bilhões', ano: 'Ref: 2024/2025' },
+          { label: 'Aposentadoria / Benefício Rural', valor: 'R$ 121,4 a 218,8 Bi', ano: 'Ref: 2024/2025' },
+          { label: 'Total de Benefícios Mantidos', valor: '35,17 Milhões', ano: 'Ref: 2024/2025' },
+          { label: 'Cidades onde RGPS > FPM', valor: '4.345 Municípios (78%)', ano: 'Ref: 2023/2024' }
+        ],
+        impactoPolitico: 'Sustentáculo absoluto da atividade econômica local em cidades do interior, especialmente no Nordeste, Sul e Centro-Oeste rural, com forte impacto no consumo básico de supermercados e farmácias.'
+      },
+      trabalho: {
+        categoria: 'TRABALHO, EMPREGO & RENDA',
+        titulo: 'Mercado de Trabalho Formal CLT & Suporte ao MEI',
+        descricao: 'O Brasil alcançou recorde histórico com quase 50 milhões de carteiras assinadas no setor privado aliadas a mais de 16,9 milhões de Microempreendedores Individuais (MEIs) formalizados, impulsionados pela valorização do Salário Mínimo e retomada de obras estruturantes.',
+        destaques: [
+          { label: 'Empregos Formais CLT Ativos', valor: '49,66 Milhões', ano: 'Ref: 2024' },
+          { label: 'MEIs Cadastrados', valor: '16,94 Milhões', ano: 'Ref: 2024' },
+          { label: 'Repasse Mensal Bolsa Família', valor: 'R$ 11,96 Bi / mês', ano: 'Ref: 2024' },
+          { label: 'Taxa de Desemprego Nacional', valor: 'Mínima Histórica (< 7%)', ano: 'Ref: 2024/2025' }
+        ],
+        impactoPolitico: 'Sensação palpável de melhora na renda familiar, segurança de direitos trabalhistas e acesso a crédito produtivo, gerando otimismo econômico nas classes trabalhadoras urbanas.'
+      },
+      agro: {
+        categoria: 'AGRICULTURA FAMILIAR & MERENDA ESCOLAR',
+        titulo: 'PNAE Merenda Escolar, Compras da Agricultura Familiar & CONAB',
+        descricao: 'A Lei Federal nº 11.947/2009 determina que no mínimo 30% dos recursos federais repassados pelo FNDE para a merenda escolar (PNAE) devem ser aplicados na compra direta de alimentos produzidos pela agricultura familiar local, promovendo comida saudável nas escolas e renda fixa para os pequenos produtores.',
+        destaques: [
+          { label: 'Compras Agricultura Familiar (PNAE)', valor: 'R$ 1,51 Bilhão', ano: 'Ref: 2024/2025' },
+          { label: 'Alunos Atendidos com Merenda', valor: '40,5 Milhões', ano: 'Ref: 2024/2025' },
+          { label: 'Exigência Legal Mínima', valor: 'No mínimo 30% Local', ano: 'Ref: Lei 11.947' },
+          { label: 'Orçamento Executado CONAB', valor: 'R$ 1,84 Bilhão', ano: 'Ref: 2024' }
+        ],
+        impactoPolitico: 'Fortalecimento da economia solidária no campo, fixação do agricultor familiar na terra, garantia de preço justo via estoques públicos da CONAB e qualidade nutricional para crianças das redes públicas municipais e estaduais.'
+      }
+    };
+    cfg = configsNacionais[tipo] || configsNacionais.saude;
+  } else {
+    // Cálculo Dinâmico Calibrado com base no Território Ativo
+    const totalCidades = escopo.totalCidades;
+    const isMunUnico = totalCidades === 1;
+    const munUnico = isMunUnico ? escopo.cidades[0] : null;
+    const popTot = escopo.cidades.reduce((s, c) => s + (c.pop || 0), 0);
+
+    const fpAtendidos = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * (c.ind?.fp || 0) / 100), 0);
+    const fpEconomia = fpAtendidos * 600;
+
+    const pdmJovens = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * 0.03 * (c.ind?.pdm || 60) / 100), 0);
+    const pdmInvest = pdmJovens * 2580;
+    const fundebVaat = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * (c.ind?.fundeb || 15.9) / 100), 0) * 1420;
+    const etiMatriculas = escopo.cidades.reduce((s, c) => s + (c.eti?.mat || 0), 0);
+
+    const prevBenef = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * (c.ind?.apos || 0) / 100), 0);
+    const prevValor = prevBenef * 17235;
+    const prevRuralValor = prevValor * (121.4 / 606.2);
+    const mediaPesoPib = totalCidades > 0 ? (escopo.cidades.reduce((s, c) => s + (c.ind?.prev_pib || 0), 0) / totalCidades).toFixed(1) : '0.0';
+
+    const cltVagas = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * (c.ind?.clt || 0) / 100), 0);
+    const meiCad = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * (c.ind?.mei || 0) / 100), 0);
+    const bfFamilias = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * (c.ind?.bf || 0) / 100), 0);
+    const bfRepasse = bfFamilias * 575;
+    const servidores = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * (c.ind?.serv || 0) / 100), 0);
+
+    const agroAlunos = escopo.cidades.reduce((s, c) => s + ((c.pop || 0) * 0.1995), 0);
+    const agroValor = agroAlunos * 37.28;
+    const agroComprasFamiliar = agroValor * 0.35;
+
+    const configsLocais = {
+      saude: {
+        categoria: 'SAÚDE PÚBLICA & ASSISTÊNCIA FARMACÊUTICA',
+        titulo: `Farmácia Popular: Cobertura e Alívio Financeiro • ${escopo.nomeTerritorio}`,
+        descricao: `Em ${escopo.nomeTerritorio} (população de ${formatarNumero(popTot)} habitantes), o Programa Farmácia Popular garante medicamentos 100% gratuitos para diabetes, hipertensão e asma, gerando alívio financeiro direto para as famílias e reduzindo a pressão sobre os postos de saúde municipais.`,
+        destaques: [
+          { label: `Pessoas Atendidas (${isMunUnico ? 'No Município' : 'No Território'})`, valor: `${formatarGrandeza(fpAtendidos)}`, ano: 'Ref: 2024' },
+          { label: 'Economia Anual das Famílias', valor: `${formatarGrandeza(fpEconomia, true)}`, ano: 'Ref: 2024' },
+          { label: isMunUnico ? 'Cobertura na População' : 'Cidades Abrangidas', valor: isMunUnico ? `${(munUnico.ind?.fp || 0).toFixed(1)}% dos Habitantes` : `${formatarNumero(totalCidades)} Municípios`, ano: 'Ref: 2024/2025' },
+          { label: isMunUnico && munUnico.sde ? 'Hipertensão e Diabetes Atendidos' : 'Medicamentos Gratuitos', valor: isMunUnico && munUnico.sde ? `${formatarNumero((munUnico.sde.hip || 0) + (munUnico.sde.diab || 0))} Pacientes` : '40+ Itens Essenciais', ano: isMunUnico ? 'Ref: SUS 2024' : 'Ref: Vigente' }
+        ],
+        impactoPolitico: `Impacto socioeconômico direto no orçamento familiar de ${escopo.nomeTerritorio}, liberando renda de idosos e famílias vulneráveis que antes seria consumida em farmácias comerciais, além de prevenir agravamentos e internações cardiovasculares.`
+      },
+      educacao: {
+        categoria: 'EDUCAÇÃO BÁSICA & JUVENTUDE',
+        titulo: `Poupança Pé-de-Meia & Expansão do Ensino Básico • ${escopo.nomeTerritorio}`,
+        descricao: `Em ${escopo.nomeTerritorio}, a poupança estudantil Pé-de-Meia protege os estudantes do ensino médio público com incentivo mensal de R$ 200 mais bônus de matrícula e ENEM, combatendo a evasão escolar e apoiando o desenvolvimento da juventude.`,
+        destaques: [
+          { label: 'Estudantes Beneficiados Pé-de-Meia', valor: `${formatarGrandeza(pdmJovens)} Jovens`, ano: 'Ref: 2024/2025' },
+          { label: 'Injeção Federal Pé-de-Meia', valor: `${formatarGrandeza(pdmInvest, true)} / ano`, ano: 'Ref: MEC 2024' },
+          { label: 'Complementação VAAT FUNDEB', valor: `${formatarGrandeza(fundebVaat, true)}`, ano: 'Ref: FUNDEB 2024' },
+          { label: etiMatriculas > 0 ? 'Matrículas Tempo Integral (ETI)' : 'Incentivo Máximo / Estudante', valor: etiMatriculas > 0 ? `${formatarGrandeza(etiMatriculas)} Vagas ETI` : 'Até R$ 9.200 no Ciclo', ano: etiMatriculas > 0 ? 'Ref: ETI 2024' : 'Ref: Lei 14.818' }
+        ],
+        impactoPolitico: `Redução drástica do abandono escolar de jovens em idade produtiva em ${escopo.nomeTerritorio}, mantendo os alunos na sala de aula e dinamizando a economia de bairros e comércios locais com os saques mensais.`
+      },
+      previdencia: {
+        categoria: 'PREVIDÊNCIA SOCIAL & SEGURIDADE',
+        titulo: `Previdência Social RGPS: Motor de Renda Local • ${escopo.nomeTerritorio}`,
+        descricao: `Em ${escopo.nomeTerritorio}, os benefícios pagos pelo Regime Geral de Previdência Social (aposentadorias urbanas e rurais) constituem a principal base de sustentação da economia local, injetando recursos regulares no comércio e serviços.`,
+        destaques: [
+          { label: 'Total Pago em Benefícios RGPS', valor: `${formatarGrandeza(prevValor, true)} / ano`, ano: 'Ref: 2024/2025' },
+          { label: 'Aposentadorias e Benefício Rural', valor: `${formatarGrandeza(prevRuralValor, true)} / ano`, ano: 'Ref: 2024/2025' },
+          { label: 'Beneficiários Mantidos (INSS)', valor: `${formatarGrandeza(prevBenef)} Pessoas`, ano: 'Ref: 2024/2025' },
+          { label: isMunUnico ? 'Peso da Previdência no PIB' : 'Peso Médio no PIB Municipal', valor: isMunUnico ? `${munUnico.ind?.prev_pib || 0}% do PIB Local` : `${mediaPesoPib}% do PIB`, ano: 'Ref: MPS / IBGE' }
+        ],
+        impactoPolitico: `Segurança social contínua em ${escopo.nomeTerritorio}: o dinheiro das aposentadorias circula integralmente na economia municipal, sustentando supermercados, farmácias e feiras livres mesmo em momentos de crise ou entressafra.`
+      },
+      trabalho: {
+        categoria: 'TRABALHO, EMPREGO & RENDA',
+        titulo: `Mercado de Trabalho, MEIs e Proteção de Renda • ${escopo.nomeTerritorio}`,
+        descricao: `Em ${escopo.nomeTerritorio}, o mercado de trabalho combina carteiras assinadas protegidas pela CLT e microempreendedores formalizados (MEI), articulados com a rede de proteção social do Bolsa Família.`,
+        destaques: [
+          { label: 'Empregos Formais CLT Ativos', valor: `${formatarGrandeza(cltVagas)}`, ano: 'Ref: 2024' },
+          { label: 'Microempreendedores MEI', valor: `${formatarGrandeza(meiCad)} MEIs`, ano: 'Ref: 2024' },
+          { label: 'Repasse Mensal Bolsa Família', valor: `${formatarGrandeza(bfRepasse, true)} / mês`, ano: 'Ref: 2024' },
+          { label: isMunUnico ? 'Servidores Públicos Ativos' : 'Famílias Cadastradas no BF', valor: isMunUnico ? `${formatarGrandeza(servidores)} Servidores` : `${formatarGrandeza(bfFamilias)} Famílias`, ano: 'Ref: 2024' }
+        ],
+        impactoPolitico: `Aquecimento da economia popular e segurança de renda para trabalhadores de ${escopo.nomeTerritorio}, estimulando contratações, microcrédito e circulação contínua de recursos.`
+      },
+      agro: {
+        categoria: 'AGRICULTURA FAMILIAR & MERENDA ESCOLAR',
+        titulo: `Alimentação Escolar PNAE e Agricultura Familiar • ${escopo.nomeTerritorio}`,
+        descricao: `Em ${escopo.nomeTerritorio}, o Programa Nacional de Alimentação Escolar (PNAE) assegura refeições de qualidade para os estudantes e impulsiona os produtores rurais com compras locais garantidas pela Lei 11.947/2009.`,
+        destaques: [
+          { label: 'Compras Agricultura Familiar (Mín. 30%)', valor: `${formatarGrandeza(agroComprasFamiliar, true)} / ano`, ano: 'Ref: Lei 11.947' },
+          { label: 'Repasse Federal Merenda (PNAE)', valor: `${formatarGrandeza(agroValor, true)} / ano`, ano: 'Ref: FNDE 2024' },
+          { label: 'Alunos Atendidos com Alimentação', valor: `${formatarGrandeza(agroAlunos)} Estudantes`, ano: 'Ref: Censo Escolar' },
+          { label: isMunUnico ? 'Exigência Legal Obrigatória' : 'Municípios Produtores', valor: isMunUnico ? 'Mínimo 30% Local' : `${formatarNumero(totalCidades)} Cidades`, ano: 'Ref: Lei 11.947' }
+        ],
+        impactoPolitico: `Fortalecimento de cooperativas e agricultores familiares locais em ${escopo.nomeTerritorio}, gerando renda no campo e garantindo alimentação fresca e saudável para as crianças nas escolas.`
+      }
+    };
+    cfg = configsLocais[tipo] || configsLocais.saude;
+  }
 
   catEl.textContent = cfg.categoria;
   titleEl.textContent = cfg.titulo;
@@ -4242,7 +4721,7 @@ function abrirModalPrioridade(tipo) {
       </div>
 
       <div style="background: #F0FDF4; border-left: 4px solid #16A34A; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
-        <strong style="color: #166534; font-size: 0.85rem;">🎯 Impacto Estratégico no Município:</strong>
+        <strong style="color: #166534; font-size: 0.85rem;">🎯 Impacto Estratégico no Território:</strong>
         <p style="color: #15803D; font-size: 0.82rem; margin: 4px 0 0 0; line-height: 1.4;">${cfg.impactoPolitico}</p>
       </div>
 
