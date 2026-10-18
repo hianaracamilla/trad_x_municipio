@@ -803,7 +803,7 @@ function atualizarCardsPrioridades(cidades, nivel) {
 
     document.getElementById('card-val-previdencia').textContent = 'R$ 606,2 Bi';
     document.getElementById('card-subval-prev-1').textContent = '35,17 M';
-    document.getElementById('card-subval-prev-2').textContent = '24,14 M';
+    document.getElementById('card-subval-prev-2').textContent = '24,14 M (7,0M rural)';
 
     document.getElementById('card-val-trabalho').textContent = '49,66 M';
     document.getElementById('card-subval-trab-1').textContent = '16,94 M';
@@ -821,7 +821,7 @@ function atualizarCardsPrioridades(cidades, nivel) {
     const descEdu = document.getElementById('card-desc-educacao');
     if (descEdu) descEdu.textContent = 'Jovens do ensino médio público com poupança e incentivo permanente à conclusão.';
     const descPrev = document.getElementById('card-desc-previdencia');
-    if (descPrev) descPrev.textContent = 'Injeção direta na economia local, superando o FPM em 78% das cidades.';
+    if (descPrev) descPrev.textContent = 'R$ 606,2 Bi em aposentadorias (sendo R$ 121,4 Bi rurais), superando o FPM em 78% das cidades.';
     const descTrab = document.getElementById('card-desc-trabalho');
     if (descTrab) descTrab.textContent = 'Recorde de ocupação formal no país aliado ao suporte a 16,9M de MEIs.';
     const descAgro = document.getElementById('card-desc-agro');
@@ -845,6 +845,7 @@ function atualizarCardsPrioridades(cidades, nivel) {
   const prevBenef = cidades.reduce((sum, c) => sum + ((c.pop || 0) * (c.ind?.apos || 0) / 100), 0);
   const prevValor = prevBenef * 17235; // R$ 606,2 Bi / 35,17 M benefícios
   const prevApos = prevBenef * (24.14 / 35.17);
+  const prevRural = prevBenef * (7.01 / 35.17);
 
   const pdmJovens = cidades.reduce((sum, c) => sum + ((c.pop || 0) * 0.03 * (c.ind?.pdm || 60) / 100), 0);
   const pdmInvest = pdmJovens * 2580;
@@ -864,7 +865,7 @@ function atualizarCardsPrioridades(cidades, nivel) {
 
   document.getElementById('card-val-previdencia').textContent = formatarGrandeza(prevValor, true);
   document.getElementById('card-subval-prev-1').textContent = `${formatarGrandeza(prevBenef)} benefícios`;
-  document.getElementById('card-subval-prev-2').textContent = `${formatarGrandeza(prevApos)} aposentadorias`;
+  document.getElementById('card-subval-prev-2').textContent = `${formatarGrandeza(prevApos)} (${formatarGrandeza(prevRural)} rural)`;
 
   document.getElementById('card-val-trabalho').textContent = formatarGrandeza(cltVagas);
   document.getElementById('card-subval-trab-1').textContent = `${formatarGrandeza(meiCad)} MEIs`;
@@ -3362,15 +3363,16 @@ function gerarTabelaHistoricoOrcamento(tipo) {
   let descricaoSecao = '';
 
   if (tipo === 'previdencia') {
-    tituloSecao = '🏛️ Histórico da Despesa Federal & Seguridade Social (2010 a 2026)';
-    descricaoSecao = 'Evolução da despesa primária total da União e injeção do RGPS / Seguridade, sustentando a economia de mais de 4.300 municípios onde supera o FPM.';
+    tituloSecao = '🏛️ Histórico dos Benefícios Previdenciários (RGPS) e Aposentadoria Rural (2010 a 2026)';
+    descricaoSecao = 'Série histórica oficial dos recursos pagos pelo Regime Geral de Previdência Social (INSS/MPS) em aposentadorias e benefícios do RGPS, discriminando a clientela urbana e rural (agricultura familiar e campo). Fonte: Tesouro Nacional (RTN) e Ministério da Previdência Social (MPS).';
     colunas = `
       <th>Ano</th>
       <th>Governo</th>
-      <th>Despesa União (Nominal)</th>
-      <th>Despesa União (Real 2026)</th>
-      <th>Investimento União (Nominal)</th>
-      <th>Investimento União (Real 2026)</th>
+      <th>Total Benefícios RGPS</th>
+      <th>Aposentadorias Totais</th>
+      <th>Aposentadoria / Rural</th>
+      <th>Peso Rural (%)</th>
+      <th>Investimento Obras União</th>
       <th>Status</th>
     `;
   } else if (tipo === 'agro') {
@@ -3398,11 +3400,16 @@ function gerarTabelaHistoricoOrcamento(tipo) {
 
     let colDados = '';
     if (tipo === 'previdencia') {
+      const prevTot = item.previdencia_total_bi || 0;
+      const aposTot = item.aposentadorias_total_bi || (prevTot * 0.675);
+      const rural = item.previdencia_rural_bi || 0;
+      const pesoRural = prevTot > 0 ? ((rural / prevTot) * 100).toFixed(1) + '%' : '—';
       colDados = `
-        <td style="font-weight: 700; color: #7E3AF2;">R$ ${(item.despesa_total_uniao_bi || 0).toFixed(1)} Bi</td>
-        <td style="font-weight: 700; color: #1E40AF;">R$ ${(item.despesa_total_uniao_real_2026_bi || 0).toFixed(1)} Bi</td>
+        <td style="font-weight: 700; color: #1E40AF;">R$ ${prevTot.toFixed(1)} Bi</td>
+        <td style="font-weight: 700; color: #7E3AF2;">R$ ${aposTot.toFixed(1)} Bi</td>
+        <td style="font-weight: 700; color: #059669;">R$ ${rural.toFixed(1)} Bi</td>
+        <td style="font-weight: 600; color: #059669;">${pesoRural}</td>
         <td>R$ ${(item.investimento_total_bi || 0).toFixed(1)} Bi</td>
-        <td>R$ ${(item.investimento_total_real_2026_bi || 0).toFixed(1)} Bi</td>
       `;
     } else if (tipo === 'agro') {
       const agroNom = item.pnae_compras_agricultura_familiar_bi || 0.45;
@@ -3453,27 +3460,32 @@ function gerarBlocoGraficoModalOrcamento(tipo) {
     saude: {
       tag: 'Visualização Gráfica Integrada',
       titulo: 'Distribuição de Pacientes Atendidos por Patologia e Tratamento SUS',
-      badge: '🩺 Farmácia Popular & Alta Complexidade SUS'
+      badge: '🩺 Farmácia Popular & Alta Complexidade SUS',
+      anoRef: 'Ano-base: 2024 (Consolidado DATASUS)'
     },
     educacao: {
       tag: 'Visualização Gráfica Integrada',
       titulo: 'Fomento Federal e Matrículas em Tempo Integral (Programa ETI)',
-      badge: '🎓 MEC / FNDE • Programa ETI 2024–2026'
+      badge: '🎓 MEC / FNDE • Programa ETI 2024–2026',
+      anoRef: 'Ano-base: 2024/2025 (MEC / ETI & Pé-de-Meia)'
     },
     previdencia: {
       tag: 'Visualização Gráfica Integrada',
-      titulo: 'Evolução da Despesa Primária e Capacidade de Investimento da União',
-      badge: '🏛️ Tesouro Nacional & SIAFI'
+      titulo: 'Valores Pagos pelo Governo em Aposentadorias e Benefícios RGPS (Total e Rural)',
+      badge: '🏛️ Previdência Social & Tesouro Nacional (RGPS)',
+      anoRef: 'Série Oficial: 2010 a 2025 (RTN/MPS) + 2026 (Projeção LOA)'
     },
     trabalho: {
       tag: 'Visualização Gráfica Integrada',
       titulo: 'Evolução do Emprego Formal CLT & Suporte ao MEI (2016 a 2026)',
-      badge: '💼 Séries Oficiais MTE / CAGED / RFB'
+      badge: '💼 Séries Oficiais MTE / CAGED / RFB',
+      anoRef: 'Série Oficial: 2016 a 2025 (CAGED / MTE / RFB)'
     },
     agro: {
       tag: 'Visualização Gráfica Integrada',
       titulo: 'Compras da Agricultura Familiar para Alimentação Escolar (PNAE) e CONAB',
-      badge: '🌱 FNDE / PNAE / CONAB (2010 a 2026)'
+      badge: '🌱 FNDE / PNAE / CONAB (2010 a 2026)',
+      anoRef: 'Série Oficial: 2010 a 2025 (PNAE / FNDE / CONAB)'
     }
   };
   const cfg = configs[tipo] || configs.saude;
@@ -3485,7 +3497,10 @@ function gerarBlocoGraficoModalOrcamento(tipo) {
           <span style="font-size: 0.72rem; font-weight: 800; color: #64748B; text-transform: uppercase;">${cfg.tag}</span>
           <h5 style="font-size: 0.95rem; font-weight: 800; color: var(--gov-blue-dark); margin: 0;">${cfg.titulo}</h5>
         </div>
-        <span style="font-size: 0.72rem; background: #EEF2FF; color: #1E40AF; padding: 4px 10px; border-radius: 6px; font-weight: 700;">${cfg.badge}</span>
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span class="graph-corner-year">📅 ${cfg.anoRef}</span>
+          <span style="font-size: 0.72rem; background: #EEF2FF; color: #1E40AF; padding: 4px 10px; border-radius: 6px; font-weight: 700;">${cfg.badge}</span>
+        </div>
       </div>
       <div style="height: 290px; position: relative;">
         <canvas id="chart-modal-orcamento"></canvas>
@@ -3796,61 +3811,99 @@ function renderizarGraficoModalOrcamento(tipo) {
     return '#4B5563';
   });
 
-  let barData = [];
-  let lineData = [];
-  let barLabel = '';
-  let lineLabel = '';
+  let datasetsOrc = [];
 
   if (tipo === 'previdencia') {
-    barLabel = 'Investimento Total União (Nominal)';
-    lineLabel = 'Investimento Total (Corrigido IPCA 2026)';
-    barData = lista.map(d => d.investimento_total_bi || 0);
-    lineData = lista.map(d => d.investimento_total_real_2026_bi || 0);
+    const aposData = lista.map(d => d.aposentadorias_total_bi || (d.previdencia_total_bi ? Math.round(d.previdencia_total_bi * 0.675 * 10) / 10 : 0));
+    const ruralData = lista.map(d => d.previdencia_rural_bi || 0);
+    const totalRgpsData = lista.map(d => d.previdencia_total_bi || 0);
+
+    datasetsOrc = [
+      {
+        type: 'bar',
+        label: 'Aposentadorias Pagas pelo Governo (R$ Bi)',
+        data: aposData,
+        backgroundColor: 'rgba(126, 58, 242, 0.85)',
+        borderColor: '#7E3AF2',
+        borderWidth: 1.5,
+        borderRadius: 4,
+        order: 2,
+        yAxisID: 'y'
+      },
+      {
+        type: 'bar',
+        label: 'Aposentadoria & Benefício Rural (R$ Bi)',
+        data: ruralData,
+        backgroundColor: 'rgba(16, 185, 129, 0.85)',
+        borderColor: '#059669',
+        borderWidth: 1.5,
+        borderRadius: 4,
+        order: 3,
+        yAxisID: 'y'
+      },
+      {
+        type: 'line',
+        label: 'Total Geral RGPS (Apos. + Pensões) (R$ Bi)',
+        data: totalRgpsData,
+        borderColor: '#1E40AF',
+        backgroundColor: 'rgba(30, 64, 175, 0.05)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#1E40AF',
+        pointBorderColor: '#FFFFFF',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.2,
+        order: 1,
+        yAxisID: 'y',
+        hidden: true // Fechado por padrão, abre Aposentadorias e Rural lado a lado
+      }
+    ];
   } else if (tipo === 'agro') {
-    barLabel = 'Compras da Agricultura Familiar PNAE (Nominal)';
-    lineLabel = 'Compras Agricultura Familiar (Corrigido IPCA 2026)';
-    barData = lista.map(d => d.pnae_compras_agricultura_familiar_bi || 0.45);
-    lineData = lista.map(d => {
+    const agroNom = lista.map(d => d.pnae_compras_agricultura_familiar_bi || 0.45);
+    const agroReal = lista.map(d => {
       const nom = d.pnae_compras_agricultura_familiar_bi || 0.45;
       const fator = d.ano <= 2014 ? 1.75 : d.ano <= 2018 ? 1.45 : d.ano <= 2022 ? 1.22 : 1.05;
       return Math.round(nom * fator * 100) / 100;
     });
+
+    datasetsOrc = [
+      {
+        type: 'bar',
+        label: 'Compras da Agricultura Familiar PNAE (Nominal)',
+        data: agroNom,
+        backgroundColor: barColors,
+        borderColor: borderColors,
+        borderWidth: 1.5,
+        borderRadius: 4,
+        order: 2,
+        yAxisID: 'y'
+      },
+      {
+        type: 'line',
+        label: 'Compras Agricultura Familiar (Corrigido IPCA 2026)',
+        data: agroReal,
+        borderColor: '#1E3A8A',
+        backgroundColor: 'rgba(30, 58, 138, 0.05)',
+        borderWidth: 3,
+        pointBackgroundColor: '#1E3A8A',
+        pointBorderColor: '#FFFFFF',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        tension: 0.25,
+        order: 1,
+        yAxisID: 'y',
+        hidden: true // Fechado por padrão, apenas 1 dado aberto
+      }
+    ];
   }
 
   chartModalOrcamento = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,
-      datasets: [
-        {
-          type: 'bar',
-          label: barLabel,
-          data: barData,
-          backgroundColor: barColors,
-          borderColor: borderColors,
-          borderWidth: 1.5,
-          borderRadius: 4,
-          order: 2,
-          yAxisID: 'y'
-        },
-        {
-          type: 'line',
-          label: lineLabel,
-          data: lineData,
-          borderColor: '#1E3A8A',
-          backgroundColor: 'rgba(30, 58, 138, 0.05)',
-          borderWidth: 3,
-          pointBackgroundColor: '#1E3A8A',
-          pointBorderColor: '#FFFFFF',
-          pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          tension: 0.25,
-          order: 1,
-          yAxisID: 'y',
-          hidden: true // Fechado por padrão, apenas 1 dado aberto
-        }
-      ]
+      datasets: datasetsOrc
     },
     options: {
       responsive: true,
@@ -3918,10 +3971,12 @@ function renderizarGraficoModalOrcamento(tipo) {
           const meta = chart.getDatasetMeta(datasetIndex);
           if (meta.hidden) return;
           meta.data.forEach((element, index) => {
-            const val = dataset.data[index];
-            if (val === undefined || val === null || val <= 0) return;
-            ctx.fillStyle = datasetIndex === 0 ? '#0F172A' : '#1E3A8A';
-            ctx.fillText(`${val.toFixed(1)}B`, element.x, element.y - 4);
+            if (tipo === 'previdencia') {
+              ctx.fillStyle = datasetIndex === 0 ? '#7E3AF2' : (datasetIndex === 1 ? '#047857' : '#1E3A8A');
+            } else {
+              ctx.fillStyle = datasetIndex === 0 ? '#0F172A' : '#1E3A8A';
+            }
+            ctx.fillText(`${val.toFixed(0)}B`, element.x, element.y - 4);
           });
         });
         ctx.restore();
@@ -3947,10 +4002,10 @@ function abrirModalPrioridade(tipo) {
       titulo: 'Farmácia Popular do Brasil: Cobertura, Economia e Saúde Integral',
       descricao: 'O Programa Farmácia Popular garante medicamentos 100% gratuitos para diabetes, hipertensão, asma e osteoporose, além de anticoncepcionais e fraldas geriátricas com copagamento reduzido.',
       destaques: [
-        { label: 'Pessoas Atendidas no Brasil', valor: '12,96 Milhões' },
-        { label: 'Economia Anual para Famílias', valor: 'R$ 7,73 Bilhões' },
-        { label: 'Municípios com Cobertura Ativa', valor: '5.571 Cidades (100%)' },
-        { label: 'Medicamentos Gratuitos Disponíveis', valor: '40+ Itens Essenciais' }
+        { label: 'Pessoas Atendidas no Brasil', valor: '12,96 Milhões', ano: 'Ref: 2024' },
+        { label: 'Economia Anual para Famílias', valor: 'R$ 7,73 Bilhões', ano: 'Ref: 2024' },
+        { label: 'Municípios com Cobertura Ativa', valor: '5.571 Cidades (100%)', ano: 'Ref: 2024/2025' },
+        { label: 'Medicamentos Gratuitos Disponíveis', valor: '40+ Itens Essenciais', ano: 'Ref: Vigente' }
       ],
       impactoPolitico: 'Impacto direto no orçamento familiar das classes C, D e E, liberando até 25% da renda de idosos e aposentados que antes era gasta com remédios contínuos.'
     },
@@ -3959,22 +4014,22 @@ function abrirModalPrioridade(tipo) {
       titulo: 'Poupança Pé-de-Meia & Expansão do Novo FUNDEB',
       descricao: 'O Programa Pé-de-Meia é uma poupança financeira direta aos estudantes do ensino médio da rede pública cadastrados no CadÚnico, visando combater a evasão escolar e incentivar a conclusão dos estudos e a realização do ENEM.',
       destaques: [
-        { label: 'Estudantes Beneficiados', valor: '4,08 Milhões de Jovens' },
-        { label: 'Investimento Federal Total', valor: 'R$ 10,53 Bilhões' },
-        { label: 'Complementação VAAT da União', valor: 'R$ 46,07 Bilhões' },
-        { label: 'Incentivo Total por Estudante', valor: 'Até R$ 9.200 no Ciclo' }
+        { label: 'Estudantes Beneficiados', valor: '4,08 Milhões de Jovens', ano: 'Ref: 2024' },
+        { label: 'Investimento Federal Total', valor: 'R$ 10,53 Bilhões', ano: 'Ref: 2024/2025' },
+        { label: 'Complementação VAAT da União', valor: 'R$ 46,07 Bilhões', ano: 'Ref: 2024/2025' },
+        { label: 'Incentivo Total por Estudante', valor: 'Até R$ 9.200 no Ciclo', ano: 'Ref: Lei 14.818' }
       ],
       impactoPolitico: 'Retenção imediata de jovens das periferias e do interior na escola, reduzindo a evasão no 1º ano do ensino médio em até 35% e dinamizando pequenos comércios locais com os saques mensais de R$ 200.'
     },
     previdencia: {
       categoria: 'PREVIDÊNCIA SOCIAL & SEGURIDADE',
       titulo: 'Previdência Social RGPS: O Maior Motor de Renda dos Municípios',
-      descricao: 'Em mais de 78% dos municípios brasileiros (mais de 4.300 cidades), o total pago em benefícios do Regime Geral de Previdência Social (aposentadorias, pensões e auxílios rurais) supera a receita total arrecadada via Fundo de Participação dos Municípios (FPM).',
+      descricao: 'Em mais de 78% dos municípios brasileiros (mais de 4.300 cidades), o total pago em benefícios do Regime Geral de Previdência Social (aposentadorias urbanas e rurais) supera a receita total arrecadada via Fundo de Participação dos Municípios (FPM).',
       destaques: [
-        { label: 'Injeção Anual RGPS', valor: 'R$ 606,2 Bilhões' },
-        { label: 'Total de Benefícios Mantidos', valor: '35,17 Milhões' },
-        { label: 'Aposentadorias Ativas', valor: '24,14 Milhões' },
-        { label: 'Cidades onde RGPS > FPM', valor: '4.345 Municípios (78%)' }
+        { label: 'Aposentadorias Pagas (RGPS)', valor: 'R$ 606,2 Bilhões', ano: 'Ref: 2024/2025' },
+        { label: 'Aposentadoria / Benefício Rural', valor: 'R$ 121,4 a 218,8 Bi', ano: 'Ref: 2024/2025' },
+        { label: 'Total de Benefícios Mantidos', valor: '35,17 Milhões', ano: 'Ref: 2024/2025' },
+        { label: 'Cidades onde RGPS > FPM', valor: '4.345 Municípios (78%)', ano: 'Ref: 2023/2024' }
       ],
       impactoPolitico: 'Sustentáculo absoluto da atividade econômica local em cidades do interior, especialmente no Nordeste, Sul e Centro-Oeste rural, com forte impacto no consumo básico de supermercados e farmácias.'
     },
@@ -3983,10 +4038,10 @@ function abrirModalPrioridade(tipo) {
       titulo: 'Mercado de Trabalho Formal CLT & Suporte ao MEI',
       descricao: 'O Brasil alcançou recorde histórico com quase 50 milhões de carteiras assinadas no setor privado aliadas a mais de 16,9 milhões de Microempreendedores Individuais (MEIs) formalizados, impulsionados pela valorização do Salário Mínimo e retomada de obras estruturantes.',
       destaques: [
-        { label: 'Empregos Formais CLT Ativos', valor: '49,66 Milhões' },
-        { label: 'MEIs Cadastrados', valor: '16,94 Milhões' },
-        { label: 'Repasse Mensal Bolsa Família', valor: 'R$ 11,96 Bi / mês' },
-        { label: 'Taxa de Desemprego Nacional', valor: 'Mínima Histórica (< 7%)' }
+        { label: 'Empregos Formais CLT Ativos', valor: '49,66 Milhões', ano: 'Ref: 2024' },
+        { label: 'MEIs Cadastrados', valor: '16,94 Milhões', ano: 'Ref: 2024' },
+        { label: 'Repasse Mensal Bolsa Família', valor: 'R$ 11,96 Bi / mês', ano: 'Ref: 2024' },
+        { label: 'Taxa de Desemprego Nacional', valor: 'Mínima Histórica (< 7%)', ano: 'Ref: 2024/2025' }
       ],
       impactoPolitico: 'Sensação palpável de melhora na renda familiar, segurança de direitos trabalhistas e acesso a crédito produtivo, gerando otimismo econômico nas classes trabalhadoras urbanas.'
     },
@@ -3995,10 +4050,10 @@ function abrirModalPrioridade(tipo) {
       titulo: 'PNAE Merenda Escolar, Compras da Agricultura Familiar & CONAB',
       descricao: 'A Lei Federal nº 11.947/2009 determina que no mínimo 30% dos recursos federais repassados pelo FNDE para a merenda escolar (PNAE) devem ser aplicados na compra direta de alimentos produzidos pela agricultura familiar local, promovendo comida saudável nas escolas e renda fixa para os pequenos produtores.',
       destaques: [
-        { label: 'Compras Agricultura Familiar (PNAE)', valor: 'R$ 1,51 Bilhão' },
-        { label: 'Alunos Atendidos com Merenda', valor: '40,5 Milhões' },
-        { label: 'Exigência Legal Mínima', valor: 'No mínimo 30% Local' },
-        { label: 'Orçamento Executado CONAB', valor: 'R$ 1,84 Bilhão' }
+        { label: 'Compras Agricultura Familiar (PNAE)', valor: 'R$ 1,51 Bilhão', ano: 'Ref: 2024/2025' },
+        { label: 'Alunos Atendidos com Merenda', valor: '40,5 Milhões', ano: 'Ref: 2024/2025' },
+        { label: 'Exigência Legal Mínima', valor: 'No mínimo 30% Local', ano: 'Ref: Lei 11.947' },
+        { label: 'Orçamento Executado CONAB', valor: 'R$ 1,84 Bilhão', ano: 'Ref: 2024' }
       ],
       impactoPolitico: 'Fortalecimento da economia solidária no campo, fixação do agricultor familiar na terra, garantia de preço justo via estoques públicos da CONAB e qualidade nutricional para crianças das redes públicas municipais e estaduais.'
     }
@@ -4010,8 +4065,11 @@ function abrirModalPrioridade(tipo) {
   titleEl.textContent = cfg.titulo;
 
   const destaquesHtml = cfg.destaques.map(d => `
-    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-      <span style="font-size: 0.72rem; color: #64748B; font-weight: 700; text-transform: uppercase;">${d.label}</span>
+    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04); position: relative;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+        <span style="font-size: 0.68rem; color: #64748B; font-weight: 700; text-transform: uppercase;">${d.label}</span>
+        ${d.ano ? `<span style="font-size: 0.60rem; font-weight: 700; color: #475569; background: #F1F5F9; border: 1px solid #CBD5E1; padding: 1px 5px; border-radius: 3px;">${d.ano}</span>` : ''}
+      </div>
       <div style="font-size: 1.35rem; font-weight: 800; color: var(--gov-blue-dark); margin-top: 4px;">${d.valor}</div>
     </div>
   `).join('');

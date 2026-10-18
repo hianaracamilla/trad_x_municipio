@@ -139,6 +139,7 @@ totais_nacionais = {
         "detalhes": [
             {"rotulo": "Benefícios RGPS totais", "valor": "35.173.071 benefícios"},
             {"rotulo": "Aposentadorias concedidas", "valor": "24.144.902 aposentados"},
+            {"rotulo": "Aposentadoria & Benefício Rural", "valor": "7.012.090 rurais (R$ 121,4 a 218,8 Bi)"},
             {"rotulo": "Massa anual de aposentadorias", "valor": "R$ 606,24 Bilhões"},
             {"rotulo": "Impacto médio no PIB local", "valor": "Até 17,6% do PIB em municípios pequenos"}
         ],
