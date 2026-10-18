@@ -3658,40 +3658,36 @@ function gerarTabelaHistoricoOrcamento(tipo) {
 }
 
 function gerarBlocoGraficoModalOrcamento(tipo) {
-  const escopo = obterEscopoTerritorialModal();
-  const isBrasil = escopo.isBrasil;
-  const locNome = escopo.nomeTerritorio;
-
   const configs = {
     saude: {
-      tag: isBrasil ? 'Visualização Gráfica Integrada' : `Visualização Local • ${locNome}`,
-      titulo: isBrasil ? 'Distribuição de Pacientes Atendidos por Patologia e Tratamento SUS' : `Pacientes Atendidos por Linha de Cuidado SUS • ${locNome}`,
-      badge: isBrasil ? '🩺 Farmácia Popular & Alta Complexidade SUS' : `🩺 ${locNome} (${formatarNumero(escopo.totalCidades)} ${escopo.totalCidades === 1 ? 'cidade' : 'cidades'})`,
-      anoRef: isBrasil ? 'Ano-base: 2024 (Consolidado DATASUS)' : 'Ref: 2024 (SUS / DATASUS / MS)'
+      tag: 'Visualização Gráfica Integrada',
+      titulo: 'Distribuição de Pacientes Atendidos por Patologia e Tratamento SUS',
+      badge: '🩺 Farmácia Popular & Alta Complexidade SUS',
+      anoRef: 'Ano-base: 2024 (Consolidado DATASUS)'
     },
     educacao: {
-      tag: isBrasil ? 'Visualização Gráfica Integrada' : `Visualização Territorial • ${locNome}`,
-      titulo: isBrasil ? 'Fomento Federal e Matrículas em Tempo Integral (Programa ETI)' : (escopo.totalCidades === 1 ? `Indicadores de Educação Básica e Pé-de-Meia • ${locNome}` : `Destaques em Tempo Integral (ETI) • ${locNome}`),
-      badge: isBrasil ? '🎓 MEC / FNDE • Programa ETI 2024–2026' : `🎓 Educação Básica • ${locNome}`,
+      tag: 'Visualização Gráfica Integrada',
+      titulo: 'Fomento Federal e Matrículas em Tempo Integral (Programa ETI)',
+      badge: '🎓 MEC / FNDE • Programa ETI 2024–2026',
       anoRef: 'Ano-base: 2024/2025 (MEC / ETI & Pé-de-Meia)'
     },
     previdencia: {
-      tag: isBrasil ? 'Visualização Gráfica Integrada' : `Visualização Territorial • ${locNome}`,
-      titulo: isBrasil ? 'Valores Pagos pelo Governo em Aposentadorias e Benefícios RGPS (Total e Rural)' : (escopo.totalCidades === 1 ? `Injeção de Benefícios Previdenciários vs FPM • ${locNome}` : `Maiores Injeções Previdenciárias RGPS • ${locNome}`),
-      badge: isBrasil ? '🏛️ Previdência Social & Tesouro Nacional (RGPS)' : `🏛️ RGPS / MPS • ${locNome}`,
-      anoRef: isBrasil ? 'Série Oficial: 2010 a 2025 (RTN/MPS) + 2026 (Projeção LOA)' : 'Ano-base: 2024/2025 (MPS / DATAPREV)'
+      tag: 'Visualização Gráfica Integrada',
+      titulo: 'Valores Pagos pelo Governo em Aposentadorias e Benefícios RGPS (Total e Rural)',
+      badge: '🏛️ Previdência Social & Tesouro Nacional (RGPS)',
+      anoRef: 'Série Oficial: 2010 a 2025 (RTN/MPS) + 2026 (Projeção LOA)'
     },
     trabalho: {
-      tag: isBrasil ? 'Visualização Gráfica Integrada' : `Visualização Territorial • ${locNome}`,
-      titulo: isBrasil ? 'Evolução do Emprego Formal CLT & Suporte ao MEI (2016 a 2026)' : (escopo.totalCidades === 1 ? `Distribuição da Força de Trabalho & Renda • ${locNome}` : `Empregos Formais CLT e MEIs • ${locNome}`),
-      badge: isBrasil ? '💼 Séries Oficiais MTE / CAGED / RFB' : `💼 Mercado de Trabalho • ${locNome}`,
-      anoRef: isBrasil ? 'Série Oficial: 2016 a 2025 (CAGED / MTE / RFB)' : 'Ref: 2024 (CAGED / MTE / RFB)'
+      tag: 'Visualização Gráfica Integrada',
+      titulo: 'Evolução do Emprego Formal CLT & Suporte ao MEI (2016 a 2026)',
+      badge: '💼 Séries Oficiais MTE / CAGED / RFB',
+      anoRef: 'Série Oficial: 2016 a 2025 (CAGED / MTE / RFB)'
     },
     agro: {
-      tag: isBrasil ? 'Visualização Gráfica Integrada' : `Visualização Territorial • ${locNome}`,
-      titulo: isBrasil ? 'Compras da Agricultura Familiar para Alimentação Escolar (PNAE) e CONAB' : (escopo.totalCidades === 1 ? `Alimentação Escolar e Compras da Agricultura Familiar • ${locNome}` : `Repasses PNAE e Demanda Agricultura Familiar • ${locNome}`),
-      badge: isBrasil ? '🌱 FNDE / PNAE / CONAB' : `🌱 Merenda PNAE • ${locNome}`,
-      anoRef: isBrasil ? 'Série Oficial: 2010 a 2025 (PNAE / FNDE / CONAB)' : 'Ref: 2024/2025 (FNDE / PNAE)'
+      tag: 'Visualização Gráfica Integrada',
+      titulo: 'Compras da Agricultura Familiar para Alimentação Escolar (PNAE) e CONAB',
+      badge: '🌱 FNDE / PNAE / CONAB (2010 a 2026)',
+      anoRef: 'Série Oficial: 2010 a 2025 (PNAE / FNDE / CONAB)'
     }
   };
   const cfg = configs[tipo] || configs.saude;
@@ -3728,39 +3724,17 @@ function renderizarGraficoModalOrcamento(tipo) {
   }
 
   const ctx = canvas.getContext('2d');
-  const escopo = obterEscopoTerritorialModal();
 
   // Caso 1: Saúde Pública (Farmácia Popular & Alta Complexidade SUS)
   if (tipo === 'saude') {
-    let sde = {};
-    if (escopo.isBrasil) {
-      sde = APP_DATA.saude_nacional || {};
-    } else if (escopo.totalCidades === 1) {
-      sde = escopo.cidades[0].sde || {};
-    } else {
-      sde = escopo.cidades.reduce((acc, c) => {
-        const cs = c.sde || {};
-        acc.hip = (acc.hip || 0) + (cs.hip || 0);
-        acc.amb = (acc.amb || 0) + (cs.amb || 0);
-        acc.diab = (acc.diab || 0) + (cs.diab || 0);
-        acc.asma = (acc.asma || 0) + (cs.asma || 0);
-        acc.ac = (acc.ac || 0) + (cs.ac || 0);
-        acc.quim = (acc.quim || 0) + (cs.quim || 0);
-        acc.rad = (acc.rad || 0) + (cs.rad || 0);
-        return acc;
-      }, {});
-    }
-
-    const isGrandezaMilhoes = escopo.isBrasil || (sde.hip > 500000);
-    const divisor = isGrandezaMilhoes ? 1000000 : 1;
-
-    const hipTot = Math.round(((sde.fp_so_hipertensao || sde.hip || 0) / divisor) * 100) / 100;
-    const ambTot = Math.round(((sde.fp_hipertensao_e_diabetes || sde.amb || 0) / divisor) * 100) / 100;
-    const diabTot = Math.round(((sde.fp_so_diabetes || sde.diab || 0) / divisor) * 100) / 100;
-    const asmaTot = Math.round(((sde.fp_asma || sde.asma || 0) / divisor) * 100) / 100;
-    const acTot = Math.round(((sde.alto_custo || sde.ac || 0) / divisor) * 100) / 100;
-    const quimTot = Math.round(((sde.quimioterapia || sde.quim || 0) / divisor) * 100) / 100;
-    const radTot = Math.round(((sde.radioterapia || sde.rad || 0) / divisor) * 100) / 100;
+    const sde = (activeRaioXCity && activeRaioXCity.sde) ? activeRaioXCity.sde : (APP_DATA.saude_nacional || {});
+    const hipTot = Math.round((sde.fp_so_hipertensao || sde.hip || 4962509) / 10000) / 100;
+    const ambTot = Math.round((sde.fp_hipertensao_e_diabetes || sde.amb || 3239501) / 10000) / 100;
+    const acTot = Math.round((sde.alto_custo || sde.ac || 3284659) / 10000) / 100;
+    const diabTot = Math.round((sde.fp_so_diabetes || sde.diab || 1808126) / 10000) / 100;
+    const asmaTot = Math.round((sde.fp_asma || sde.asma || 875033) / 10000) / 100;
+    const quimTot = Math.round((sde.quimioterapia || sde.quim || 361331) / 10000) / 100;
+    const radTot = Math.round((sde.radioterapia || sde.rad || 8987) / 10000) / 100;
 
     const labels = [
       'Hipertensão isolada',
@@ -3781,7 +3755,7 @@ function renderizarGraficoModalOrcamento(tipo) {
         labels: labels,
         datasets: [
           {
-            label: `Farmácia Popular (${isGrandezaMilhoes ? 'Milhões de Pacientes' : 'Pacientes Atendidos'})`,
+            label: 'Farmácia Popular (Milhões de Pacientes)',
             data: dataFP,
             backgroundColor: 'rgba(14, 159, 110, 0.85)',
             borderColor: '#0E9F6E',
@@ -3789,7 +3763,7 @@ function renderizarGraficoModalOrcamento(tipo) {
             borderRadius: 4
           },
           {
-            label: `Alta Complexidade SUS (${isGrandezaMilhoes ? 'Milhões de Atendimentos' : 'Atendimentos'})`,
+            label: 'Alta Complexidade SUS (Milhões de Atendimentos)',
             data: dataSUS,
             backgroundColor: 'rgba(30, 58, 138, 0.85)',
             borderColor: '#1E3A8A',
@@ -3822,17 +3796,19 @@ function renderizarGraficoModalOrcamento(tipo) {
           },
           tooltip: {
             callbacks: {
-              label: (c) => ` ${c.dataset.label}: ${c.raw !== null ? (isGrandezaMilhoes ? c.raw.toFixed(2) + ' Milhões' : formatarNumero(c.raw) + ' pessoas') : '—'}`
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw !== null ? ctx.raw.toFixed(2) + ' Milhões' : '—'}`
             }
           }
         },
         scales: {
           x: {
             beginAtZero: true,
-            ticks: { callback: v => isGrandezaMilhoes ? `${v} M` : formatarNumero(v) },
-            title: { display: true, text: isGrandezaMilhoes ? 'Milhões de Pacientes / Procedimentos' : 'Número de Pacientes / Procedimentos Atendidos', font: { weight: 'bold' } }
+            ticks: { callback: v => `${v} M` },
+            title: { display: true, text: 'Milhões de Pacientes / Procedimentos', font: { weight: 'bold' } }
           },
-          y: { grid: { display: false } }
+          y: {
+            grid: { display: false }
+          }
         }
       }
     });
@@ -3841,64 +3817,34 @@ function renderizarGraficoModalOrcamento(tipo) {
 
   // Caso 2: Educação Básica & Programa Escola em Tempo Integral (ETI)
   if (tipo === 'educacao') {
-    let labels = [];
-    let ds1Label = '';
-    let ds2Label = '';
-    let ds1Data = [];
-    let ds2Data = [];
-
-    if (escopo.isBrasil) {
-      const etiTop10 = (APP_DATA.eti_por_uf || []).slice(0, 10);
-      labels = etiTop10.map(d => `${d.nome} (${d.uf})`);
-      ds1Label = 'Fomento Federal Rede Municipal (R$ Milhões)';
-      ds1Data = etiTop10.map(d => Math.round(d.fomento / 1000000));
-      ds2Label = 'Matrículas Tempo Integral (Milhares de Alunos)';
-      ds2Data = etiTop10.map(d => Math.round(d.matriculas / 1000));
-    } else if (escopo.totalCidades === 1) {
-      const c = escopo.cidades[0];
-      const pdmJ = Math.round((c.pop || 0) * 0.03 * (c.ind?.pdm || 60) / 100);
-      const etiM = c.eti?.mat || 0;
-      const alunosRede = Math.round((c.pop || 0) * 0.1995);
-      labels = ['Estudantes Pé-de-Meia', 'Matrículas Tempo Integral (ETI)', 'Alunos da Rede Pública'];
-      ds1Label = `Estudantes Beneficiados em ${c.nm}`;
-      ds1Data = [pdmJ, etiM, alunosRede];
-    } else {
-      const topCidades = escopo.cidades.slice().sort((a,b) => ((b.eti?.mat || 0) + (b.pop||0)*0.01) - ((a.eti?.mat || 0) + (a.pop||0)*0.01)).slice(0, 10);
-      labels = topCidades.map(c => `${c.nm} (${c.uf})`);
-      ds1Label = 'Matrículas Tempo Integral ETI';
-      ds1Data = topCidades.map(c => c.eti?.mat || Math.round((c.pop||0)*0.015));
-      ds2Label = 'Estudantes Pé-de-Meia';
-      ds2Data = topCidades.map(c => Math.round((c.pop || 0) * 0.03 * (c.ind?.pdm || 60) / 100));
-    }
-
-    const datasetsEdu = [
-      {
-        label: ds1Label,
-        data: ds1Data,
-        backgroundColor: 'rgba(26, 86, 219, 0.85)',
-        borderColor: '#1A56DB',
-        borderWidth: 1.5,
-        borderRadius: 4
-      }
-    ];
-
-    if (ds2Data && ds2Data.length > 0) {
-      datasetsEdu.push({
-        label: ds2Label,
-        data: ds2Data,
-        backgroundColor: 'rgba(245, 158, 11, 0.85)',
-        borderColor: '#D97706',
-        borderWidth: 1.5,
-        borderRadius: 4,
-        hidden: true
-      });
-    }
+    const etiTop10 = (APP_DATA.eti_por_uf || []).slice(0, 10);
+    const labels = etiTop10.map(d => `${d.nome} (${d.uf})`);
+    const fomData = etiTop10.map(d => Math.round(d.fomento / 1000000));
+    const matData = etiTop10.map(d => Math.round(d.matriculas / 1000));
 
     chartModalOrcamento = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: labels,
-        datasets: datasetsEdu
+        datasets: [
+          {
+            label: 'Fomento Federal Rede Municipal (R$ Milhões)',
+            data: fomData,
+            backgroundColor: 'rgba(26, 86, 219, 0.85)',
+            borderColor: '#1A56DB',
+            borderWidth: 1.5,
+            borderRadius: 4
+          },
+          {
+            label: 'Matrículas Tempo Integral (Milhares de Alunos)',
+            data: matData,
+            backgroundColor: 'rgba(245, 158, 11, 0.85)',
+            borderColor: '#D97706',
+            borderWidth: 1.5,
+            borderRadius: 4,
+            hidden: true
+          }
+        ]
       },
       options: {
         indexAxis: 'y',
@@ -3923,17 +3869,19 @@ function renderizarGraficoModalOrcamento(tipo) {
           },
           tooltip: {
             callbacks: {
-              label: (c) => ` ${c.dataset.label}: ${formatarNumero(c.raw)}`
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.datasetIndex === 0 ? 'R$ ' + ctx.raw + ' Mi' : ctx.raw + ' mil vagas'}`
             }
           }
         },
         scales: {
           x: {
             beginAtZero: true,
-            ticks: { callback: v => formatarNumero(v) },
-            title: { display: true, text: 'Vagas e Estudantes Contemplados', font: { weight: 'bold' } }
+            ticks: { callback: v => `${v}` },
+            title: { display: true, text: 'R$ Milhões / Milhares de Vagas ETI', font: { weight: 'bold' } }
           },
-          y: { grid: { display: false } }
+          y: {
+            grid: { display: false }
+          }
         }
       }
     });
@@ -3942,173 +3890,10 @@ function renderizarGraficoModalOrcamento(tipo) {
 
   // Caso 3: Mercado de Trabalho Formal CLT & Suporte ao MEI
   if (tipo === 'trabalho') {
-    if (escopo.isBrasil) {
-      const nacList = APP_DATA?.series_historicas?.nacional || [];
-      const labels = nacList.map(d => String(d.ano));
-      const cltData = nacList.map(d => d.clt_milhoes);
-      const meiData = nacList.map(d => d.meis_milhoes);
-
-      chartModalOrcamento = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              type: 'bar',
-              label: 'Empregos Formais CLT (Milhões de Carteiras)',
-              data: cltData,
-              backgroundColor: 'rgba(26, 86, 219, 0.85)',
-              borderColor: '#1A56DB',
-              borderWidth: 1.5,
-              borderRadius: 4,
-              order: 1
-            },
-            {
-              type: 'bar',
-              label: 'Microempreendedores MEI (Milhões de Formalizados)',
-              data: meiData,
-              backgroundColor: 'rgba(245, 158, 11, 0.85)',
-              borderColor: '#D97706',
-              borderWidth: 1.5,
-              borderRadius: 4,
-              order: 2,
-              hidden: true
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: { boxWidth: 12, font: { size: 11, weight: '700' } },
-              onClick: function(e, legendItem, legend) {
-                const index = legendItem.datasetIndex;
-                const ci = legend.chart;
-                if (ci.isDatasetVisible(index)) {
-                  ci.hide(index);
-                  legendItem.hidden = true;
-                } else {
-                  ci.show(index);
-                  legendItem.hidden = false;
-                }
-                const cltVis = ci.isDatasetVisible(0);
-                const meiVis = ci.isDatasetVisible(1);
-                const yAxis = ci.options.scales.y;
-                if (cltVis && !meiVis) {
-                  yAxis.min = 80;
-                  yAxis.suggestedMin = 80;
-                  yAxis.suggestedMax = 108;
-                  yAxis.title.text = 'Milhões de Trabalhadores CLT (Corte a partir de 80M)';
-                } else if (!cltVis && meiVis) {
-                  yAxis.min = 0;
-                  yAxis.suggestedMin = 0;
-                  yAxis.suggestedMax = 22;
-                  yAxis.title.text = 'Milhões de Microempreendedores MEI (Escala 0 a 22M)';
-                } else if (cltVis && meiVis) {
-                  yAxis.min = 0;
-                  yAxis.suggestedMin = 0;
-                  yAxis.suggestedMax = 115;
-                  yAxis.title.text = 'Milhões de Trabalhadores (CLT & MEI - Escala Geral)';
-                } else {
-                  yAxis.min = 0;
-                  yAxis.suggestedMin = 0;
-                  yAxis.suggestedMax = 100;
-                }
-                ci.update();
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: (c) => ` ${c.dataset.label}: ${c.raw.toFixed(2)} Milhões`
-              }
-            }
-          },
-          scales: {
-            x: { grid: { display: false } },
-            y: {
-              min: 80,
-              suggestedMin: 80,
-              suggestedMax: 108,
-              ticks: { callback: v => `${v} M` },
-              title: { display: true, text: 'Milhões de Trabalhadores CLT (Corte a partir de 80M)', font: { weight: 'bold' } }
-            }
-          }
-        },
-        plugins: [{
-          id: 'cltMeiLabels',
-          afterDatasetsDraw(chart) {
-            const { ctx } = chart;
-            ctx.save();
-            ctx.font = 'bold 9px Inter, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            chart.data.datasets.forEach((dataset, datasetIndex) => {
-              const meta = chart.getDatasetMeta(datasetIndex);
-              if (meta.hidden) return;
-              meta.data.forEach((bar, index) => {
-                const val = dataset.data[index];
-                if (val === undefined || val === null || val <= 0) return;
-                ctx.fillStyle = '#1E293B';
-                ctx.fillText(`${val.toFixed(1)}M`, bar.x, bar.y - 3);
-              });
-            });
-            ctx.restore();
-          }
-        }]
-      });
-      return;
-    }
-
-    if (escopo.totalCidades === 1) {
-      const c = escopo.cidades[0];
-      const clt = Math.round((c.pop || 0) * (c.ind?.clt || 0) / 100);
-      const mei = Math.round((c.pop || 0) * (c.ind?.mei || 0) / 100);
-      const bf = Math.round((c.pop || 0) * (c.ind?.bf || 0) / 100);
-      const serv = Math.round((c.pop || 0) * (c.ind?.serv || 0) / 100);
-
-      chartModalOrcamento = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Carteira Assinada (CLT)', 'Microempreendedores (MEI)', 'Famílias Bolsa Família', 'Servidores Públicos'],
-          datasets: [{
-            label: `Pessoas / Postos em ${c.nm}`,
-            data: [clt, mei, bf, serv],
-            backgroundColor: ['#1A56DB', '#D97706', '#0E9F6E', '#7E3AF2'],
-            borderRadius: 6
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (c) => ` ${formatarNumero(c.raw)} pessoas`
-              }
-            }
-          },
-          scales: {
-            x: {
-              beginAtZero: true,
-              ticks: { callback: v => formatarGrandeza(v) },
-              title: { display: true, text: 'Quantidade de Vagas / Vínculos Ativos', font: { weight: 'bold' } }
-            },
-            y: { grid: { display: false } }
-          }
-        }
-      });
-      return;
-    }
-
-    const topCidades = escopo.cidades.slice().sort((a,b) => ((b.pop||0)*(b.ind?.clt||0)) - ((a.pop||0)*(a.ind?.clt||0))).slice(0, 10);
-    const labels = topCidades.map(c => `${c.nm} (${c.uf})`);
-    const cltData = topCidades.map(c => Math.round((c.pop||0)*(c.ind?.clt||0)/100));
-    const meiData = topCidades.map(c => Math.round((c.pop||0)*(c.ind?.mei||0)/100));
+    const nacList = APP_DATA?.series_historicas?.nacional || [];
+    const labels = nacList.map(d => String(d.ano));
+    const cltData = nacList.map(d => d.clt_milhoes);
+    const meiData = nacList.map(d => d.meis_milhoes);
 
     chartModalOrcamento = new Chart(ctx, {
       type: 'bar',
@@ -4116,392 +3901,327 @@ function renderizarGraficoModalOrcamento(tipo) {
         labels: labels,
         datasets: [
           {
-            label: 'Empregos Formais CLT',
+            type: 'bar',
+            label: 'Empregos Formais CLT (Milhões de Carteiras)',
             data: cltData,
             backgroundColor: 'rgba(26, 86, 219, 0.85)',
             borderColor: '#1A56DB',
             borderWidth: 1.5,
-            borderRadius: 4
+            borderRadius: 4,
+            order: 1
           },
           {
-            label: 'Microempreendedores MEI',
+            type: 'bar',
+            label: 'Microempreendedores MEI (Milhões de Formalizados)',
             data: meiData,
             backgroundColor: 'rgba(245, 158, 11, 0.85)',
             borderColor: '#D97706',
             borderWidth: 1.5,
             borderRadius: 4,
+            order: 2,
             hidden: true
           }
         ]
       },
       options: {
-        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: {
             position: 'top',
-            labels: { boxWidth: 12, font: { size: 11, weight: '700' } }
+            labels: { boxWidth: 12, font: { size: 11, weight: '700' } },
+            onClick: function(e, legendItem, legend) {
+              const index = legendItem.datasetIndex;
+              const ci = legend.chart;
+              if (ci.isDatasetVisible(index)) {
+                ci.hide(index);
+                legendItem.hidden = true;
+              } else {
+                ci.show(index);
+                legendItem.hidden = false;
+              }
+
+              const cltVis = ci.isDatasetVisible(0);
+              const meiVis = ci.isDatasetVisible(1);
+              const yAxis = ci.options.scales.y;
+
+              if (cltVis && !meiVis) {
+                yAxis.min = 80;
+                yAxis.suggestedMin = 80;
+                yAxis.suggestedMax = 108;
+                yAxis.title.text = 'Milhões de Trabalhadores CLT (Corte a partir de 80M)';
+              } else if (!cltVis && meiVis) {
+                yAxis.min = 0;
+                yAxis.suggestedMin = 0;
+                yAxis.suggestedMax = 22;
+                yAxis.title.text = 'Milhões de Microempreendedores MEI (Escala 0 a 22M)';
+              } else if (cltVis && meiVis) {
+                yAxis.min = 0;
+                yAxis.suggestedMin = 0;
+                yAxis.suggestedMax = 115;
+                yAxis.title.text = 'Milhões de Trabalhadores (CLT & MEI - Escala Geral)';
+              } else {
+                yAxis.min = 0;
+                yAxis.suggestedMin = 0;
+                yAxis.suggestedMax = 100;
+              }
+
+              ci.update();
+            }
           },
           tooltip: {
             callbacks: {
-              label: (c) => ` ${c.dataset.label}: ${formatarNumero(c.raw)} pessoas`
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)} Milhões`
             }
           }
         },
         scales: {
-          x: {
-            beginAtZero: true,
-            ticks: { callback: v => formatarGrandeza(v) },
-            title: { display: true, text: 'Vagas Formais e Empreendedores Ativos', font: { weight: 'bold' } }
-          },
-          y: { grid: { display: false } }
+          x: { grid: { display: false } },
+          y: {
+            min: 80,
+            suggestedMin: 80,
+            suggestedMax: 108,
+            ticks: { callback: v => `${v} M` },
+            title: { display: true, text: 'Milhões de Trabalhadores CLT (Corte a partir de 80M)', font: { weight: 'bold' } }
+          }
         }
-      }
+      },
+      plugins: [{
+        id: 'cltMeiLabels',
+        afterDatasetsDraw(chart) {
+          const { ctx } = chart;
+          ctx.save();
+          ctx.font = 'bold 9px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          chart.data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            if (meta.hidden) return;
+            meta.data.forEach((bar, index) => {
+              const val = dataset.data[index];
+              if (val === undefined || val === null || val <= 0) return;
+              ctx.fillStyle = '#1E293B';
+              ctx.fillText(`${val.toFixed(1)}M`, bar.x, bar.y - 3);
+            });
+          });
+          ctx.restore();
+        }
+      }]
     });
     return;
   }
 
   // Casos 4 e 5: Previdência e Agro
   const lista = APP_DATA?.series_historicas?.orcamento_governos || [];
+  if (lista.length === 0) return;
+
+  const labels = lista.map(d => String(d.ano));
+
+  const barColors = lista.map(d => {
+    if (d.governo.includes('Lula 2')) return 'rgba(239, 68, 68, 0.75)';
+    if (d.governo.includes('Dilma')) return 'rgba(220, 38, 38, 0.75)';
+    if (d.governo.includes('Temer')) return 'rgba(100, 116, 139, 0.75)';
+    if (d.governo.includes('Bolsonaro')) return 'rgba(37, 99, 235, 0.75)';
+    if (d.governo.includes('Lula 3')) return 'rgba(185, 28, 28, 0.85)';
+    return 'rgba(75, 85, 99, 0.75)';
+  });
+
+  const borderColors = lista.map(d => {
+    if (d.governo.includes('Lula 2')) return '#EF4444';
+    if (d.governo.includes('Dilma')) return '#DC2626';
+    if (d.governo.includes('Temer')) return '#64748B';
+    if (d.governo.includes('Bolsonaro')) return '#2563EB';
+    if (d.governo.includes('Lula 3')) return '#B91C1C';
+    return '#4B5563';
+  });
+
+  let datasetsOrc = [];
 
   if (tipo === 'previdencia') {
-    if (escopo.isBrasil) {
-      if (lista.length === 0) return;
-      const labels = lista.map(d => String(d.ano));
-      const aposData = lista.map(d => d.aposentadorias_total_bi || (d.previdencia_total_bi ? Math.round(d.previdencia_total_bi * 0.675 * 10) / 10 : 0));
-      const ruralData = lista.map(d => d.previdencia_rural_bi || 0);
-      const totalRgpsData = lista.map(d => d.previdencia_total_bi || 0);
+    const aposData = lista.map(d => d.aposentadorias_total_bi || (d.previdencia_total_bi ? Math.round(d.previdencia_total_bi * 0.675 * 10) / 10 : 0));
+    const ruralData = lista.map(d => d.previdencia_rural_bi || 0);
+    const totalRgpsData = lista.map(d => d.previdencia_total_bi || 0);
 
-      chartModalOrcamento = new Chart(ctx, {
+    datasetsOrc = [
+      {
         type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              type: 'bar',
-              label: 'Aposentadorias Pagas pelo Governo (R$ Bi)',
-              data: aposData,
-              backgroundColor: 'rgba(126, 58, 242, 0.85)',
-              borderColor: '#7E3AF2',
-              borderWidth: 1.5,
-              borderRadius: 4,
-              order: 2,
-              yAxisID: 'y'
-            },
-            {
-              type: 'bar',
-              label: 'Aposentadoria & Benefício Rural (R$ Bi)',
-              data: ruralData,
-              backgroundColor: 'rgba(16, 185, 129, 0.85)',
-              borderColor: '#059669',
-              borderWidth: 1.5,
-              borderRadius: 4,
-              order: 3,
-              yAxisID: 'y'
-            },
-            {
-              type: 'line',
-              label: 'Total Geral RGPS (Apos. + Pensões) (R$ Bi)',
-              data: totalRgpsData,
-              borderColor: '#1E40AF',
-              backgroundColor: 'rgba(30, 64, 175, 0.05)',
-              borderWidth: 2.5,
-              pointBackgroundColor: '#1E40AF',
-              pointBorderColor: '#FFFFFF',
-              pointBorderWidth: 2,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              tension: 0.2,
-              order: 1,
-              yAxisID: 'y',
-              hidden: true
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: { boxWidth: 12, font: { size: 11, weight: '700' }, color: '#334155' }
-            },
-            tooltip: {
-              callbacks: {
-                label: (c) => ` ${c.dataset.label}: R$ ${c.raw !== null ? c.raw.toFixed(1) : '0'} Bi`
-              }
-            }
-          },
-          scales: {
-            x: { grid: { display: false } },
-            y: {
-              beginAtZero: true,
-              ticks: { callback: v => `R$ ${v} Bi` },
-              title: { display: true, text: 'Valores em R$ Bilhões', font: { weight: 'bold' } }
-            }
-          }
-        }
-      });
-      return;
-    }
-
-    if (escopo.totalCidades === 1) {
-      const c = escopo.cidades[0];
-      const benef = (c.pop || 0) * (c.ind?.apos || 0) / 100;
-      const valorTotMi = (benef * 17235) / 1000000;
-      const valorRuralMi = (valorTotMi * (121.4 / 606.2));
-      const fpmEstMi = ((c.pop || 0) * 850) / 1000000;
-
-      chartModalOrcamento = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Injeção Previdência RGPS Total', 'Aposentadorias Rurais', 'Estimativa de Repasses FPM'],
-          datasets: [{
-            label: `Valores Anuais em ${c.nm} (R$ Milhões)`,
-            data: [Math.round(valorTotMi * 10) / 10, Math.round(valorRuralMi * 10) / 10, Math.round(fpmEstMi * 10) / 10],
-            backgroundColor: ['#7E3AF2', '#059669', '#3B82F6'],
-            borderRadius: 6
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (c) => ` R$ ${c.raw.toFixed(1)} Milhões / ano`
-              }
-            }
-          },
-          scales: {
-            x: {
-              beginAtZero: true,
-              ticks: { callback: v => `R$ ${v} Mi` },
-              title: { display: true, text: 'R$ Milhões Anuais Injetados na Cidade', font: { weight: 'bold' } }
-            },
-            y: { grid: { display: false } }
-          }
-        }
-      });
-      return;
-    }
-
-    const topCidades = escopo.cidades.slice().sort((a,b) => ((b.pop||0)*(b.ind?.apos||0)) - ((a.pop||0)*(a.ind?.apos||0))).slice(0, 10);
-    const labels = topCidades.map(c => `${c.nm} (${c.uf})`);
-    const prevDataMi = topCidades.map(c => Math.round(((c.pop||0)*(c.ind?.apos||0)/100)*17235 / 1000000 * 10)/10);
-    const ruralDataMi = prevDataMi.map(v => Math.round(v * (121.4 / 606.2) * 10)/10);
-
-    chartModalOrcamento = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Injeção Previdência Total (R$ Mi/ano)',
-            data: prevDataMi,
-            backgroundColor: 'rgba(126, 58, 242, 0.85)',
-            borderColor: '#7E3AF2',
-            borderWidth: 1.5,
-            borderRadius: 4
-          },
-          {
-            label: 'Benefícios Rurais (R$ Mi/ano)',
-            data: ruralDataMi,
-            backgroundColor: 'rgba(16, 185, 129, 0.85)',
-            borderColor: '#059669',
-            borderWidth: 1.5,
-            borderRadius: 4,
-            hidden: true
-          }
-        ]
+        label: 'Aposentadorias Pagas pelo Governo (R$ Bi)',
+        data: aposData,
+        backgroundColor: 'rgba(126, 58, 242, 0.85)',
+        borderColor: '#7E3AF2',
+        borderWidth: 1.5,
+        borderRadius: 4,
+        order: 2,
+        yAxisID: 'y'
       },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
-          tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: R$ ${c.raw.toFixed(1)} Mi` } }
-        },
-        scales: {
-          x: {
-            beginAtZero: true,
-            ticks: { callback: v => `R$ ${v} Mi` },
-            title: { display: true, text: 'R$ Milhões Anuais Injetados pelo RGPS', font: { weight: 'bold' } }
-          },
-          y: { grid: { display: false } }
-        }
+      {
+        type: 'bar',
+        label: 'Aposentadoria & Benefício Rural (R$ Bi)',
+        data: ruralData,
+        backgroundColor: 'rgba(16, 185, 129, 0.85)',
+        borderColor: '#059669',
+        borderWidth: 1.5,
+        borderRadius: 4,
+        order: 3,
+        yAxisID: 'y'
+      },
+      {
+        type: 'line',
+        label: 'Total Geral RGPS (Apos. + Pensões) (R$ Bi)',
+        data: totalRgpsData,
+        borderColor: '#1E40AF',
+        backgroundColor: 'rgba(30, 64, 175, 0.05)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#1E40AF',
+        pointBorderColor: '#FFFFFF',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.2,
+        order: 1,
+        yAxisID: 'y',
+        hidden: true
       }
+    ];
+  } else if (tipo === 'agro') {
+    const agroNom = lista.map(d => d.pnae_compras_agricultura_familiar_bi || 0.45);
+    const agroReal = lista.map(d => {
+      const nom = d.pnae_compras_agricultura_familiar_bi || 0.45;
+      const fator = d.ano <= 2014 ? 1.75 : d.ano <= 2018 ? 1.45 : d.ano <= 2022 ? 1.22 : 1.05;
+      return Math.round(nom * fator * 100) / 100;
     });
-    return;
+
+    datasetsOrc = [
+      {
+        type: 'bar',
+        label: 'Compras da Agricultura Familiar PNAE (Nominal)',
+        data: agroNom,
+        backgroundColor: barColors,
+        borderColor: borderColors,
+        borderWidth: 1.5,
+        borderRadius: 4,
+        order: 2,
+        yAxisID: 'y'
+      },
+      {
+        type: 'line',
+        label: 'Compras Agricultura Familiar (Corrigido IPCA 2026)',
+        data: agroReal,
+        borderColor: '#1E3A8A',
+        backgroundColor: 'rgba(30, 58, 138, 0.05)',
+        borderWidth: 3,
+        pointBackgroundColor: '#1E3A8A',
+        pointBorderColor: '#FFFFFF',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        tension: 0.25,
+        order: 1,
+        yAxisID: 'y',
+        hidden: true
+      }
+    ];
   }
 
-  if (tipo === 'agro') {
-    if (escopo.isBrasil) {
-      if (lista.length === 0) return;
-      const labels = lista.map(d => String(d.ano));
-      const barColors = lista.map(d => {
-        if (d.governo.includes('Lula 2')) return 'rgba(239, 68, 68, 0.75)';
-        if (d.governo.includes('Dilma')) return 'rgba(220, 38, 38, 0.75)';
-        if (d.governo.includes('Temer')) return 'rgba(100, 116, 139, 0.75)';
-        if (d.governo.includes('Bolsonaro')) return 'rgba(37, 99, 235, 0.75)';
-        if (d.governo.includes('Lula 3')) return 'rgba(185, 28, 28, 0.85)';
-        return 'rgba(75, 85, 99, 0.75)';
-      });
-
-      const agroNom = lista.map(d => d.pnae_compras_agricultura_familiar_bi || 0.45);
-      const agroReal = lista.map(d => {
-        const nom = d.pnae_compras_agricultura_familiar_bi || 0.45;
-        const fator = d.ano <= 2014 ? 1.75 : d.ano <= 2018 ? 1.45 : d.ano <= 2022 ? 1.22 : 1.05;
-        return Math.round(nom * fator * 100) / 100;
-      });
-
-      chartModalOrcamento = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              type: 'bar',
-              label: 'Compras da Agricultura Familiar PNAE (Nominal)',
-              data: agroNom,
-              backgroundColor: barColors,
-              borderWidth: 1.5,
-              borderRadius: 4,
-              order: 2,
-              yAxisID: 'y'
-            },
-            {
-              type: 'line',
-              label: 'Compras Agricultura Familiar (Corrigido IPCA 2026)',
-              data: agroReal,
-              borderColor: '#1E3A8A',
-              backgroundColor: 'rgba(30, 58, 138, 0.05)',
-              borderWidth: 3,
-              pointBackgroundColor: '#1E3A8A',
-              tension: 0.25,
-              order: 1,
-              yAxisID: 'y',
-              hidden: true
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
-            tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: R$ ${c.raw.toFixed(2)} Bi` } }
-          },
-          scales: {
-            x: { grid: { display: false } },
-            y: {
-              beginAtZero: true,
-              ticks: { callback: v => `R$ ${v} Bi` },
-              title: { display: true, text: 'Valores em R$ Bilhões', font: { weight: 'bold' } }
-            }
-          }
-        }
-      });
-      return;
-    }
-
-    if (escopo.totalCidades === 1) {
-      const c = escopo.cidades[0];
-      const alunos = (c.pop || 0) * 0.1995;
-      const repasseMil = (alunos * 37.28) / 1000;
-      const agroFamMil = repasseMil * 0.35;
-
-      chartModalOrcamento = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Repasse Total Merenda PNAE', 'Compra Agricultura Familiar (Mín 30%)'],
-          datasets: [{
-            label: `Valores Anuais em ${c.nm} (R$ Mil)`,
-            data: [Math.round(repasseMil * 10) / 10, Math.round(agroFamMil * 10) / 10],
-            backgroundColor: ['#1A56DB', '#059669'],
-            borderRadius: 6
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (c) => ` R$ ${c.raw.toFixed(1)} Mil / ano`
-              }
-            }
-          },
-          scales: {
-            x: {
-              beginAtZero: true,
-              ticks: { callback: v => `R$ ${v} Mil` },
-              title: { display: true, text: 'R$ Milhares Anuais do PNAE', font: { weight: 'bold' } }
-            },
-            y: { grid: { display: false } }
-          }
-        }
-      });
-      return;
-    }
-
-    const topCidades = escopo.cidades.slice().sort((a,b) => (b.pop||0) - (a.pop||0)).slice(0, 10);
-    const labels = topCidades.map(c => `${c.nm} (${c.uf})`);
-    const pnaeDataMil = topCidades.map(c => Math.round(((c.pop||0)*0.1995*37.28)/1000));
-    const agroDataMil = pnaeDataMil.map(v => Math.round(v * 0.35));
-
-    chartModalOrcamento = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Repasse Total PNAE Merenda (R$ Mil/ano)',
-            data: pnaeDataMil,
-            backgroundColor: 'rgba(26, 86, 219, 0.85)',
-            borderColor: '#1A56DB',
-            borderWidth: 1.5,
-            borderRadius: 4
-          },
-          {
-            label: 'Compras Agricultura Familiar (R$ Mil/ano)',
-            data: agroDataMil,
-            backgroundColor: 'rgba(16, 185, 129, 0.85)',
-            borderColor: '#059669',
-            borderWidth: 1.5,
-            borderRadius: 4,
-            hidden: true
-          }
-        ]
+  chartModalOrcamento = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: datasetsOrc
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false
       },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
-          tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: R$ ${formatarNumero(c.raw)} Mil` } }
-        },
-        scales: {
-          x: {
-            beginAtZero: true,
-            ticks: { callback: v => `R$ ${v} Mil` },
-            title: { display: true, text: 'R$ Milhares Anuais PNAE / Agricultura Familiar', font: { weight: 'bold' } }
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            boxWidth: 12,
+            font: { size: 11, weight: '700' },
+            color: '#334155'
           },
-          y: { grid: { display: false } }
+          onClick: function(e, legendItem, legend) {
+            const index = legendItem.datasetIndex;
+            const ci = legend.chart;
+            if (ci.isDatasetVisible(index)) {
+              ci.hide(index);
+              legendItem.hidden = true;
+            } else {
+              ci.show(index);
+              legendItem.hidden = false;
+            }
+            ci.update();
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          padding: 12,
+          titleFont: { size: 12, weight: 'bold' },
+          bodyFont: { size: 11 },
+          callbacks: {
+            label: function(context) {
+              const val = context.parsed.y !== null ? context.parsed.y.toFixed(2) : '0.00';
+              return ` ${context.dataset.label}: R$ ${val} Bi`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            font: { size: 10, weight: '600' },
+            color: '#64748B'
+          }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(226, 232, 240, 0.6)' },
+          ticks: {
+            font: { size: 10 },
+            color: '#64748B',
+            callback: v => `R$ ${v} Bi`
+          },
+          title: {
+            display: true,
+            text: 'Valores em R$ Bilhões',
+            font: { size: 10, weight: 'bold' },
+            color: '#64748B'
+          }
         }
       }
-    });
-    return;
-  }
+    },
+    plugins: [{
+      id: 'barLabelsModalOrcamento',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        ctx.save();
+        ctx.font = 'bold 9px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+          const meta = chart.getDatasetMeta(datasetIndex);
+          if (meta.hidden || (chart.isDatasetVisible && !chart.isDatasetVisible(datasetIndex))) return;
+          meta.data.forEach((element, index) => {
+            const val = dataset.data[index];
+            if (val === undefined || val === null || val <= 0) return;
+            if (tipo === 'previdencia') {
+              ctx.fillStyle = datasetIndex === 0 ? '#7E3AF2' : (datasetIndex === 1 ? '#047857' : '#1E3A8A');
+            } else {
+              ctx.fillStyle = datasetIndex === 0 ? '#0F172A' : '#1E3A8A';
+            }
+            ctx.fillText(`${val.toFixed(0)}B`, element.x, element.y - 4);
+          });
+        });
+        ctx.restore();
+      }
+    }]
+  });
 }
 
 /**
