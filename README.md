@@ -139,6 +139,15 @@ Evolução da taxa de abstenção (% de eleitores aptos que deixaram de comparec
 | **Cidades Autônomas e Agroindustriais** | 21,2% | 21,8% | 22,3% | 20,9% | **21,77%** | +0,5% |
 | **Pequenos Municípios do Funcionalismo** | 23,4% | 24,3% | 25,6% | 22,5% | **22,92%** | -0,5% |
 
+## 💻 Plataforma Web Interativa (`dashboard/`)
+
+O projeto dispõe de uma aplicação web de inteligência analítica de alta performance (`dashboard/index.html`) sem dependências pesadas, construída com JavaScript Vanilla, Leaflet.js e Chart.js:
+
+* 🎯 **Mapa de Calor dos Centróides (Z-Score)**: Matriz comparativa completa dos 7 clusters socioeconômicos nas 8 dimensões de políticas públicas, com coloração térmica (*diverging red-blue*) que evidencia a intensidade de cada vocação econômica.
+* ⚡ **Alertas Territoriais Acima da Mediana**: Identificação dinâmica em tempo real de indicadores que superam a mediana nacional dos 5.571 municípios, com navegação suave que destaca o indicador no Raio-X.
+* 🗳️ **Eleições Oficiais TSE (2018 a 2026)**: Comparador quadripartite com votação real oficial (2026 1ºT com Lula x Flávio; 2022 1ºT e 2ºT com Lula x Bolsonaro; e 2018 2ºT com Haddad x Bolsonaro).
+* 📈 **Séries Históricas Macroeconômicas (2016–2026)**: Acompanhamento da evolução do poder de compra, cesta básica, gás, gasolina, financiamento habitacional SBPE, crédito e mercado de trabalho com zoom dinâmico CLT e MEI.
+
 ---
 
 ## 📁 Estrutura de Arquivos e Bases de Dados

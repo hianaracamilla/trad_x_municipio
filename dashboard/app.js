@@ -146,15 +146,15 @@ const PERFIS_IMPACTO = {
 const MAPA_INDICADORES_PAUTA = {
   apos: {
     icone: '👴',
-    nome: 'Aposentadorias RGPS',
-    temaCurto: 'Aposentadorias RGPS',
+    nome: 'Aposentados RGPS',
+    temaCurto: 'Aposentados RGPS',
     pauta: 'Reajuste do Salário Mínimo e Previdência',
     sufixo: '/100 hab'
   },
   bpc: {
     icone: '♿',
     nome: 'BPC / LOAS',
-    temaCurto: 'BPC / LOAS (Idosos & PCD)',
+    temaCurto: 'BPC / LOAS',
     pauta: 'Amparo social a idosos e PCDs em vulnerabilidade',
     sufixo: '/100 hab'
   },
@@ -168,35 +168,35 @@ const MAPA_INDICADORES_PAUTA = {
   bf: {
     icone: '🤝',
     nome: 'Bolsa Família',
-    temaCurto: 'Bolsa Família & 1ª Infância',
+    temaCurto: 'Bolsa Família',
     pauta: 'Segurança alimentar e transferência de renda',
     sufixo: '/100 hab'
   },
   pdm: {
     icone: '🎓',
-    nome: 'Poupança Pé-de-Meia',
-    temaCurto: 'Poupança Pé-de-Meia',
+    nome: 'Pé-de-Meia',
+    temaCurto: 'Pé-de-Meia',
     pauta: 'Incentivo à conclusão do Ensino Médio público',
     sufixo: '%'
   },
   clt: {
     icone: '💼',
-    nome: 'Emprego Formal CLT',
-    temaCurto: 'Emprego Formal CLT',
+    nome: 'Emprego CLT',
+    temaCurto: 'Emprego CLT',
     pauta: 'Vagas com carteira assinada, salários e qualificação',
     sufixo: '/100 hab'
   },
   mei: {
     icone: '🏪',
-    nome: 'MEI & Microcrédito',
-    temaCurto: 'MEI & Microcrédito (Acredita)',
+    nome: 'MEI Formal',
+    temaCurto: 'MEI Formal',
     pauta: 'Crédito produtivo orientado e apoio ao pequeno negócio',
     sufixo: '/100 hab'
   },
   serv: {
     icone: '🏛️',
-    nome: 'Serviço Público',
-    temaCurto: 'Serviço Público Municipal',
+    nome: 'Servidores Públicos',
+    temaCurto: 'Servidores Públicos',
     pauta: 'Pisos da Educação/Saúde e capacidade fiscal local',
     sufixo: '/100 hab'
   }
@@ -641,7 +641,7 @@ function atualizarBannerPerfilHeader(nivel, titulo, perfilNome, cidadesTerritori
 
         return `
           <button class="${pillClass}" onclick="destacarIndicadorRaioX('${item.key}')" title="${tooltip}">
-            <span class="pill-title-content">${tagIcon} ${item.icone} <strong>${item.temaCurto}:</strong> ${item.pauta}</span>
+            <span class="pill-title-content">${tagIcon} ${item.icone} <strong>${item.nome}</strong></span>
             <span class="pill-stat-tag ${tagClass}">▲ ${valTxt} <span class="pill-med-ref">(med. ${medTxt})</span></span>
           </button>
         `;

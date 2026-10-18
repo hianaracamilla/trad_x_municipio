@@ -234,3 +234,39 @@ Isso atualizará automaticamente `dashboard/data/dashboard_data.json` mantendo a
   - **Apenas MEI visível**: O eixo Y baixa automaticamente para escala `0 a 22M` (`min: 0`), exibindo com máxima clareza o volume total dos microempreendedores.
   - **Ambos visíveis (CLT + MEI)**: O zoom é diminuído automaticamente para a escala geral de `0 a 115M` (`min: 0`), permitindo a comparação harmônica dos dois volumes sem nenhum corte ou truncamento.
 
+### 8.3. Alertas Territoriais Dinâmicos e Indicadores Acima da Mediana
+- **Camada Dupla de Assuntos de Impacto no Banner de Perfil**:
+  - **Camada 1 (Eixo Estrutural do Perfil)**: Preserva os 4 temas centrais característicos do arquétipo socioeconômico (ex.: permanência escolar, FUNDEB e qualificação profissional em *Jovens & Apoio Social*).
+  - **Camada 2 (Alertas Territoriais Acima da Mediana)**: Calcula em tempo real quais indicadores da localidade ativa superam a **mediana nacional dos 5.571 municípios** (`medianas_municipais`).
+- **Pílulas Compactas com Identificação Direta**:
+  - Exibe o ícone, o nome direto do indicador e o selo comparativo com a mediana (`⚡ 🎓 Pé-de-Meia ▲ 81.0% (med. 60%)`, `⚡ 🏛️ Servidores Públicos ▲ 7.3/100 hab (med. 6.3/100 hab)`), eliminando textos longos para leitura instantânea. O detalhamento completo da pauta permanece no *tooltip* ao passar o mouse.
+- **Prioridade para Alertas Complementares (`⚡` em âmbar)**:
+  - O algoritmo destaca em primeiro lugar os indicadores que **vão além do perfil geral**. Exemplo em Recife (PE): embora classificado em *Jovens & Apoio Social*, a cidade tem alta densidade de idosos e vulnerabilidade extrema, destacando prontamente **Farmácia Popular**, **BPC/LOAS** e **Aposentadorias RGPS**.
+- **Navegação Interativa Integrada ao Raio-X**:
+  - Clicar em qualquer pílula de alerta executa uma rolagem suave (*smooth scroll*) até o respectivo card no Raio-X e aciona uma animação de pulso luminoso verde (`highlight-card-pulse`) para localização visual instantânea.
+- **Suporte aos 5 Níveis Territoriais**:
+  - Opera de forma consistente em Municípios (dados locais), Estados (média ponderada pela população da UF), Regiões (ponderada regional), Clusters (média do perfil) e Brasil (prioridades nacionais consolidadas).
+
+### 8.4. Metodologia de Clusterização & Matriz Comparativa Térmica (Z-Score)
+- **Seção Didática no Rodapé da Aplicação**:
+  - Estruturada em 4 etapas didáticas: (1) Padronização Z-Score dos 5.571 municípios, (2) 8 dimensões estruturais per capita / por 100 hab, (3) Calibração K-Means em 30 rodadas e (4) Isolamento e projeção euclidiana das grandes metrópoles atípicas.
+- **Matriz Comparativa com Mapa de Calor (Assinatura Z-Score)**:
+  - Tabela completa comparando todos os 7 perfis socioeconômicos + Brasil referência nas 8 dimensões públicas.
+  - **Pintura Térmica (*Diverging Red-Blue*)**: Cada célula recebe cor de fundo proporcional à intensidade Z-Score de seu centróide no modelo de machine learning:
+    - 🟥 **Forte Destaque / Alta Concentração ($Z \ge +1.0$)**: Vermelho/coral para as marcas registradas de cada cluster (ex.: Aposentados e Farmácia Pop. em *Cidades de Aposentados*; Servidores em *Funcionalismo*; Bolsa Família em *Seguridade* e *Jovens & Apoio Social*).
+    - 🟧 **Acima da Média ($+0.45 \le Z < +1.0$)**: Tons pêssego/laranja para dinamismo produtivo (CLT e MEI nos *Polos de Serviços* e *Agro*; Pé-de-Meia no *Apoio Social*).
+    - ⬜ **Na Média ($-0.15 < Z < +0.15$)**: Fundo neutro balanceado.
+    - 🟦 **Abaixo da Média / Baixa Concentração ($Z \le -0.45$)**: Tons de azul celeste a azul frio para vazios estruturais (baixa carteira assinada em *Seguridade* e *Jovens & Apoio Social*).
+  - **Preservação dos Valores Reais**: Os números originais das taxas permanecem inalterados e legíveis, associados a *tooltips* com o valor do Z-score e interpretação qualitativa.
+  - **Barra de Legenda Visual**: Inserida no cabeçalho da tabela para facilitar a compreensão imediata da gradação térmica.
+  - **Filtragem por Linha**: Clicar em qualquer perfil da tabela aplica o filtro em todo o painel e no mapa.
+
+### 8.5. Sincronização e Nivelamento dos Gráficos de Topo
+- **Correção da Assimetria ("Gráficos Tortos")**:
+  - Os cabeçalhos dos dois cartões superiores (`.top-chart-header`) foram padronizados com altura mínima unificada de 64px e layout flexível balanceado, evitando que botões ou quebras de linha desalinhassem os cartões.
+  - As alturas dos containers dos gráficos foram travadas harmonicamente em **320px**.
+  - **Rótulos Horizontais em Duas Linhas**: No gráfico de barras de desempenho eleitoral e abstenção, os nomes longos dos clusters foram divididos em duas linhas compactas com rotação `0°` (ex.: `["Polos de", "Emprego & Serv."]`), garantindo que o gráfico de barras não seja espremido verticalmente e mantenha proporções idênticas ao gráfico vizinho de Peso Eleitoral.
+- **Botão de Atalho no Topo**:
+  - Adicionado o botão `🎯 Como foi feita a Clusterização & Médias?` no cabeçalho superior com rolagem automática suave e destaque luminoso temporário (`highlight-section-pulse`) na seção metodológica.
+
+
