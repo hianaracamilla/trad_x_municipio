@@ -220,6 +220,12 @@ function configurarEventosGlobais() {
     });
   });
 
+  // Botão de Metodologia da Clusterização no Topo
+  const btnMethod = document.getElementById('btn-cluster-methodology');
+  if (btnMethod) {
+    btnMethod.addEventListener('click', rolarParaMetodologiaClusterizacao);
+  }
+
   // Autocomplete de Busca Discreta por Município no Topo
   const searchInput = document.getElementById('city-search-input');
   const searchDropdown = document.getElementById('search-dropdown');
@@ -681,6 +687,21 @@ function atualizarCardsPrioridades(cidades, nivel) {
 }
 
 /**
+ * Rola a página suavemente até a seção de Metodologia de Clusterização
+ */
+function rolarParaMetodologiaClusterizacao() {
+  const el = document.getElementById('secao-metodologia-clusterizacao');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    el.classList.add('highlight-section-pulse');
+    setTimeout(() => {
+      el.classList.remove('highlight-section-pulse');
+    }, 2200);
+  }
+}
+window.rolarParaMetodologiaClusterizacao = rolarParaMetodologiaClusterizacao;
+
+/**
  * 4. DOIS GRÁFICOS DE TOPO (LADO A LADO CONFORME O ESBOÇO)
  * - Esquerda: Peso Eleitoral por Perfil Socioeconômico
  * - Direita: Desempenho Eleitoral c/ Abstenção por Perfil
@@ -843,6 +864,20 @@ function atualizarTopCharts(cidadesFiltradas) {
     }]
   });
 
+  // Labels multi-linha compactos no eixo X para evitar inclinação e nivelar a altura
+  const labelsDireita = perfisOrdenados.map(p => {
+    if (p.includes(' & ')) {
+      const parts = p.split(' & ');
+      return [parts[0], '& ' + parts[1]];
+    }
+    const words = p.split(' ');
+    if (words.length >= 2) {
+      const mid = Math.ceil(words.length / 2);
+      return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+    }
+    return p;
+  });
+
   // --- Renderização Gráfico 2: Desempenho Eleitoral c/ Abstenção (Amarelo e com Rótulos) ---
   const ctxDesemp = document.getElementById('chart-desempenho-abstencao').getContext('2d');
   if (chartDesempenhoAbstencao) chartDesempenhoAbstencao.destroy();
@@ -853,7 +888,7 @@ function atualizarTopCharts(cidadesFiltradas) {
   chartDesempenhoAbstencao = new Chart(ctxDesemp, {
     type: 'bar',
     data: {
-      labels: labels,
+      labels: labelsDireita,
       datasets: [
         {
           label: `${nomeCand1} (%)`,
@@ -899,10 +934,11 @@ function atualizarTopCharts(cidadesFiltradas) {
             stepSize: 20,
             callback: v => v + '%'
           },
-          title: { display: true, text: '% dos Votos e Abstenção' }
+          title: { display: true, text: '% dos Votos e Abstenção', font: { weight: 'bold' } }
         },
         x: {
-          ticks: { font: { size: 9 }, maxRotation: 30 }
+          ticks: { font: { family: 'Inter', size: 9.5, weight: 600 }, maxRotation: 0, minRotation: 0 },
+          grid: { display: false }
         }
       }
     },

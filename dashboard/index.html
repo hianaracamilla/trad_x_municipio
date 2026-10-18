@@ -143,24 +143,26 @@
         
         <!-- Gráfico da Esquerda: Peso Eleitoral por Perfil Socioeconômico -->
         <div class="chart-card top-chart-card">
-          <div class="chart-card-header">
-            <div>
+          <div class="chart-card-header top-chart-header">
+            <div class="header-titles-wrap">
               <div class="chart-title-row">
                 <h4 class="chart-title">Peso Eleitoral por Perfil Socioeconômico</h4>
-                <button class="btn-methodology-link" id="btn-open-methodology" title="Ver como o cálculo é feito">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                  </svg>
-                  Como é feito o cálculo?
-                </button>
               </div>
               <p class="chart-subtitle" id="peso-perfil-subtitle">Distribuição do eleitorado apto (TSE) concentrado em cada perfil municipal</p>
             </div>
-            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-              <span class="chart-scope-badge" id="badge-scope-peso">Visão Nacional</span>
-              <span class="chart-tag" id="peso-perfil-tag">Eleitorado Apto</span>
+            <div class="header-actions-wrap">
+              <button class="btn-cluster-methodology" onclick="rolarParaMetodologiaClusterizacao()" id="btn-cluster-methodology" title="Clique para ver a metodologia completa e médias por indicador">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                🎯 Como foi feita a Clusterização & Médias?
+              </button>
+              <div class="badges-row">
+                <span class="chart-scope-badge" id="badge-scope-peso">Visão Nacional</span>
+                <span class="chart-tag" id="peso-perfil-tag">Eleitorado Apto</span>
+              </div>
             </div>
           </div>
           <div class="chart-container-compact">
@@ -170,14 +172,18 @@
 
         <!-- Gráfico da Direita: Desempenho Eleitoral c/ Abstenções por Perfil -->
         <div class="chart-card top-chart-card">
-          <div class="chart-card-header">
-            <div>
-              <h4 class="chart-title">Desempenho Eleitoral c/ Abstenções por Perfil</h4>
+          <div class="chart-card-header top-chart-header">
+            <div class="header-titles-wrap">
+              <div class="chart-title-row">
+                <h4 class="chart-title">Desempenho Eleitoral c/ Abstenções por Perfil</h4>
+              </div>
               <p class="chart-subtitle" id="desempenho-abst-subtitle">Comparativo de votos válidos de Lula, opositor e taxa de abstenção em cada cluster</p>
             </div>
-            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-              <span class="chart-scope-badge" id="badge-scope-desempenho">Visão Nacional</span>
-              <span class="chart-tag" id="desempenho-abst-tag">2026 • 1º Turno</span>
+            <div class="header-actions-wrap header-actions-right">
+              <div class="badges-row">
+                <span class="chart-scope-badge" id="badge-scope-desempenho">Visão Nacional</span>
+                <span class="chart-tag" id="desempenho-abst-tag">2026 • 1º Turno</span>
+              </div>
             </div>
           </div>
           <div class="chart-container-compact">
@@ -544,6 +550,242 @@
           </div>
           <div class="series-chart-wrapper" style="height: 380px;">
             <canvas id="chart-series-historicas"></canvas>
+          </div>
+        </div>
+
+    <!-- ==================== 5. SEÇÃO: METODOLOGIA DE CLUSTERIZAÇÃO E MÉDIAS POR INDICADOR ==================== -->
+    <section class="cluster-methodology-section" id="secao-metodologia-clusterizacao">
+      <div class="cluster-section-card">
+        
+        <!-- Cabeçalho da Seção -->
+        <div class="cluster-section-header">
+          <div>
+            <div class="cluster-section-eyebrow">
+              <span class="eyebrow-dot"></span>
+              METODOLOGIA CIENTÍFICA & MACHINE LEARNING (K-MEANS)
+            </div>
+            <h3 class="cluster-section-title">Como foi feita a Clusterização dos 5.571 Municípios Brasileiros</h3>
+            <p class="cluster-section-subtitle">
+              Classificação socioeconômica estruturada sobre 10 indicadores de intensidade relativa por 100 habitantes e percentuais do PIB, eliminando distorções de escala populacional e agrupando as cidades por vocação econômica real.
+            </p>
+          </div>
+          <div class="cluster-header-badges">
+            <span class="badge-tech">🤖 K-Means Clustering</span>
+            <span class="badge-tech">⚖️ Z-Score Normalizado</span>
+            <span class="badge-tech">🏙️ 5.571 Cidades Classificadas</span>
+          </div>
+        </div>
+
+        <!-- 4 Passos Metodológicos Didáticos -->
+        <div class="cluster-steps-grid">
+          <div class="cluster-step-box">
+            <div class="step-num-badge">1</div>
+            <h5 class="step-title">Variáveis de Intensidade Relativa</h5>
+            <p class="step-desc">
+              Para não separar cidades apenas por serem grandes ou pequenas, foram selecionadas <strong>10 variáveis contínuas por 100 habitantes</strong> (CLT, MEI, Servidores, Aposentadorias, Bolsa Família, BPC, Farmácia Popular, Pé-de-Meia, Fundeb e Previdência/PIB).
+            </p>
+          </div>
+          <div class="cluster-step-box">
+            <div class="step-num-badge">2</div>
+            <h5 class="step-title">Padronização Z-Score</h5>
+            <p class="step-desc">
+              Todas as métricas foram normalizadas com <em>média zero e variância unitária</em> (StandardScaler). Isso impediu que variáveis com números maiores (ex: percentuais de 0 a 100) dominassem grandezas mais concentradas (ex: servidores de 0 a 15).
+            </p>
+          </div>
+          <div class="cluster-step-box">
+            <div class="step-num-badge">3</div>
+            <h5 class="step-title">Calibração K-Means em 30 Rodadas</h5>
+            <p class="step-desc">
+              O algoritmo foi treinado exclusivamente sobre as <strong>5.518 cidades do interior</strong>, com diagnóstico de $K=6$ via Método do Cotovelo e Silhueta ($s=0,171$). Foram simuladas 30 rodadas com sementes distintas para obter centróides hiperestáveis.
+            </p>
+          </div>
+          <div class="cluster-step-box">
+            <div class="step-num-badge">4</div>
+            <h5 class="step-title">Projeção e Reclassificação das Metrópoles</h5>
+            <p class="step-desc">
+              As 53 grandes metrópoles e capitais foram projetadas na distância euclidiana dos centróides. <strong>48 foram integradas</strong> aos perfis de serviços, autônomos ou apoio social (distância &le; 3,02), e apenas 5 capitais atípicas formaram o grupo singular.
+            </p>
+          </div>
+        </div>
+
+        <!-- Tabela Comparativa: Médias x Indicador x Cluster -->
+        <div class="cluster-matrix-wrap">
+          <div class="matrix-header-row">
+            <div>
+              <h4 class="matrix-title">Matriz Comparativa: Médias dos Indicadores por Perfil Socioeconômico</h4>
+              <p class="matrix-subtitle">Valores médios reais consolidados entre todos os municípios pertencentes a cada cluster. Clique em uma linha para filtrar o painel.</p>
+            </div>
+            <span class="matrix-tip">💡 Clique em qualquer perfil para filtrar o dashboard</span>
+          </div>
+
+          <div class="matrix-table-scroll">
+            <table class="cluster-matrix-table">
+              <thead>
+                <tr>
+                  <th style="min-width: 220px;">Perfil Socioeconômico</th>
+                  <th style="text-align: center;">Cidades</th>
+                  <th style="text-align: right;">Pop. Média</th>
+                  <th style="text-align: right;" title="Trabalhadores com carteira assinada por 100 hab">CLT / 100 hab</th>
+                  <th style="text-align: right;" title="Microempreendedores Individuais por 100 hab">MEI / 100 hab</th>
+                  <th style="text-align: right;" title="Servidores públicos por 100 hab">Servidores</th>
+                  <th style="text-align: right;" title="Aposentadorias RGPS por 100 hab">Aposentados</th>
+                  <th style="text-align: right;" title="Famílias beneficiárias por 100 hab">Bolsa Família</th>
+                  <th style="text-align: right;" title="Beneficiários BPC/LOAS por 100 hab">BPC / 100 hab</th>
+                  <th style="text-align: right;" title="Medicamentos retirados / 100 hab">Farmácia Pop.</th>
+                  <th style="text-align: right;" title="Cobertura dos jovens no ensino médio">Pé-de-Meia</th>
+                  <th style="min-width: 240px;">Vocação Econômica Central</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="clickable-matrix-row" onclick="aplicarFiltroTerritorial('perfil', 'Jovens & Apoio Social')">
+                  <td>
+                    <span class="cluster-pill" style="background: rgba(245, 158, 11, 0.12); color: #B45309; border: 1px solid rgba(245, 158, 11, 0.35);">
+                      ● Jovens & Apoio Social
+                    </span>
+                  </td>
+                  <td style="text-align: center; font-weight: 700;">1.414 <span class="sub-col">(25,4%)</span></td>
+                  <td style="text-align: right; font-weight: 600;">37,7 mil</td>
+                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">16,0</td>
+                  <td style="text-align: right; font-weight: 600; color: #0284C7;">6,0</td>
+                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">7,6</td>
+                  <td style="text-align: right; font-weight: 600; color: #475569;">6,3</td>
+                  <td style="text-align: right; font-weight: 700; color: #DC2626;">12,6</td>
+                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,8</td>
+                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">3,2</td>
+                  <td style="text-align: right; font-weight: 800; color: #047857;">75,9%</td>
+                  <td class="col-vocacao">População jovem com forte impacto de transferências de renda e alta permanência escolar.</td>
+                </tr>
+
+                <tr class="clickable-matrix-row" onclick="aplicarFiltroTerritorial('perfil', 'Polos de Emprego & Serviços')">
+                  <td>
+                    <span class="cluster-pill" style="background: rgba(26, 86, 219, 0.12); color: #1A56DB; border: 1px solid rgba(26, 86, 219, 0.35);">
+                      ● Polos de Emprego & Serviços
+                    </span>
+                  </td>
+                  <td style="text-align: center; font-weight: 700;">1.134 <span class="sub-col">(20,4%)</span></td>
+                  <td style="text-align: right; font-weight: 600;">62,1 mil</td>
+                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">28,4</td>
+                  <td style="text-align: right; font-weight: 600; color: #0284C7;">9,0</td>
+                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">5,5</td>
+                  <td style="text-align: right; font-weight: 600; color: #475569;">12,0</td>
+                  <td style="text-align: right; font-weight: 700; color: #DC2626;">6,5</td>
+                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,4</td>
+                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">7,9</td>
+                  <td style="text-align: right; font-weight: 800; color: #047857;">44,2%</td>
+                  <td class="col-vocacao">Centros regionais urbanos de comércio e serviços dinâmicos, com alta densidade de carteiras assinadas.</td>
+                </tr>
+
+                <tr class="clickable-matrix-row" onclick="aplicarFiltroTerritorial('perfil', 'Polos Agroindustriais')">
+                  <td>
+                    <span class="cluster-pill" style="background: rgba(14, 159, 110, 0.12); color: #0E9F6E; border: 1px solid rgba(14, 159, 110, 0.35);">
+                      ● Polos Agroindustriais
+                    </span>
+                  </td>
+                  <td style="text-align: center; font-weight: 700;">957 <span class="sub-col">(17,2%)</span></td>
+                  <td style="text-align: right; font-weight: 600;">56,6 mil</td>
+                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">27,3</td>
+                  <td style="text-align: right; font-weight: 600; color: #0284C7;">9,3</td>
+                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">5,6</td>
+                  <td style="text-align: right; font-weight: 600; color: #475569;">11,9</td>
+                  <td style="text-align: right; font-weight: 700; color: #DC2626;">4,2</td>
+                  <td style="text-align: right; font-weight: 600; color: #D97706;">3,3</td>
+                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">7,5</td>
+                  <td style="text-align: right; font-weight: 800; color: #047857;">44,9%</td>
+                  <td class="col-vocacao">Produção do agronegócio e cooperativas industriais, com a menor dependência de Bolsa Família do país.</td>
+                </tr>
+
+                <tr class="clickable-matrix-row" onclick="aplicarFiltroTerritorial('perfil', 'Seguridade & Repasses')">
+                  <td>
+                    <span class="cluster-pill" style="background: rgba(224, 82, 82, 0.12); color: #B91C1C; border: 1px solid rgba(224, 82, 82, 0.35);">
+                      ● Seguridade & Repasses
+                    </span>
+                  </td>
+                  <td style="text-align: center; font-weight: 700;">766 <span class="sub-col">(13,8%)</span></td>
+                  <td style="text-align: right; font-weight: 600;">26,2 mil</td>
+                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">15,4</td>
+                  <td style="text-align: right; font-weight: 600; color: #0284C7;">5,7</td>
+                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">6,4</td>
+                  <td style="text-align: right; font-weight: 600; color: #475569;">16,5</td>
+                  <td style="text-align: right; font-weight: 700; color: #DC2626;">13,0</td>
+                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,8</td>
+                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">4,7</td>
+                  <td style="text-align: right; font-weight: 800; color: #047857;">79,7%</td>
+                  <td class="col-vocacao">Economia fortemente sustentada por benefícios previdenciários e assistência social conjugada ao FPM.</td>
+                </tr>
+
+                <tr class="clickable-matrix-row" onclick="aplicarFiltroTerritorial('perfil', 'Cidades de Aposentados')">
+                  <td>
+                    <span class="cluster-pill" style="background: rgba(126, 58, 242, 0.12); color: #7E3AF2; border: 1px solid rgba(126, 58, 242, 0.35);">
+                      ● Cidades de Aposentados
+                    </span>
+                  </td>
+                  <td style="text-align: center; font-weight: 700;">722 <span class="sub-col">(13,0%)</span></td>
+                  <td style="text-align: right; font-weight: 600;">12,1 mil</td>
+                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">28,5</td>
+                  <td style="text-align: right; font-weight: 600; color: #0284C7;">9,6</td>
+                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">6,2</td>
+                  <td style="text-align: right; font-weight: 700; color: #7E3AF2;">22,1</td>
+                  <td style="text-align: right; font-weight: 700; color: #DC2626;">5,0</td>
+                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,9</td>
+                  <td style="text-align: right; font-weight: 700; color: #0E9F6E;">15,1</td>
+                  <td style="text-align: right; font-weight: 800; color: #047857;">41,2%</td>
+                  <td class="col-vocacao">Municípios sêniores com o maior índice de aposentadorias do país e recorde de gratuidade na Farmácia Popular.</td>
+                </tr>
+
+                <tr class="clickable-matrix-row" onclick="aplicarFiltroTerritorial('perfil', 'Funcionalismo Público')">
+                  <td>
+                    <span class="cluster-pill" style="background: rgba(192, 38, 211, 0.12); color: #C026D3; border: 1px solid rgba(192, 38, 211, 0.35);">
+                      ● Funcionalismo Público
+                    </span>
+                  </td>
+                  <td style="text-align: center; font-weight: 700;">573 <span class="sub-col">(10,3%)</span></td>
+                  <td style="text-align: right; font-weight: 600;">5,4 mil</td>
+                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">26,9</td>
+                  <td style="text-align: right; font-weight: 600; color: #0284C7;">9,1</td>
+                  <td style="text-align: right; font-weight: 700; color: #C026D3;">10,7</td>
+                  <td style="text-align: right; font-weight: 600; color: #475569;">6,6</td>
+                  <td style="text-align: right; font-weight: 700; color: #DC2626;">6,2</td>
+                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,9</td>
+                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">5,5</td>
+                  <td style="text-align: right; font-weight: 800; color: #047857;">57,4%</td>
+                  <td class="col-vocacao">Pequenos municípios onde o serviço público municipal e estadual representa o principal eixo empregador.</td>
+                </tr>
+
+                <tr class="clickable-matrix-row" onclick="aplicarFiltroTerritorial('perfil', 'Metrópoles & Capitais')">
+                  <td>
+                    <span class="cluster-pill" style="background: rgba(55, 65, 81, 0.12); color: #374151; border: 1px solid rgba(55, 65, 81, 0.35);">
+                      ● Metrópoles & Capitais
+                    </span>
+                  </td>
+                  <td style="text-align: center; font-weight: 700;">5 <span class="sub-col">(0,1%)</span></td>
+                  <td style="text-align: right; font-weight: 600;">720,1 mil</td>
+                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">18,4</td>
+                  <td style="text-align: right; font-weight: 600; color: #0284C7;">5,4</td>
+                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">2,8</td>
+                  <td style="text-align: right; font-weight: 600; color: #475569;">8,3</td>
+                  <td style="text-align: right; font-weight: 700; color: #DC2626;">12,3</td>
+                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,9</td>
+                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">7,0</td>
+                  <td style="text-align: right; font-weight: 800; color: #047857;">59,8%</td>
+                  <td class="col-vocacao">Grandes aglomerações atípicas com desafios metropolitanos de densidade, periferias e serviços complexos.</td>
+                </tr>
+
+                <tr class="row-brasil-total">
+                  <td style="font-weight: 800; color: #0F172A;">🇧🇷 BRASIL (Média Geral)</td>
+                  <td style="text-align: center; font-weight: 800;">5.571 cidades</td>
+                  <td style="text-align: right; font-weight: 800;">36,5 mil</td>
+                  <td style="text-align: right; font-weight: 800; color: #1E3A8A;">24,5</td>
+                  <td style="text-align: right; font-weight: 800; color: #0284C7;">8,3</td>
+                  <td style="text-align: right; font-weight: 800; color: #7E3AF2;">6,8</td>
+                  <td style="text-align: right; font-weight: 800; color: #475569;">11,8</td>
+                  <td style="text-align: right; font-weight: 800; color: #DC2626;">8,3</td>
+                  <td style="text-align: right; font-weight: 800; color: #D97706;">2,8</td>
+                  <td style="text-align: right; font-weight: 800; color: #0E9F6E;">7,0</td>
+                  <td style="text-align: right; font-weight: 900; color: #047857;">58,3%</td>
+                  <td style="font-style: italic; color: #475569;">Parâmetro de referência central para os 5.571 municípios do país.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
