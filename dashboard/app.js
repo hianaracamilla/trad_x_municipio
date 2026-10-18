@@ -172,9 +172,9 @@ async function carregarDados() {
   APP_DATA = await respData.json();
   GEOJSON_ESTADOS = await respGeo.json();
   
-  // Define Petrolina (PE) ou padrão como cidade ativa para Raio-X inicial
-  activeRaioXCity = APP_DATA.municipios.find(m => m.nm === 'Petrolina' && m.uf === 'PE') || APP_DATA.municipios[0];
-  studioConfig.selectedCity = activeRaioXCity;
+  // Padrão nacional: nível Brasil consolidado como inicial no Raio-X
+  activeRaioXCity = null;
+  studioConfig.selectedCity = APP_DATA.municipios[0];
   studioConfig.selectedProfile = Object.keys(APP_DATA.perfis)[0];
 }
 
@@ -359,24 +359,21 @@ function aplicarFiltroTerritorial(nivel, id, opcoes = {}) {
     perfilNomeAtivo = 'Polos Regionais de Emprego e Serviços';
     tituloTerritorio = 'Visão Nacional: 5.571 Municípios Brasileiros';
     cidadesTerritorio = APP_DATA.municipios;
+    activeRaioXCity = null;
   } else if (nivel === 'regiao') {
     const regObj = APP_DATA.regioes[id];
     filtroTerritorial.nome = `Região ${id}`;
     perfilNomeAtivo = regObj ? regObj.perfil_predominante : 'Polos Regionais de Emprego e Serviços';
     tituloTerritorio = `Região ${id}: ${regObj ? regObj.total_municipios : 0} Municípios (${regObj ? regObj.estados.join(', ') : ''})`;
     cidadesTerritorio = APP_DATA.municipios.filter(m => m.reg === id);
-    // Seleciona cidade emblemática da região para o Raio-X
-    const cand = cidadesTerritorio.find(m => m.pop > 150000) || cidadesTerritorio[0];
-    if (cand) activeRaioXCity = cand;
+    activeRaioXCity = null;
   } else if (nivel === 'estado') {
     const ufObj = APP_DATA.estados[id];
     filtroTerritorial.nome = ufObj ? `${ufObj.nome} (${id})` : id;
     perfilNomeAtivo = ufObj ? ufObj.perfil_predominante : 'Polos Regionais de Emprego e Serviços';
     tituloTerritorio = `Estado de ${ufObj ? ufObj.nome : id} (${id}): ${ufObj ? ufObj.total_municipios : 0} Municípios`;
     cidadesTerritorio = APP_DATA.municipios.filter(m => m.uf === id);
-    // Seleciona capital ou maior cidade do estado para o Raio-X
-    const cand = cidadesTerritorio.find(m => m.pop > 200000) || cidadesTerritorio[0];
-    if (cand) activeRaioXCity = cand;
+    activeRaioXCity = null; // Mostra consolidado estadual no Raio-X
   } else if (nivel === 'municipio') {
     const m = APP_DATA.municipios.find(c => c.id === id);
     if (m) {
@@ -897,18 +894,18 @@ function atualizarTopCharts(cidadesFiltradas) {
  * 5. RAIO-X DO MUNICÍPIO INTEGRADO (COM COMPARATIVO LULA 2022 vs 2026)
  */
 function atualizarRaioXIntegrado() {
-  const isBrasil = !activeRaioXCity;
+  const isBrasil = !activeRaioXCity && (filtroTerritorial.nivel === 'brasil' || !filtroTerritorial.id);
+  const isEstado = !activeRaioXCity && (filtroTerritorial.nivel === 'estado');
   const m = activeRaioXCity;
 
   const titleEl = document.getElementById('raiox-current-city-title');
   const tagEl = document.getElementById('raiox-current-profile-tag');
   const deltaBadge = document.getElementById('raiox-delta-badge');
+  const metaInfoEl = document.getElementById('raiox-city-meta-info');
 
   let lula22_1t = 48.4;
   let lula22_2t = 50.9;
   let lula26 = 51.8;
-
-  const metaInfoEl = document.getElementById('raiox-city-meta-info');
 
   if (isBrasil) {
     titleEl.textContent = 'Diagnóstico: Brasil (Consolidado Nacional)';
@@ -924,7 +921,39 @@ function atualizarRaioXIntegrado() {
     deltaBadge.textContent = '▲ +0.9 pp vs 2022';
     deltaBadge.style.backgroundColor = '#DCFCE7';
     deltaBadge.style.color = '#166534';
-  } else {
+  } else if (isEstado) {
+    const ufId = filtroTerritorial.id;
+    const ufObj = APP_DATA.estados[ufId];
+    const ufNome = ufObj ? ufObj.nome : ufId;
+    const corPerfil = ufObj?.cor_predominante || '#1A56DB';
+
+    titleEl.textContent = `Diagnóstico: Estado de ${ufNome} (${ufId})`;
+    tagEl.textContent = `${ufObj ? ufObj.total_municipios : 0} Municípios • ${ufObj?.perfil_predominante || 'Consolidado Estadual'}`;
+    tagEl.style.backgroundColor = `${corPerfil}18`;
+    tagEl.style.color = corPerfil;
+    tagEl.style.border = `1px solid ${corPerfil}40`;
+
+    const ufPop = ufObj?.populacao_total || 0;
+    const ufEleit = ufObj?.eleitores_aptos || 0;
+    if (metaInfoEl) {
+      metaInfoEl.innerHTML = `👥 População: <strong>${formatarNumero(ufPop)} hab</strong> &nbsp;|&nbsp; 🗳️ Eleitores: <strong>${formatarNumero(ufEleit)}</strong> &nbsp;|&nbsp; 🏙️ Cidades: <strong>${ufObj?.total_municipios || 0}</strong>`;
+    }
+
+    lula22_1t = ufObj?.eleicoes?.['2022_1t']?.lula_pct || 0;
+    lula22_2t = ufObj?.eleicoes?.['2022_2t']?.lula_pct || 0;
+    lula26 = ufObj?.eleicoes?.['2026_1t']?.lula_pct || 0;
+
+    const delta = lula26 - lula22_2t;
+    if (delta >= 0) {
+      deltaBadge.textContent = `▲ +${delta.toFixed(1)} pp vs 2022`;
+      deltaBadge.style.backgroundColor = '#DCFCE7';
+      deltaBadge.style.color = '#166534';
+    } else {
+      deltaBadge.textContent = `▼ ${delta.toFixed(1)} pp vs 2022`;
+      deltaBadge.style.backgroundColor = '#FEE2E2';
+      deltaBadge.style.color = '#991B1B';
+    }
+  } else if (m) {
     titleEl.textContent = `Diagnóstico: ${m.nm} (${m.uf})`;
     const corPerfil = PERFIS_IMPACTO[m.pf]?.cor || '#1A56DB';
     tagEl.textContent = m.pf;
@@ -966,7 +995,7 @@ function atualizarRaioXIntegrado() {
   document.getElementById('raiox-lula-26').textContent = `${lula26.toFixed(1)}%`;
   document.getElementById('raiox-bar-26').style.width = `${Math.min(100, lula26)}%`;
 
-  // Renderização Dinâmica dos Cards Horizontais com Range Bar e Mediana
+  // Renderização Dinâmica dos Cards com Range Bar, Mediana e Nome não-truncado
   const container = document.getElementById('raiox-indicators-grid');
   if (!container) return;
 
@@ -984,27 +1013,18 @@ function atualizarRaioXIntegrado() {
     { key: 'pdm', icon: '🎓', label: 'Pé-de-Meia' }
   ];
 
+  const cidadesEstado = isEstado ? APP_DATA.municipios.filter(c => c.uf === filtroTerritorial.id) : [];
+  const ufTotalPop = isEstado ? cidadesEstado.reduce((acc, c) => acc + (c.pop || 0), 0) : 0;
+
   container.innerHTML = itensConfig.map(cfg => {
     const stat = medianas[cfg.key] || { min: 0, mediana: 5, max: 20 };
-    const val = isBrasil ? (brasilIndicadores[cfg.key] || stat.mediana) : (m?.ind?.[cfg.key] || 0);
-    const isAbove = val > stat.mediana;
-
-    const min = stat.min;
-    const max = stat.max;
-    const med = stat.mediana;
-
-    const pct = Math.max(0, Math.min(100, ((val - min) / (max - min || 1)) * 100));
-    const medianPct = Math.max(0, Math.min(100, ((med - min) / (max - min || 1)) * 100));
-
-    const cardClass = isAbove ? 'raiox-ind-pill card-above-median' : 'raiox-ind-pill';
-    const badgeHtml = isAbove
-      ? `<span class="median-status-chip chip-above" title="Acima da mediana nacional dos municípios (${med})">▲ Acima (${med})</span>`
-      : `<span class="median-status-chip chip-below" title="Na ou abaixo da mediana nacional (${med})">▼ Mediana (${med})</span>`;
-
-    // Volume absoluto estimado e taxa per 100 hab
+    
+    let val = 0;
     let volumeTxt = '';
     let taxaTxt = '';
+
     if (isBrasil) {
+      val = brasilIndicadores[cfg.key] || stat.mediana;
       const volNac = {
         clt: '49,7 M vagas',
         mei: '16,9 M ativos',
@@ -1017,7 +1037,19 @@ function atualizarRaioXIntegrado() {
       };
       volumeTxt = volNac[cfg.key] || '';
       taxaTxt = cfg.key === 'pdm' ? `${val.toFixed(1)}% cobertura` : `${val.toFixed(1)} por 100 hab`;
+    } else if (isEstado) {
+      const sumVal = cidadesEstado.reduce((acc, c) => acc + ((c.pop || 0) * (c.ind?.[cfg.key] || 0) / 100), 0);
+      val = ufTotalPop > 0 ? (sumVal / ufTotalPop) * 100 : stat.mediana;
+      if (cfg.key === 'pdm') {
+        const pdmJovens = formatarGrandeza(4080000 * ufTotalPop / 203000000);
+        volumeTxt = `~${pdmJovens} jovens`;
+        taxaTxt = `${val.toFixed(1)}% cobertura ensino médio`;
+      } else {
+        volumeTxt = `~${formatarGrandeza(sumVal)} total`;
+        taxaTxt = `${val.toFixed(1)} por 100 hab`;
+      }
     } else if (m?.pop) {
+      val = m.ind?.[cfg.key] || 0;
       if (cfg.key === 'pdm') {
         const pdmJovens = formatarGrandeza(4080000 * m.pop / 203000000);
         volumeTxt = `~${pdmJovens} jovens`;
@@ -1029,14 +1061,28 @@ function atualizarRaioXIntegrado() {
       }
     }
 
+    const isAbove = val > stat.mediana;
+    const min = stat.min;
+    const max = stat.max;
+    const med = stat.mediana;
+
+    const pct = Math.max(0, Math.min(100, ((val - min) / (max - min || 1)) * 100));
+    const medianPct = Math.max(0, Math.min(100, ((med - min) / (max - min || 1)) * 100));
+
+    const cardClass = isAbove ? 'raiox-ind-pill card-above-median' : 'raiox-ind-pill';
+    const badgeHtml = isAbove
+      ? `<span class="median-status-chip chip-above" title="Acima da mediana nacional dos municípios (${med})">▲ Acima (${med})</span>`
+      : `<span class="median-status-chip chip-below" title="Na ou abaixo da mediana nacional (${med})">▼ Mediana (${med})</span>`;
+
     return `
       <div class="${cardClass}">
         <div class="raiox-ind-top-row">
-          <div class="raiox-ind-header">
-            <span class="raiox-ind-icon">${cfg.icon}</span>
-            <span class="raiox-ind-title" title="${cfg.label}">${cfg.label}</span>
-          </div>
+          <span class="raiox-ind-icon">${cfg.icon}</span>
           ${badgeHtml}
+        </div>
+
+        <div class="raiox-ind-title-row">
+          <span class="raiox-ind-title" title="${cfg.label}">${cfg.label}</span>
         </div>
 
         <div class="raiox-ind-values-box">
@@ -1872,29 +1918,29 @@ function atualizarGraficoSeriesHistoricas() {
 
   if (currentSeriesMetric === 'poder_compra') {
     titleEl.textContent = 'Custo de Bens Essenciais em % do Salário Mínimo';
-    subtitleEl.textContent = 'Proporção da renda mínima necessária para adquirir Cesta Básica e Botijão de Gás';
+    subtitleEl.textContent = 'Proporção da renda mínima necessária para adquirir Cesta Básica, Botijão de Gás e 1L de Gasolina';
     tagEl.textContent = 'DIEESE / ANP / BCB';
 
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
         <span class="series-highlight-title">Cesta Básica (% Salário Mínimo)</span>
-        <div class="series-highlight-val">54,5% <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▼ -8.4 p.p.</span></div>
+        <div class="series-highlight-val">54,5% <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▼ -8.4 p.p. vs 2022</span></div>
         <span class="series-highlight-sub">No pico de 2022 consumia 62,9% do salário mínimo; em 2026 caiu para 54,5%.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
         <span class="series-highlight-title">Botijão de Gás GLP 13kg</span>
-        <div class="series-highlight-val">6,7% <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▼ -2.4 p.p.</span></div>
+        <div class="series-highlight-val">6,7% <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▼ -2.4 p.p. vs 2022</span></div>
         <span class="series-highlight-sub">Chegou a consumir 9,1% do salário mínimo em 2022; agora exige 6,7%.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
         <span class="series-highlight-title">1 Litro de Gasolina Comum</span>
-        <div class="series-highlight-val">0,41% <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▼ -0.12 p.p.</span></div>
-        <span class="series-highlight-sub">Em 2022, 1L de gasolina exigia 0,53% do salário mínimo; agora exige 0,41%.</span>
+        <div class="series-highlight-val">0,41% <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▼ -0.12 p.p. vs 2022</span></div>
+        <span class="series-highlight-sub">Em 2022, 1L de gasolina consumia 0,53% do salário mínimo; agora exige 0,41%.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
         <span class="series-highlight-title">Salário Mínimo Nominal</span>
-        <div class="series-highlight-val">R$ 1.518 <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +72.5%</span></div>
-        <span class="series-highlight-sub">Evoluiu de R$ 880 (2016) e R$ 1.212 (2022) para R$ 1.518 com ganho real.</span>
+        <div class="series-highlight-val">R$ 1.518 <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +25,2% vs 2022</span></div>
+        <span class="series-highlight-sub">Evoluiu de R$ 1.212 (2022) para R$ 1.518 (2026) com valorização real acima da inflação.</span>
       </div>
     `;
 
@@ -1910,11 +1956,20 @@ function atualizarGraficoSeriesHistoricas() {
         pointRadius: 4
       },
       {
-        label: 'Botijão de Gás (% do Salário Mínimo)',
+        label: 'Botijão de Gás GLP (% do Salário Mínimo)',
         data: dados.map(d => d.gas_glp_pct_sm),
         borderColor: '#0E9F6E',
         backgroundColor: 'rgba(14, 159, 110, 0.08)',
         borderWidth: 3,
+        tension: 0.25,
+        pointRadius: 4
+      },
+      {
+        label: '1L Gasolina Comum (% do Salário Mínimo)',
+        data: dados.map(d => d.gasolina_pct_sm || 0.41),
+        borderColor: '#D97706',
+        backgroundColor: 'rgba(217, 119, 6, 0.08)',
+        borderWidth: 2.5,
         tension: 0.25,
         pointRadius: 4
       }
@@ -1933,22 +1988,22 @@ function atualizarGraficoSeriesHistoricas() {
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
         <span class="series-highlight-title">Veículos Usados e Seminovos</span>
-        <div class="series-highlight-val">12,85 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Recorde</span></div>
+        <div class="series-highlight-val">12,85 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +23,8% vs 2022</span></div>
         <span class="series-highlight-sub">Volume anual de transferências no mercado formal (era 10,38M em 2022).</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
         <span class="series-highlight-title">Veículos Novos (0 km)</span>
-        <div class="series-highlight-val">2,65 M <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ Retomada</span></div>
-        <span class="series-highlight-sub">Licenciamentos anuais de automóveis e comerciais leves.</span>
+        <div class="series-highlight-val">2,65 M <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +26,2% vs 2022</span></div>
+        <span class="series-highlight-sub">Licenciamentos anuais de automóveis e comerciais leves (era 2,10M em 2022).</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
         <span class="series-highlight-title">Razão Usados por Novo</span>
-        <div class="series-highlight-val">4,80x</div>
-        <span class="series-highlight-sub">Para cada 1 carro 0 km vendido no Brasil, giram 4,8 carros usados.</span>
+        <div class="series-highlight-val">4,85x</div>
+        <span class="series-highlight-sub">Para cada 1 carro 0 km vendido no Brasil, giram quase 5 carros usados.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
         <span class="series-highlight-title">Crédito Automotivo</span>
-        <div class="series-highlight-val">+22,4%</div>
+        <div class="series-highlight-val">+22,4% vs 2022</div>
         <span class="series-highlight-sub">Expansão na concessão de financiamentos para aquisição de veículos.</span>
       </div>
     `;
@@ -1958,21 +2013,24 @@ function atualizarGraficoSeriesHistoricas() {
         label: 'Veículos Usados Vendidos (Milhões)',
         data: dados.map(d => d.veiculos_usados_milhoes),
         backgroundColor: '#0E9F6E',
-        borderRadius: 6,
-        type: 'bar'
+        borderRadius: 4,
+        type: 'bar',
+        stack: 'veiculos'
       },
       {
         label: 'Veículos Novos Licenciados (Milhões)',
         data: dados.map(d => d.veiculos_novos_milhoes),
         backgroundColor: '#1A56DB',
-        borderRadius: 6,
-        type: 'bar'
+        borderRadius: 4,
+        type: 'bar',
+        stack: 'veiculos'
       }
     ];
 
     yAxisConfig = {
+      stacked: true,
       ticks: { callback: v => v + ' M' },
-      title: { display: true, text: 'Milhões de Veículos' }
+      title: { display: true, text: 'Milhões de Veículos (Empilhado)' }
     };
 
   } else if (currentSeriesMetric === 'habitacao') {
@@ -1983,8 +2041,8 @@ function atualizarGraficoSeriesHistoricas() {
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
         <span class="series-highlight-title">Imóveis Financiados SBPE</span>
-        <div class="series-highlight-val">182 mil <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ 2,4x vs 2016</span></div>
-        <span class="series-highlight-sub">Evoluiu de 73,5 mil unidades em 2016 para mais de 180 mil ao ano.</span>
+        <div class="series-highlight-val">182 mil <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +61,8% vs 2022</span></div>
+        <span class="series-highlight-sub">Evoluiu de 112,5 mil unidades em 2022 para mais de 180 mil ao ano em 2026.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
         <span class="series-highlight-title">Crédito Habitacional PF</span>
@@ -1998,8 +2056,8 @@ function atualizarGraficoSeriesHistoricas() {
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
         <span class="series-highlight-title">Faturamento do Comércio</span>
-        <div class="series-highlight-val">R$ 4,1 Tri</div>
-        <span class="series-highlight-sub">Faturamento anual do comércio varejista ampliado (PMC / IBGE).</span>
+        <div class="series-highlight-val">R$ 2,48 Tri <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +25,3% vs 2022</span></div>
+        <span class="series-highlight-sub">Faturamento anual do comércio varejista ampliado (BCB Série 28544 / IBGE).</span>
       </div>
     `;
 
@@ -2022,36 +2080,36 @@ function atualizarGraficoSeriesHistoricas() {
     };
 
   } else if (currentSeriesMetric === 'trabalho_agro') {
-    titleEl.textContent = 'Mercado Formal, Empreendedorismo e Balança do Agronegócio';
-    subtitleEl.textContent = 'Evolução de empregos com carteira (CLT), MEIs cadastrados e superávit do Agro';
-    tagEl.textContent = 'MTE / RFB / MAPA';
+    titleEl.textContent = 'Mercado Formal de Trabalho e Empreendedorismo (CLT & MEI)';
+    subtitleEl.textContent = 'Evolução de empregos com carteira assinada (CLT) e Microempreendedores Individuais (MEI)';
+    tagEl.textContent = 'MTE / RFB / CAGED';
 
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
         <span class="series-highlight-title">Empregos Formais CLT</span>
-        <div class="series-highlight-val">102,7 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +6,7 M vs 2022</span></div>
-        <span class="series-highlight-sub">Passou de 96,0M em 2022 para 102,7M de pessoas com carteira assinada.</span>
+        <div class="series-highlight-val">102,7 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +7,0% vs 2022</span></div>
+        <span class="series-highlight-sub">Passou de 96,0M em 2022 para 102,7M de carteiras assinadas ativas em 2026.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
         <span class="series-highlight-title">Microempreendedores MEI</span>
-        <div class="series-highlight-val">16,94 M <span style="font-size: 0.8rem; color: #D97706; font-weight: 700;">▲ 2,6x vs 2016</span></div>
-        <span class="series-highlight-sub">Passou de 6,55M em 2016 para 16,9M de microempreendedores ativos.</span>
+        <div class="series-highlight-val">16,94 M <span style="font-size: 0.8rem; color: #D97706; font-weight: 700;">▲ +17,2% vs 2022</span></div>
+        <span class="series-highlight-sub">Passou de 14,45M em 2022 para 16,94M de MEIs cadastrados ativos em 2026.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
-        <span class="series-highlight-title">Saldo Exportador do Agro</span>
-        <div class="series-highlight-val">US$ 140,5 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Quase 2x</span></div>
-        <span class="series-highlight-sub">Superávit comercial líquido do agronegócio (era US$ 71,3 Bi em 2016).</span>
+        <span class="series-highlight-title">Total da Força Formal</span>
+        <div class="series-highlight-val">119,6 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Recorde</span></div>
+        <span class="series-highlight-sub">Soma de empregados CLT e microempreendedores formalizados no Brasil.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
-        <span class="series-highlight-title">Abertura de Empresas</span>
-        <div class="series-highlight-val">3,95 M/ano</div>
-        <span class="series-highlight-sub">Novos CNPJs abertos por ano em todo o território nacional.</span>
+        <span class="series-highlight-title">Massa Salarial em Alta</span>
+        <div class="series-highlight-val">R$ 330 Bi/mês</div>
+        <span class="series-highlight-sub">Massa de rendimento real habitualmente recebida por trabalhadores.</span>
       </div>
     `;
 
     datasets = [
       {
-        label: 'Trabalhadores CLT (Milhões)',
+        label: 'Trabalhadores Formais CLT (Milhões)',
         data: dados.map(d => d.clt_milhoes),
         borderColor: '#1A56DB',
         backgroundColor: '#1A56DB',
@@ -2060,10 +2118,10 @@ function atualizarGraficoSeriesHistoricas() {
         pointRadius: 4
       },
       {
-        label: 'Saldo Agro (US$ Bi)',
-        data: dados.map(d => d.agro_saldo_usd_bi),
-        borderColor: '#0E9F6E',
-        backgroundColor: '#0E9F6E',
+        label: 'Microempreendedores MEI (Milhões)',
+        data: dados.map(d => d.meis_milhoes),
+        borderColor: '#D97706',
+        backgroundColor: '#D97706',
         borderWidth: 3,
         tension: 0.25,
         pointRadius: 4
@@ -2071,12 +2129,13 @@ function atualizarGraficoSeriesHistoricas() {
     ];
 
     yAxisConfig = {
-      title: { display: true, text: 'Volume de Atividade' }
+      ticks: { callback: v => v + ' M' },
+      title: { display: true, text: 'Milhões de Pessoas Formalizadas' }
     };
 
   } else if (currentSeriesMetric === 'orcamento_federal') {
     titleEl.textContent = 'Orçamento Executado dos Governos Federais (2010 – 2026)';
-    subtitleEl.textContent = 'Valores reais atualizados pelo IPCA a preços de 2026 em Saúde, Educação e Investimentos';
+    subtitleEl.textContent = 'Valores reais atualizados pelo IPCA a preços de 2026 em Saúde, Educação e Farmácia Popular';
     tagEl.textContent = 'Tesouro Nacional (RTN) / SIAFI';
 
     const orcDados = APP_DATA.series_historicas.orcamento_governos || [];
@@ -2092,15 +2151,15 @@ function atualizarGraficoSeriesHistoricas() {
         <div class="series-highlight-val">R$ 137,8 Bi <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +48%</span></div>
         <span class="series-highlight-sub">Expansão via Novo FUNDEB e implantação do Pé-de-Meia.</span>
       </div>
-      <div class="series-highlight-box" style="border-left: 4px solid #F59E0B;">
-        <span class="series-highlight-title">Obras do Novo PAC</span>
-        <div class="series-highlight-val">R$ 54,6 Bi</div>
-        <span class="series-highlight-sub">Retomada dos investimentos federais em transportes, saneamento e energia.</span>
+      <div class="series-highlight-box" style="border-left: 4px solid #DC2626;">
+        <span class="series-highlight-title">Farmácia Popular (Real)</span>
+        <div class="series-highlight-val">R$ 5,4 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +116% vs 2022</span></div>
+        <span class="series-highlight-sub">Orçamento integralmente garantido com gratuidade de 40 medicamentos essenciais.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
-        <span class="series-highlight-title">Farmácia Popular Executado</span>
-        <div class="series-highlight-val">R$ 5,4 Bi</div>
-        <span class="series-highlight-sub">Orçamento integralmente garantido com gratuidade de 40 medicamentos.</span>
+        <span class="series-highlight-title">Economia das Famílias</span>
+        <div class="series-highlight-val">R$ 7,73 Bi / ano</div>
+        <span class="series-highlight-sub">Gasto do bolso evitado na compra direta de medicamentos contínuos.</span>
       </div>
     `;
 
@@ -2124,18 +2183,111 @@ function atualizarGraficoSeriesHistoricas() {
         pointRadius: 4
       },
       {
-        label: 'Obras do PAC Real (R$ Bi)',
-        data: orcDados.map(d => d.obras_pac_real_2026_bi || d.obras_pac_bi),
-        borderColor: '#F59E0B',
+        label: 'Farmácia Popular Real (R$ Bi)',
+        data: orcDados.map(d => d.farmacia_popular_real_2026_bi || d.farmacia_popular_bi),
+        borderColor: '#DC2626',
+        backgroundColor: 'rgba(220, 38, 38, 0.08)',
         borderWidth: 2.5,
-        borderDash: [5, 5],
-        pointRadius: 3
+        tension: 0.25,
+        pointRadius: 4
       }
     ];
 
     yAxisConfig = {
       ticks: { callback: v => 'R$ ' + v + ' Bi' },
       title: { display: true, text: 'R$ Bilhões (Preços de 2026)' }
+    };
+
+  } else if (currentSeriesMetric === 'comercio') {
+    titleEl.textContent = 'Vendas do Comércio Varejista Ampliado (2016 – 2026)';
+    subtitleEl.textContent = 'Volume total de faturamento do varejo brasileiro incluindo veículos, motos e materiais de construção';
+    tagEl.textContent = 'Banco Central (Série 28544) / IBGE (PMC)';
+
+    highlightsHtml = `
+      <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
+        <span class="series-highlight-title">Faturamento Varejista Ampliado</span>
+        <div class="series-highlight-val">R$ 2,48 Tri <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +25,3% vs 2022</span></div>
+        <span class="series-highlight-sub">Evoluiu de R$ 1,98 Tri em 2022 para R$ 2,48 Tri ao ano em 2026.</span>
+      </div>
+      <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
+        <span class="series-highlight-title">Massa de Renda Circulante</span>
+        <div class="series-highlight-val">R$ 330 Bi/mês <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">Recorde</span></div>
+        <span class="series-highlight-sub">Aumento da massa salarial real impulsiona o consumo de bens duráveis e semiduráveis.</span>
+      </div>
+      <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
+        <span class="series-highlight-title">Hipermercados e Alimentação</span>
+        <div class="series-highlight-val">~42% do Varejo</div>
+        <span class="series-highlight-sub">Principal componente de despesa básica das famílias nos municípios.</span>
+      </div>
+      <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
+        <span class="series-highlight-title">Inadimplência de Famílias</span>
+        <div class="series-highlight-val">Em Queda <span style="font-size: 0.8rem; color: #166534; font-weight: 700;">Desenrola</span></div>
+        <span class="series-highlight-sub">Efeito da recuperação de crédito e renegociação de dívidas ativas.</span>
+      </div>
+    `;
+
+    datasets = [
+      {
+        label: 'Varejo Ampliado (R$ Trilhões)',
+        data: dados.map(d => d.comercio_varejo_rs_tri),
+        borderColor: '#1A56DB',
+        backgroundColor: 'rgba(26, 86, 219, 0.1)',
+        borderWidth: 3,
+        tension: 0.25,
+        fill: true,
+        pointRadius: 4
+      }
+    ];
+
+    yAxisConfig = {
+      ticks: { callback: v => 'R$ ' + v + ' Tri' },
+      title: { display: true, text: 'R$ Trilhões Correntes' }
+    };
+
+  } else if (currentSeriesMetric === 'gastos_exterior') {
+    titleEl.textContent = 'Gastos de Brasileiros em Viagens no Exterior (2016 – 2026)';
+    subtitleEl.textContent = 'Despesas de turistas e residentes brasileiros no exterior (Conta de Viagens Internacionais)';
+    tagEl.textContent = 'Banco Central do Brasil (Série 22742)';
+
+    highlightsHtml = `
+      <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
+        <span class="series-highlight-title">Despesas no Exterior (2026)</span>
+        <div class="series-highlight-val">US$ 18,7 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +53,3% vs 2022</span></div>
+        <span class="series-highlight-sub">Recuperação expressiva frente aos US$ 12,2 Bi de 2022 e pico pós-pandemia.</span>
+      </div>
+      <div class="series-highlight-box" style="border-left: 4px solid #DC2626;">
+        <span class="series-highlight-title">Mínima Histórica (Pandemia)</span>
+        <div class="series-highlight-val">US$ 5,3 Bi <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">2021</span></div>
+        <span class="series-highlight-sub">Queda abrupta de 71% durante o fechamento de fronteiras na crise sanitária.</span>
+      </div>
+      <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
+        <span class="series-highlight-title">Passageiros em Voos Internacionais</span>
+        <div class="series-highlight-val">24,5 Milhões</div>
+        <span class="series-highlight-sub">Movimentação anual nos aeroportos brasileiros (ANAC).</span>
+      </div>
+      <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
+        <span class="series-highlight-title">Câmbio Médio de Referência</span>
+        <div class="series-highlight-val">R$ 5,35 / US$</div>
+        <span class="series-highlight-sub">Nível da taxa de câmbio nominal PTAX anual.</span>
+      </div>
+    `;
+
+    datasets = [
+      {
+        label: 'Gastos no Exterior (US$ Bilhões)',
+        data: dados.map(d => d.gastos_exterior_usd_bi),
+        borderColor: '#7E3AF2',
+        backgroundColor: 'rgba(126, 58, 242, 0.1)',
+        borderWidth: 3,
+        tension: 0.25,
+        fill: true,
+        pointRadius: 4
+      }
+    ];
+
+    yAxisConfig = {
+      ticks: { callback: v => 'US$ ' + v + ' Bi' },
+      title: { display: true, text: 'US$ Bilhões' }
     };
   }
 
@@ -2173,6 +2325,7 @@ function atualizarGraficoSeriesHistoricas() {
       scales: {
         y: yAxisConfig,
         x: {
+          stacked: currentSeriesMetric === 'veiculos',
           grid: { display: false }
         }
       }
@@ -2561,67 +2714,201 @@ function fecharModalMetodologia() {
   document.getElementById('modal-metodologia').classList.add('hidden');
 }
 
-/**
- * 12. TABELA DE SÉRIE HISTÓRICA DO ORÇAMENTO FEDERAL NOS MODAIS DE PRIORIDADES
- */
 function gerarTabelaHistoricoOrcamento(tipo) {
-  if (!APP_DATA || !APP_DATA.series_historicas || !APP_DATA.series_historicas.orcamento_governos) {
-    return '';
-  }
-  const lista = APP_DATA.series_historicas.orcamento_governos;
-
-  let colunas = '';
-  let tituloSecao = '';
-  let descricaoSecao = '';
-
   if (tipo === 'saude') {
-    tituloSecao = '🏛️ Histórico do Orçamento Federal: Farmácia Popular e Saúde (2010 a 2026)';
-    descricaoSecao = 'Trajetória dos orçamentos nominais e reais (corrigidos pelo IPCA a preços de 2026). Destaque para a expansão em Dilma, o congelamento sob o teto de gastos (2017–2022) e a retomada recorde em Lula 3.';
-    colunas = `
-      <th>Ano</th>
-      <th>Governo</th>
-      <th>Farmácia Pop. (Nominal)</th>
-      <th>Farmácia Pop. (Real 2026)</th>
-      <th>Saúde Total (Nominal)</th>
-      <th>Saúde Total (Real 2026)</th>
-      <th>Status</th>
+    const sde = (activeRaioXCity && activeRaioXCity.sde) ? activeRaioXCity.sde : (APP_DATA.saude_nacional || {});
+    const isMun = !!activeRaioXCity;
+    const nomeLoc = isMun ? `${activeRaioXCity.nm} (${activeRaioXCity.uf})` : 'Brasil (Consolidado Nacional)';
+
+    const hipTot = sde.fp_so_hipertensao || sde.hip || 4962509;
+    const ambTot = sde.fp_hipertensao_e_diabetes || sde.amb || 3239501;
+    const diabTot = sde.fp_so_diabetes || sde.diab || 1808126;
+    const asmaTot = sde.fp_asma || sde.asma || 875033;
+    const fpTotal = sde.fp_total || sde.tot || 12957809;
+
+    const acTot = sde.alto_custo || sde.ac || 3284659;
+    const quimTot = sde.quimioterapia || sde.quim || 361331;
+    const radTot = sde.radioterapia || sde.rad || 8987;
+
+    const bMin = sde.bolso_minimo || sde.b_min || 4661567780;
+    const bMed = sde.bolso_mediano || sde.b_med || 7732862870;
+
+    return `
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E2E8F0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+          <h4 style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: var(--gov-blue-dark); margin: 0;">
+            🩺 Assistência Farmacêutica e Linhas de Cuidado SUS • ${nomeLoc}
+          </h4>
+          <span style="font-size: 0.72rem; background: #DCFCE7; color: #166534; padding: 4px 10px; border-radius: 6px; font-weight: 700;">
+            Fonte: saude-municipios.web.app / MS / DATASUS
+          </span>
+        </div>
+        <p style="font-size: 0.78rem; color: #64748B; margin-bottom: 14px; line-height: 1.4;">
+          Decomposição oficial de pacientes beneficiados pelo programa Farmácia Popular por patologia crônica e linhas de cuidado de alta complexidade do SUS (Oncologia e Medicamentos Especializados).
+        </p>
+
+        <!-- Banner de Economia no Bolso das Famílias -->
+        <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid #86EFAC; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <span style="font-size: 0.72rem; font-weight: 800; color: #166534; text-transform: uppercase;">💰 Gasto do Bolso Evitado (Economia Familiar Direta)</span>
+            <div style="font-size: 1.25rem; font-weight: 800; color: #14532D; margin-top: 2px;">
+              ${isMun ? `R$ ${(bMed / 1000000).toFixed(2)} Milhões / ano` : `R$ ${(bMed / 1000000000).toFixed(2)} Bilhões / ano`}
+            </div>
+            <span style="font-size: 0.74rem; color: #166534;">
+              Estimativa mediana do valor que as famílias deixaram de pagar em farmácias privadas para tratar hipertensão, diabetes e asma. Faixa conservadora: ${isMun ? `R$ ${(bMin / 1000000).toFixed(2)} Mi` : `R$ ${(bMin / 1000000000).toFixed(2)} Bi`}.
+            </span>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 8px; padding: 8px 14px; text-align: center; border: 1px solid #BBF7D0;">
+            <span style="font-size: 0.70rem; color: #64748B; font-weight: 700;">TOTAL ATENDIDOS FP</span>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #166534;">${formatarNumero(fpTotal)}</div>
+          </div>
+        </div>
+
+        <div class="budget-history-table-wrap">
+          <table class="budget-history-table">
+            <thead>
+              <tr>
+                <th>Linha de Cuidado / Patologia</th>
+                <th>Programa SUS</th>
+                <th>Pacientes Atendidos</th>
+                <th>% do Total FP</th>
+                <th>Itens / Cobertura</th>
+                <th>Impacto no Município</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 700;">Hipertensão Arterial isolada</td>
+                <td><span class="gov-badge gov-lula">Farmácia Popular</span></td>
+                <td style="font-weight: 700; color: #1A56DB;">${formatarNumero(hipTot)}</td>
+                <td>${((hipTot / (fpTotal || 1)) * 100).toFixed(1)}%</td>
+                <td>Losartana, Atenolol, Hidroclorotiazida</td>
+                <td style="font-size: 0.72rem; color: #166534;">100% Gratuito • Redução de AVC e infarto</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 700;">Hipertensão + Diabetes (Comorbidade)</td>
+                <td><span class="gov-badge gov-lula">Farmácia Popular</span></td>
+                <td style="font-weight: 700; color: #7E3AF2;">${formatarNumero(ambTot)}</td>
+                <td>${((ambTot / (fpTotal || 1)) * 100).toFixed(1)}%</td>
+                <td>Anti-hipertensivos + Antidiabéticos Orais</td>
+                <td style="font-size: 0.72rem; color: #166534;">100% Gratuito • Pacientes de maior custo clínico</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 700;">Diabetes Mellitus isolada</td>
+                <td><span class="gov-badge gov-lula">Farmácia Popular</span></td>
+                <td style="font-weight: 700; color: #0E9F6E;">${formatarNumero(diabTot)}</td>
+                <td>${((diabTot / (fpTotal || 1)) * 100).toFixed(1)}%</td>
+                <td>Metformina, Glibenclamida, Insulinas</td>
+                <td style="font-size: 0.72rem; color: #166534;">100% Gratuito • Prevenção de nefropatias</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 700;">Asma Crônica</td>
+                <td><span class="gov-badge gov-lula">Farmácia Popular</span></td>
+                <td style="font-weight: 700; color: #D97706;">${formatarNumero(asmaTot)}</td>
+                <td>${((asmaTot / (fpTotal || 1)) * 100).toFixed(1)}%</td>
+                <td>Salbutamol, Beclometasona, Ipratrópio</td>
+                <td style="font-size: 0.72rem; color: #166534;">100% Gratuito • Redução de internações pediátricas</td>
+              </tr>
+              <tr style="background: #F8FAFC;">
+                <td style="font-weight: 700;">Medicamentos de Alto Custo (Especializado)</td>
+                <td><span class="gov-badge gov-temer">SUS Especializado</span></td>
+                <td style="font-weight: 700; color: #1E40AF;">${formatarNumero(acTot)}</td>
+                <td>—</td>
+                <td>Protocolos Clínicos e Diretrizes Terapêuticas (PCDT)</td>
+                <td style="font-size: 0.72rem; color: #64748B;">Fornecimento federal direto aos estados</td>
+              </tr>
+              <tr style="background: #F8FAFC;">
+                <td style="font-weight: 700;">Tratamento Oncológico: Quimioterapia</td>
+                <td><span class="gov-badge gov-bolsonaro">Oncologia SUS</span></td>
+                <td style="font-weight: 700; color: #DC2626;">${formatarNumero(quimTot)}</td>
+                <td>—</td>
+                <td>Quimioterapia Ambulatorial e Hospitalar</td>
+                <td style="font-size: 0.72rem; color: #64748B;">Hospitais habilitados e CACON/UNACON</td>
+              </tr>
+              <tr style="background: #F8FAFC;">
+                <td style="font-weight: 700;">Tratamento Oncológico: Radioterapia</td>
+                <td><span class="gov-badge gov-bolsonaro">Oncologia SUS</span></td>
+                <td style="font-weight: 700; color: #DC2626;">${formatarNumero(radTot)}</td>
+                <td>—</td>
+                <td>Aceleradores lineares e expansão federal</td>
+                <td style="font-size: 0.72rem; color: #64748B;">Plano de Expansão da Radioterapia no SUS</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     `;
-  } else if (tipo === 'educacao') {
-    tituloSecao = '🏛️ Histórico do Orçamento Federal: Educação Básica e FUNDEB União (2010 a 2026)';
-    descricaoSecao = 'Aportes federais na Educação Básica e evolução da complementação da União no FUNDEB (de 10% no antigo modelo para 23% em 2026 no Novo FUNDEB).';
-    colunas = `
-      <th>Ano</th>
-      <th>Governo</th>
-      <th>Educação (Nominal)</th>
-      <th>Educação (Real 2026)</th>
-      <th>Fundeb União (Nominal)</th>
-      <th>Fundeb União (Real 2026)</th>
-      <th>Status</th>
+  }
+
+  if (tipo === 'educacao') {
+    const etiNac = APP_DATA.eti_nacional || { total_fomento: 2134201430, total_matriculas: 406400, total_redes: 4107 };
+    const etiUfList = APP_DATA.eti_por_uf || [];
+
+    const linhasEti = etiUfList.map((uf, idx) => {
+      const isTop5 = idx < 5 ? 'style="font-weight: 700;"' : '';
+      return `
+        <tr ${isTop5}>
+          <td style="font-weight: 700;">${uf.nome} (${uf.uf})</td>
+          <td style="font-weight: 700; color: #1A56DB;">R$ ${(uf.fomento / 1000000).toFixed(2)} Mi</td>
+          <td style="font-weight: 700; color: #047857;">${formatarNumero(uf.matriculas)} vagas</td>
+          <td>R$ ${Math.round(uf.fomento / (uf.matriculas || 1)).toLocaleString('pt-BR')}</td>
+          <td><span class="gov-badge gov-lula">Pactuação 2024–2026</span></td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E2E8F0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+          <h4 style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: var(--gov-blue-dark); margin: 0;">
+            🎓 Programa Escola em Tempo Integral (ETI) • Fomento e Pactuação Federal
+          </h4>
+          <span style="font-size: 0.72rem; background: #EEF2FF; color: #1E40AF; padding: 4px 10px; border-radius: 6px; font-weight: 700;">
+            Fonte: MEC / FNDE / Lei nº 14.640/2023
+          </span>
+        </div>
+        <p style="font-size: 0.78rem; color: #64748B; margin-bottom: 14px; line-height: 1.4;">
+          Dados oficiais da pactuação de novas matrículas e repasses federais diretos da União às redes municipais de educação para expansão da jornada integral (mínimo de 7 horas diárias).
+        </p>
+
+        <!-- Banner de Destaques Nacionais do Programa ETI -->
+        <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 1px solid #93C5FD; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <span style="font-size: 0.72rem; font-weight: 800; color: #1E40AF; text-transform: uppercase;">Aporte Federal Direto às Redes Municipais</span>
+            <div style="font-size: 1.25rem; font-weight: 800; color: #1E3A8A; margin-top: 2px;">
+              R$ ${(etiNac.total_fomento / 1000000000).toFixed(2)} Bilhões Pactuados
+            </div>
+            <span style="font-size: 0.74rem; color: #1E40AF;">
+              Total de <strong>${formatarNumero(etiNac.total_matriculas)} matrículas integrais</strong> financiadas em <strong>${formatarNumero(etiNac.total_redes)} redes municipais</strong> de todo o Brasil.
+            </span>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 8px; padding: 8px 14px; text-align: center; border: 1px solid #BFDBFE;">
+            <span style="font-size: 0.70rem; color: #64748B; font-weight: 700;">APORTE MÉDIO / ALUNO</span>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #1E40AF;">R$ 5.250 / ano</div>
+          </div>
+        </div>
+
+        <div class="budget-history-table-wrap">
+          <table class="budget-history-table">
+            <thead>
+              <tr>
+                <th>Unidade Federativa (UF)</th>
+                <th>Fomento Rede Municipal (R$)</th>
+                <th>Matrículas ETI Pactuadas</th>
+                <th>Aporte Médio / Matrícula</th>
+                <th>Status do Programa</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${linhasEti}
+            </tbody>
+          </table>
+        </div>
+      </div>
     `;
-  } else if (tipo === 'previdencia') {
-    tituloSecao = '🏛️ Histórico da Despesa Federal & Seguridade Social (2010 a 2026)';
-    descricaoSecao = 'Evolução da despesa primária total da União e injeção do RGPS / Seguridade, sustentando a economia de mais de 4.300 municípios onde supera o FPM.';
-    colunas = `
-      <th>Ano</th>
-      <th>Governo</th>
-      <th>Despesa União (Nominal)</th>
-      <th>Despesa União (Real 2026)</th>
-      <th>Investimento União (Nominal)</th>
-      <th>Investimento União (Real 2026)</th>
-      <th>Status</th>
-    `;
-  } else if (tipo === 'trabalho') {
-    tituloSecao = '🏛️ Evolução Histórica: Empregos Formais CLT e MEIs Cadastrados (2016 a 2026)';
-    descricaoSecao = 'Trajetória oficial da força de trabalho formalizada no Brasil: evolução do contingente com carteira assinada (CLT) e avanço dos Microempreendedores Individuais (MEI).';
-    colunas = `
-      <th>Ano</th>
-      <th>Governo</th>
-      <th>Empregos CLT (Milhões)</th>
-      <th>MEIs Cadastrados (Milhões)</th>
-      <th>Total Formalizado (Milhões)</th>
-      <th>Salário Mínimo</th>
-      <th>Status</th>
-    `;
+  }
+
+  if (tipo === 'trabalho') {
     const nacLista = APP_DATA?.series_historicas?.nacional || [];
     const linhasTrab = nacLista.map(item => {
       let badgeClass = 'gov-lula';
@@ -2650,15 +2937,23 @@ function gerarTabelaHistoricoOrcamento(tipo) {
     return `
       <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E2E8F0;">
         <h4 style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: var(--gov-blue-dark); margin-bottom: 4px;">
-          ${tituloSecao}
+          🏛️ Evolução Histórica: Empregos Formais CLT e MEIs Cadastrados (2016 a 2026)
         </h4>
         <p style="font-size: 0.78rem; color: #64748B; margin-bottom: 12px; line-height: 1.4;">
-          ${descricaoSecao}
+          Trajetória oficial da força de trabalho formalizada no Brasil: evolução do contingente com carteira assinada (CLT) e avanço dos Microempreendedores Individuais (MEI).
         </p>
         <div class="budget-history-table-wrap">
           <table class="budget-history-table">
             <thead>
-              <tr>${colunas}</tr>
+              <tr>
+                <th>Ano</th>
+                <th>Governo</th>
+                <th>Empregos CLT (Milhões)</th>
+                <th>MEIs Cadastrados (Milhões)</th>
+                <th>Total Formalizado (Milhões)</th>
+                <th>Salário Mínimo</th>
+                <th>Status</th>
+              </tr>
             </thead>
             <tbody>
               ${linhasTrab}
@@ -2666,6 +2961,29 @@ function gerarTabelaHistoricoOrcamento(tipo) {
           </table>
         </div>
       </div>
+    `;
+  }
+
+  if (!APP_DATA || !APP_DATA.series_historicas || !APP_DATA.series_historicas.orcamento_governos) {
+    return '';
+  }
+  const lista = APP_DATA.series_historicas.orcamento_governos;
+
+  let colunas = '';
+  let tituloSecao = '';
+  let descricaoSecao = '';
+
+  if (tipo === 'previdencia') {
+    tituloSecao = '🏛️ Histórico da Despesa Federal & Seguridade Social (2010 a 2026)';
+    descricaoSecao = 'Evolução da despesa primária total da União e injeção do RGPS / Seguridade, sustentando a economia de mais de 4.300 municípios onde supera o FPM.';
+    colunas = `
+      <th>Ano</th>
+      <th>Governo</th>
+      <th>Despesa União (Nominal)</th>
+      <th>Despesa União (Real 2026)</th>
+      <th>Investimento União (Nominal)</th>
+      <th>Investimento União (Real 2026)</th>
+      <th>Status</th>
     `;
   } else if (tipo === 'agro') {
     tituloSecao = '🏛️ Histórico do Orçamento Federal: Agricultura Familiar, PNAE Merenda & CONAB (2010 a 2026)';
@@ -2691,21 +3009,7 @@ function gerarTabelaHistoricoOrcamento(tipo) {
     const isLula3 = item.ano >= 2023 ? 'row-lula-3' : '';
 
     let colDados = '';
-    if (tipo === 'saude') {
-      colDados = `
-        <td style="font-weight: 700; color: #0E9F6E;">R$ ${(item.farmacia_popular_bi || 0).toFixed(2)} Bi</td>
-        <td style="font-weight: 700; color: #1E40AF;">R$ ${(item.farmacia_popular_real_2026_bi || 0).toFixed(2)} Bi</td>
-        <td>R$ ${(item.saude_bi || 0).toFixed(1)} Bi</td>
-        <td>R$ ${(item.saude_real_2026_bi || 0).toFixed(1)} Bi</td>
-      `;
-    } else if (tipo === 'educacao') {
-      colDados = `
-        <td style="font-weight: 700; color: #1A56DB;">R$ ${(item.educacao_bi || 0).toFixed(1)} Bi</td>
-        <td style="font-weight: 700; color: #1E40AF;">R$ ${(item.educacao_real_2026_bi || 0).toFixed(1)} Bi</td>
-        <td style="font-weight: 700; color: #F59E0B;">R$ ${(item.fundeb_compl_uniao_bi || 0).toFixed(2)} Bi</td>
-        <td>R$ ${(item.fundeb_compl_uniao_real_2026_bi || 0).toFixed(2)} Bi</td>
-      `;
-    } else if (tipo === 'previdencia') {
+    if (tipo === 'previdencia') {
       colDados = `
         <td style="font-weight: 700; color: #7E3AF2;">R$ ${(item.despesa_total_uniao_bi || 0).toFixed(1)} Bi</td>
         <td style="font-weight: 700; color: #1E40AF;">R$ ${(item.despesa_total_uniao_real_2026_bi || 0).toFixed(1)} Bi</td>
@@ -2756,15 +3060,44 @@ function gerarTabelaHistoricoOrcamento(tipo) {
   `;
 }
 
-function gerarBlocoGraficoModalOrcamento() {
+function gerarBlocoGraficoModalOrcamento(tipo) {
+  const configs = {
+    saude: {
+      tag: 'Visualização Gráfica Integrada',
+      titulo: 'Distribuição de Pacientes Atendidos por Patologia e Tratamento SUS',
+      badge: '🩺 Farmácia Popular & Alta Complexidade SUS'
+    },
+    educacao: {
+      tag: 'Visualização Gráfica Integrada',
+      titulo: 'Fomento Federal e Matrículas em Tempo Integral (Programa ETI)',
+      badge: '🎓 MEC / FNDE • Programa ETI 2024–2026'
+    },
+    previdencia: {
+      tag: 'Visualização Gráfica Integrada',
+      titulo: 'Evolução da Despesa Primária e Capacidade de Investimento da União',
+      badge: '🏛️ Tesouro Nacional & SIAFI'
+    },
+    trabalho: {
+      tag: 'Visualização Gráfica Integrada',
+      titulo: 'Evolução do Emprego Formal CLT & Suporte ao MEI (2016 a 2026)',
+      badge: '💼 Séries Oficiais MTE / CAGED / RFB'
+    },
+    agro: {
+      tag: 'Visualização Gráfica Integrada',
+      titulo: 'Compras da Agricultura Familiar para Alimentação Escolar (PNAE) e CONAB',
+      badge: '🌱 FNDE / PNAE / CONAB (2010 a 2026)'
+    }
+  };
+  const cfg = configs[tipo] || configs.saude;
+
   return `
     <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px; margin: 20px 0;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
         <div>
-          <span style="font-size: 0.72rem; font-weight: 800; color: #64748B; text-transform: uppercase;">Visualização Gráfica Integrada</span>
-          <h5 style="font-size: 0.95rem; font-weight: 800; color: var(--gov-blue-dark); margin: 0;">Evolução Histórica e Políticas Públicas Federais</h5>
+          <span style="font-size: 0.72rem; font-weight: 800; color: #64748B; text-transform: uppercase;">${cfg.tag}</span>
+          <h5 style="font-size: 0.95rem; font-weight: 800; color: var(--gov-blue-dark); margin: 0;">${cfg.titulo}</h5>
         </div>
-        <span style="font-size: 0.72rem; background: #EEF2FF; color: #1E40AF; padding: 4px 10px; border-radius: 6px; font-weight: 700;">📊 Séries Oficiais de Orçamento e Emprego</span>
+        <span style="font-size: 0.72rem; background: #EEF2FF; color: #1E40AF; padding: 4px 10px; border-radius: 6px; font-weight: 700;">${cfg.badge}</span>
       </div>
       <div style="height: 290px; position: relative;">
         <canvas id="chart-modal-orcamento"></canvas>
@@ -2787,10 +3120,145 @@ function renderizarGraficoModalOrcamento(tipo) {
 
   const ctx = canvas.getContext('2d');
 
-  // Caso Especial Solicitado: Mercado de Trabalho Formal CLT & Suporte ao MEI
+  // Caso 1: Saúde Pública (Farmácia Popular & Alta Complexidade SUS)
+  if (tipo === 'saude') {
+    const sde = (activeRaioXCity && activeRaioXCity.sde) ? activeRaioXCity.sde : (APP_DATA.saude_nacional || {});
+    const hipTot = Math.round((sde.fp_so_hipertensao || sde.hip || 4962509) / 10000) / 100;
+    const ambTot = Math.round((sde.fp_hipertensao_e_diabetes || sde.amb || 3239501) / 10000) / 100;
+    const acTot = Math.round((sde.alto_custo || sde.ac || 3284659) / 10000) / 100;
+    const diabTot = Math.round((sde.fp_so_diabetes || sde.diab || 1808126) / 10000) / 100;
+    const asmaTot = Math.round((sde.fp_asma || sde.asma || 875033) / 10000) / 100;
+    const quimTot = Math.round((sde.quimioterapia || sde.quim || 361331) / 10000) / 100;
+    const radTot = Math.round((sde.radioterapia || sde.rad || 8987) / 10000) / 100;
+
+    const labels = [
+      'Hipertensão isolada',
+      'Hipertensão + Diabetes',
+      'Diabetes isolada',
+      'Asma Crônica',
+      'Alto Custo Especializado',
+      'Quimioterapia Oncológica',
+      'Radioterapia Oncológica'
+    ];
+
+    // Dataset 1: Farmácia Popular (Atenção Básica) - Aberto por padrão
+    const dataFP = [hipTot, ambTot, diabTot, asmaTot, null, null, null];
+    // Dataset 2: SUS Alta Complexidade & Oncologia - Fechado por padrão (hidden: true)
+    const dataSUS = [null, null, null, null, acTot, quimTot, radTot];
+
+    chartModalOrcamento = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Farmácia Popular (Milhões de Pacientes)',
+            data: dataFP,
+            backgroundColor: 'rgba(14, 159, 110, 0.85)',
+            borderColor: '#0E9F6E',
+            borderWidth: 1.5,
+            borderRadius: 4
+          },
+          {
+            label: 'Alta Complexidade SUS (Milhões de Atendimentos)',
+            data: dataSUS,
+            backgroundColor: 'rgba(30, 58, 138, 0.85)',
+            borderColor: '#1E3A8A',
+            borderWidth: 1.5,
+            borderRadius: 4,
+            hidden: true // Fechado por padrão, mantendo apenas 1 dado aberto
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw !== null ? ctx.raw.toFixed(2) + ' Milhões' : '—'}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: { callback: v => `${v} M` },
+            title: { display: true, text: 'Milhões de Pacientes / Procedimentos', font: { weight: 'bold' } }
+          },
+          y: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
+    return;
+  }
+
+  // Caso 2: Educação Básica & Programa Escola em Tempo Integral (ETI)
+  if (tipo === 'educacao') {
+    const etiTop10 = (APP_DATA.eti_por_uf || []).slice(0, 10);
+    const labels = etiTop10.map(d => `${d.nome} (${d.uf})`);
+    const fomData = etiTop10.map(d => Math.round(d.fomento / 1000000));
+    const matData = etiTop10.map(d => Math.round(d.matriculas / 1000));
+
+    chartModalOrcamento = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Fomento Federal Rede Municipal (R$ Milhões)',
+            data: fomData,
+            backgroundColor: 'rgba(26, 86, 219, 0.85)',
+            borderColor: '#1A56DB',
+            borderWidth: 1.5,
+            borderRadius: 4
+          },
+          {
+            label: 'Matrículas Tempo Integral (Milhares de Alunos)',
+            data: matData,
+            backgroundColor: 'rgba(245, 158, 11, 0.85)',
+            borderColor: '#D97706',
+            borderWidth: 1.5,
+            borderRadius: 4,
+            hidden: true // Fechado por padrão, apenas 1 dado aberto
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: '700' } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.datasetIndex === 0 ? 'R$ ' + ctx.raw + ' Mi' : ctx.raw + ' mil vagas'}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: { callback: v => `${v}` },
+            title: { display: true, text: 'R$ Milhões / Milhares de Vagas ETI', font: { weight: 'bold' } }
+          },
+          y: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
+    return;
+  }
+
+  // Caso 3: Mercado de Trabalho Formal CLT & Suporte ao MEI
   if (tipo === 'trabalho') {
     const nacList = APP_DATA?.series_historicas?.nacional || [];
-    const labels = nacList.map(d => String(d.ano));
+    const labels = nacList.map(d => String(d.ano)); // Apenas o ano no eixo X
     const cltData = nacList.map(d => d.clt_milhoes);
     const meiData = nacList.map(d => d.meis_milhoes);
 
@@ -2817,7 +3285,8 @@ function renderizarGraficoModalOrcamento(tipo) {
             borderColor: '#D97706',
             borderWidth: 1.5,
             borderRadius: 4,
-            order: 2
+            order: 2,
+            hidden: true // Fechado por padrão, apenas 1 dado aberto
           }
         ]
       },
@@ -2836,9 +3305,11 @@ function renderizarGraficoModalOrcamento(tipo) {
         scales: {
           x: { grid: { display: false } },
           y: {
-            beginAtZero: true,
+            min: 80, // Zoom solicitado para o eixo iniciar em 80M
+            suggestedMin: 80,
+            suggestedMax: 108,
             ticks: { callback: v => `${v} M` },
-            title: { display: true, text: 'Milhões de Trabalhadores / MEIs', font: { weight: 'bold' } }
+            title: { display: true, text: 'Milhões de Trabalhadores (Escala a partir de 80M)', font: { weight: 'bold' } }
           }
         }
       },
@@ -2867,10 +3338,11 @@ function renderizarGraficoModalOrcamento(tipo) {
     return;
   }
 
+  // Casos 4 e 5: Previdência e Agro
   const lista = APP_DATA?.series_historicas?.orcamento_governos || [];
   if (lista.length === 0) return;
 
-  const labels = lista.map(d => `${d.ano} (${d.governo})`);
+  const labels = lista.map(d => String(d.ano)); // Apenas o ano no eixo X, sem presidente
 
   // Cores temáticas das barras por Governo
   const barColors = lista.map(d => {
@@ -2896,17 +3368,7 @@ function renderizarGraficoModalOrcamento(tipo) {
   let barLabel = '';
   let lineLabel = '';
 
-  if (tipo === 'saude') {
-    barLabel = 'Farmácia Popular (Repasse Nominal)';
-    lineLabel = 'Farmácia Popular (Corrigido IPCA a Preços de 2026)';
-    barData = lista.map(d => d.farmacia_popular_bi || 0);
-    lineData = lista.map(d => d.farmacia_popular_real_2026_bi || 0);
-  } else if (tipo === 'educacao') {
-    barLabel = 'Complementação FUNDEB União (Nominal)';
-    lineLabel = 'FUNDEB União (Corrigido IPCA 2026)';
-    barData = lista.map(d => d.fundeb_compl_uniao_bi || 0);
-    lineData = lista.map(d => d.fundeb_compl_uniao_real_2026_bi || 0);
-  } else if (tipo === 'previdencia') {
+  if (tipo === 'previdencia') {
     barLabel = 'Investimento Total União (Nominal)';
     lineLabel = 'Investimento Total (Corrigido IPCA 2026)';
     barData = lista.map(d => d.investimento_total_bi || 0);
@@ -2928,6 +3390,17 @@ function renderizarGraficoModalOrcamento(tipo) {
       labels: labels,
       datasets: [
         {
+          type: 'bar',
+          label: barLabel,
+          data: barData,
+          backgroundColor: barColors,
+          borderColor: borderColors,
+          borderWidth: 1.5,
+          borderRadius: 4,
+          order: 2,
+          yAxisID: 'y'
+        },
+        {
           type: 'line',
           label: lineLabel,
           data: lineData,
@@ -2941,18 +3414,8 @@ function renderizarGraficoModalOrcamento(tipo) {
           pointHoverRadius: 7,
           tension: 0.25,
           order: 1,
-          yAxisID: 'y'
-        },
-        {
-          type: 'bar',
-          label: barLabel,
-          data: barData,
-          backgroundColor: barColors,
-          borderColor: borderColors,
-          borderWidth: 1.5,
-          borderRadius: 4,
-          order: 2,
-          yAxisID: 'y'
+          yAxisID: 'y',
+          hidden: true // Fechado por padrão, apenas 1 dado aberto
         }
       ]
     },
@@ -2989,10 +3452,8 @@ function renderizarGraficoModalOrcamento(tipo) {
         x: {
           grid: { display: false },
           ticks: {
-            font: { size: 9 },
-            color: '#64748B',
-            maxRotation: 45,
-            minRotation: 30
+            font: { size: 10, weight: '600' },
+            color: '#64748B'
           }
         },
         y: {
@@ -3026,7 +3487,7 @@ function renderizarGraficoModalOrcamento(tipo) {
           meta.data.forEach((element, index) => {
             const val = dataset.data[index];
             if (val === undefined || val === null || val <= 0) return;
-            ctx.fillStyle = datasetIndex === 0 ? '#1E3A8A' : '#0F172A';
+            ctx.fillStyle = datasetIndex === 0 ? '#0F172A' : '#1E3A8A';
             ctx.fillText(`${val.toFixed(1)}B`, element.x, element.y - 4);
           });
         });
@@ -3122,7 +3583,7 @@ function abrirModalPrioridade(tipo) {
     </div>
   `).join('');
 
-  const grafBloco = gerarBlocoGraficoModalOrcamento();
+  const grafBloco = gerarBlocoGraficoModalOrcamento(tipo);
   const tabelaBloco = gerarTabelaHistoricoOrcamento(tipo);
 
   bodyEl.innerHTML = `
@@ -3362,9 +3823,7 @@ async function abrirModalMunicipio(idIbge) {
         WhatsApp
       </button>
 
-      <button class="btn-primary" onclick="carregarMunicipioNoEstudio('${m.id}')">
-        Gerar Card para Redes Sociais
-      </button>
+      <!-- Estúdio de cards desativado temporariamente conforme solicitado -->
     </div>
   `;
 

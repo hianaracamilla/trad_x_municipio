@@ -82,7 +82,7 @@
           <span id="btn-toggle-banner-text">Ocultar Perfil</span>
         </button>
 
-        <button class="btn-primary" id="btn-open-cards-studio">
+        <button class="btn-primary" id="btn-open-cards-studio" style="display: none;">
           <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -335,134 +335,71 @@
       </div>
     </section>
 
-    <!-- 3. RAIO-X MUNICIPAL ESTRATÉGICO (LARGURA TOTAL, ALINHADO COM AS GRANDES PRIORIDADES) -->
-    <section class="raiox-fullwidth-section">
-      <div class="raiox-integrated-box" id="raiox-integrated-box">
-        <div class="raiox-box-header">
-          <div class="raiox-title-group">
-            <span class="raiox-badge">Raio-X Municipal Estratégico</span>
-            <h4 class="raiox-title" id="raiox-current-city-title">Diagnóstico: Brasil (Consolidado Nacional)</h4>
-            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
-              <span class="raiox-profile-tag" id="raiox-current-profile-tag">5.571 Municípios Brasileiros</span>
-              <span id="raiox-city-meta-info" style="font-size: 0.78rem; color: #64748B; font-weight: 600;"></span>
-            </div>
-          </div>
-          <div class="raiox-city-selector-wrap">
-            <button class="btn-change-city" id="btn-select-city-raiox" onclick="focarBuscaMunicipio()">
-              🔍 Selecionar Outra Cidade
-            </button>
-          </div>
-        </div>
-
-        <!-- Card Comparativo Lula: 2022 (1ºT e 2ºT) vs 2026 -->
-        <div class="raiox-election-comparison-card" id="raiox-comparison-card">
-          <div class="comparison-card-header">
-            <span class="comparison-eyebrow">COMPARATIVO ELEITORAL LULA</span>
-            <span class="comparison-badge" id="raiox-delta-badge">+0.0 pp</span>
-          </div>
-          <div class="comparison-bars-grid">
-            <div class="comp-col">
-              <span class="comp-label">2022 • 1º Turno</span>
-              <div class="comp-val lula-color" id="raiox-lula-22-1t">55.2%</div>
-              <div class="comp-bar-track">
-                <div class="comp-bar-fill" id="raiox-bar-22-1t" style="width: 55.2%;"></div>
-              </div>
-            </div>
-            <div class="comp-col">
-              <span class="comp-label">2022 • 2º Turno</span>
-              <div class="comp-val lula-color" id="raiox-lula-22-2t">58.4%</div>
-              <div class="comp-bar-track">
-                <div class="comp-bar-fill" id="raiox-bar-22-2t" style="width: 58.4%;"></div>
-              </div>
-            </div>
-            <div class="comp-col highlight-col">
-              <span class="comp-label">2026 • Projeção Atual</span>
-              <div class="comp-val lula-color" id="raiox-lula-26">57.1%</div>
-              <div class="comp-bar-track">
-                <div class="comp-bar-fill gold-bar" id="raiox-bar-26" style="width: 57.1%;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Indicadores Chave do Município (Cards Horizontais com Range Bullets e Medianas) -->
-        <div class="raiox-indicators-mini-grid" id="raiox-indicators-grid">
-          <!-- Inserido dinamicamente via JS: CLT, MEI, Servidores, Aposentados, Bolsa Família, BPC, Farmácia e Pé-de-Meia -->
-        </div>
-
-        <div class="raiox-actions-row">
-          <button class="btn-view-full-raiox" id="btn-open-full-city-modal" onclick="abrirModalCidadeAtual()">
-            📄 Abrir Raio-X Detalhado & Gerar Cards ➔
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. BOTTOM SECTION: 2-COLUMN SPLIT (SÉRIES TEMPORAIS À ESQUERDA & MAPA À DIREITA) -->
+    <!-- 3. SEÇÃO PRINCIPAL (2 COLUNAS): RAIO-X MUNICIPAL À ESQUERDA & MAPA TERRITORIAL À DIREITA -->
     <section class="split-body-section">
       <div class="split-grid-container">
 
-        <!-- ==================== COLUNA ESQUERDA: SÉRIES TEMPORAIS NACIONAIS ==================== -->
+        <!-- ==================== COLUNA ESQUERDA: RAIO-X MUNICIPAL ESTRATÉGICO ==================== -->
         <div class="split-col-left">
-
-          <!-- Séries Históricas & Poder de Compra -->
-          <div class="series-card-wrapper">
-            <div class="series-header-inline">
-              <div>
-                <span class="series-eyebrow">SÉRIES TEMPORAIS HISTÓRICAS</span>
-                <h3 class="series-title">Evolução do Poder de Compra, Consumo & Atividade Econômica</h3>
-              </div>
-              
-              <!-- Aviso sobre granularidade -->
-              <div class="granularity-notice" id="granularity-notice">
-                <span class="granularity-icon">ℹ️</span>
-                <span>Dados consolidados em nível nacional e estadual (Séries Oficiais 2010–2026).</span>
-              </div>
-            </div>
-
-            <!-- Tab Pills -->
-            <div class="series-tab-group">
-              <button class="series-tab-btn active" data-metric="poder_compra" id="tab-btn-poder-compra">
-                🍞 Poder de Compra
-              </button>
-              <button class="series-tab-btn" data-metric="veiculos" id="tab-btn-veiculos">
-                🚗 Veículos
-              </button>
-              <button class="series-tab-btn" data-metric="habitacao" id="tab-btn-habitacao">
-                🏠 Habitação & Crédito
-              </button>
-              <button class="series-tab-btn" data-metric="trabalho_agro" id="tab-btn-trabalho-agro">
-                💼 Emprego CLT & MEIs
-              </button>
-              <button class="series-tab-btn" data-metric="orcamento_federal" id="tab-btn-orcamento-federal">
-                🏛️ Orçamento dos Governos
-              </button>
-            </div>
-
-            <!-- Destaques da Métrica Selecionada -->
-            <div class="series-highlights-grid" id="series-highlights-grid">
-              <!-- Renderizado via JS -->
-            </div>
-
-            <!-- Gráfico de Séries Temporais -->
-            <div class="series-chart-card">
-              <div class="series-chart-header">
-                <div>
-                  <h4 class="chart-title" id="series-chart-title">Custo de Bens Essenciais em Proporção do Salário Mínimo (%)</h4>
-                  <p class="chart-subtitle" id="series-chart-subtitle">Quanto da renda mínima é comprometida para adquirir Cesta Básica e Botijão de Gás</p>
-                </div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <span class="chart-tag" id="series-chart-tag">Série Histórica</span>
-                  <span class="chart-scope-badge scope-nacional" id="badge-scope-series">Visão Nacional</span>
+          <div class="raiox-integrated-box" id="raiox-integrated-box">
+            <div class="raiox-box-header">
+              <div class="raiox-title-group">
+                <span class="raiox-badge">Raio-X Estratégico</span>
+                <h4 class="raiox-title" id="raiox-current-city-title">Diagnóstico: Brasil (Consolidado Nacional)</h4>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+                  <span class="raiox-profile-tag" id="raiox-current-profile-tag">5.571 Municípios Brasileiros</span>
+                  <span id="raiox-city-meta-info" style="font-size: 0.76rem; color: #64748B; font-weight: 600;"></span>
                 </div>
               </div>
-              <div class="series-chart-wrapper">
-                <canvas id="chart-series-historicas"></canvas>
+              <div class="raiox-city-selector-wrap">
+                <button class="btn-change-city" id="btn-select-city-raiox" onclick="focarBuscaMunicipio()">
+                  🔍 Selecionar Cidade
+                </button>
               </div>
             </div>
 
+            <!-- Card Comparativo Lula: 2022 (1ºT e 2ºT) vs 2026 -->
+            <div class="raiox-election-comparison-card" id="raiox-comparison-card">
+              <div class="comparison-card-header">
+                <span class="comparison-eyebrow">COMPARATIVO ELEITORAL LULA</span>
+                <span class="comparison-badge" id="raiox-delta-badge">+0.0 pp</span>
+              </div>
+              <div class="comparison-bars-grid">
+                <div class="comp-col">
+                  <span class="comp-label">2022 • 1º Turno</span>
+                  <div class="comp-val lula-color" id="raiox-lula-22-1t">55.2%</div>
+                  <div class="comp-bar-track">
+                    <div class="comp-bar-fill" id="raiox-bar-22-1t" style="width: 55.2%;"></div>
+                  </div>
+                </div>
+                <div class="comp-col">
+                  <span class="comp-label">2022 • 2º Turno</span>
+                  <div class="comp-val lula-color" id="raiox-lula-22-2t">58.4%</div>
+                  <div class="comp-bar-track">
+                    <div class="comp-bar-fill" id="raiox-bar-22-2t" style="width: 58.4%;"></div>
+                  </div>
+                </div>
+                <div class="comp-col highlight-col">
+                  <span class="comp-label">2026 • Projeção</span>
+                  <div class="comp-val lula-color" id="raiox-lula-26">57.1%</div>
+                  <div class="comp-bar-track">
+                    <div class="comp-bar-fill gold-bar" id="raiox-bar-26" style="width: 57.1%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Indicadores Chave do Território (Grid com Range Bullets e Medianas) -->
+            <div class="raiox-indicators-mini-grid" id="raiox-indicators-grid">
+              <!-- Inserido dinamicamente via JS: CLT, MEI, Servidores, Aposentados, Bolsa Família, BPC, Farmácia e Pé-de-Meia -->
+            </div>
+
+            <div class="raiox-actions-row">
+              <button class="btn-view-full-raiox" id="btn-open-full-city-modal" onclick="abrirModalCidadeAtual()">
+                📋 Abrir Diagnóstico Completo da Cidade ➔
+              </button>
+            </div>
           </div>
-
         </div>
 
         <!-- ==================== COLUNA DIREITA: MAPA + MODAL CORRELAÇÃO + TABELA ==================== -->
@@ -475,7 +412,7 @@
               <h3 class="drilldown-title">Distribuição por Município & Perfil</h3>
             </div>
 
-            <!-- Botão que abre o modal da Correlação (conforme solicitado) -->
+            <!-- Botão que abre o modal da Correlação -->
             <button class="btn-open-correlation-modal" id="btn-open-scatter-modal" onclick="abrirModalCorrelacao()">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -483,7 +420,7 @@
                 <circle cx="16" cy="9" r="3"></circle>
                 <line x1="4" y1="18" x2="20" y2="6"></line>
               </svg>
-              <span>📊 Correlação: Voto vs. Dependência de Políticas</span>
+              <span>📊 Correlação: Voto vs. Dependência</span>
             </button>
           </div>
 
@@ -528,6 +465,72 @@
             </button>
           </div>
 
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. SEÇÃO INFERIOR (LARGURA TOTAL): EVOLUÇÃO DO PODER DE COMPRA, CONSUMO & ATIVIDADE ECONÔMICA -->
+    <section class="series-fullwidth-section" style="margin-bottom: 36px;">
+      <div class="series-card-wrapper">
+        <div class="series-header-inline">
+          <div>
+            <span class="series-eyebrow">SÉRIES TEMPORAIS HISTÓRICAS</span>
+            <h3 class="series-title">Evolução do Poder de Compra, Consumo & Atividade Econômica</h3>
+          </div>
+          
+          <!-- Aviso sobre granularidade -->
+          <div class="granularity-notice" id="granularity-notice">
+            <span class="granularity-icon">ℹ️</span>
+            <span>Dados consolidados em nível nacional e estadual (Séries Oficiais 2010–2026).</span>
+          </div>
+        </div>
+
+        <!-- Tab Pills: Comércio Varejista e Gastos no Exterior integrados -->
+        <div class="series-tab-group">
+          <button class="series-tab-btn active" data-metric="poder_compra" id="tab-btn-poder-compra">
+            🍞 Poder de Compra
+          </button>
+          <button class="series-tab-btn" data-metric="veiculos" id="tab-btn-veiculos">
+            🚗 Veículos (Empilhado)
+          </button>
+          <button class="series-tab-btn" data-metric="habitacao" id="tab-btn-habitacao">
+            🏠 Habitação & Crédito
+          </button>
+          <button class="series-tab-btn" data-metric="trabalho_agro" id="tab-btn-trabalho-agro">
+            💼 Emprego CLT & MEIs
+          </button>
+          <button class="series-tab-btn" data-metric="comercio" id="tab-btn-comercio">
+            🛍️ Comércio Varejista
+          </button>
+          <button class="series-tab-btn" data-metric="gastos_exterior" id="tab-btn-gastos-exterior">
+            ✈️ Gastos no Exterior
+          </button>
+          <button class="series-tab-btn" data-metric="orcamento_federal" id="tab-btn-orcamento-federal">
+            🏛️ Orçamento dos Governos
+          </button>
+        </div>
+
+        <!-- Destaques da Métrica Selecionada -->
+        <div class="series-highlights-grid" id="series-highlights-grid">
+          <!-- Renderizado via JS -->
+        </div>
+
+        <!-- Gráfico de Séries Temporais -->
+        <div class="series-chart-card">
+          <div class="series-chart-header">
+            <div>
+              <h4 class="chart-title" id="series-chart-title">Custo de Bens Essenciais em Proporção do Salário Mínimo (%)</h4>
+              <p class="chart-subtitle" id="series-chart-subtitle">Quanto da renda mínima é comprometida para adquirir Cesta Básica, Gás e Gasolina</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="chart-tag" id="series-chart-tag">Série Histórica</span>
+              <span class="chart-scope-badge scope-nacional" id="badge-scope-series">Visão Nacional</span>
+            </div>
+          </div>
+          <div class="series-chart-wrapper" style="height: 380px;">
+            <canvas id="chart-series-historicas"></canvas>
+          </div>
         </div>
 
       </div>

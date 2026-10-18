@@ -1108,6 +1108,12 @@ body {
    SÉRIES HISTÓRICAS & PODER DE COMPRA SECTION
    ========================================================================== */
 
+.series-fullwidth-section {
+  width: 100%;
+  margin-top: 24px;
+  margin-bottom: 40px;
+}
+
 .series-historicas-section {
   background: #FFFFFF;
   border-radius: var(--radius-lg);
@@ -2943,16 +2949,16 @@ body {
    ========================================================================== */
 .raiox-indicators-mini-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
-  gap: 12px !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px !important;
   overflow-x: visible !important;
   padding-bottom: 0 !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 14px !important;
 }
 
-@media (min-width: 1280px) {
+@media (max-width: 680px) {
   .raiox-indicators-mini-grid {
-    grid-template-columns: repeat(8, 1fr) !important;
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 
@@ -2961,12 +2967,12 @@ body {
   max-width: 100% !important;
   background: #FFFFFF !important;
   border: 1px solid var(--border-subtle) !important;
-  border-radius: 12px !important;
-  padding: 12px 10px !important;
+  border-radius: 10px !important;
+  padding: 9px 8px !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
@@ -3007,27 +3013,18 @@ body {
   gap: 4px;
 }
 
-.raiox-ind-header {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  overflow: hidden;
-}
-
-.raiox-ind-icon {
-  font-size: 0.95rem;
-  flex-shrink: 0;
+.raiox-ind-title-row {
+  width: 100%;
+  margin: 2px 0;
 }
 
 .raiox-ind-title {
-  font-size: 0.68rem;
+  font-size: 0.70rem;
   font-weight: 700;
   color: #334155;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  letter-spacing: 0.2px;
+  white-space: normal;
+  line-height: 1.15;
+  display: block;
 }
 
 .median-status-chip {

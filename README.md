@@ -28,21 +28,25 @@
 
 A pasta [`dashboard/`](dashboard/) abriga a aplicação web executiva completa de visualização e exploração dos dados:
 
-* 🗺️ **Mapa Territorial Interativo (Leaflet + Esri Canvas):** Navegação fluida e transições de câmera suaves em 3 níveis: **Brasil ➔ 5 Regiões ➔ 27 Estados ➔ 5.571 Municípios** com polígonos GeoJSON coloridos por perfil, marcadores municipais e tooltips instantâneos (livre de chaves de API e marcas d'água).
-* 📍 **Sinalizador de Filtro Territorial no Cabeçalho:** O cabeçalho superior (`top-nav`) mantém permanentemente visível a localidade selecionada via chip interativo com botão `✕` para desfazer o filtro e restaurar a visão nacional.
-* 🏷️ **Sinalização de Escopo em Todos os Gráficos:** Cada visualização é rotulada com selos explícitos de abrangência (`[Visão Nacional]`, `[Visão Estadual / Regional]` ou `[Visão Municipal]`), eliminando ambiguidades estatísticas.
-* 📊 **Rótulos Diretos de Dados:** Gráficos de barras e séries temporais contam com data labels visíveis diretamente nos elementos gráficos, sem depender do hover do mouse.
-* 🏛️ **Resumo das 5 Grandes Prioridades Nacionais:** Cards dinâmicos e modais aprofundados para:
-  - 💊 **Farmácia Popular & Saúde:** Atendimento e gratuidade de medicamentos para diabetes, hipertensão e asma;
-  - 🎓 **Educação Básica & Pé-de-Meia:** Investimento do Pé-de-Meia e complementação federal do Fundeb (VAAT);
-  - 💼 **Mercado de Trabalho CLT & Suporte ao MEI:** Vagas com carteira assinada, suporte a microempreendedores e evolução histórica (2016–2026);
+* 🗺️ **Mapeamento & Raio-X em Layout Dividido (50% / 50%):**
+  - **Coluna Esquerda:** Raio-X Estratégico com granularidade padrão no nível **Brasil (Consolidado Nacional)**, adaptando-se automaticamente a **Estado** ou **Município** conforme os filtros; 8 indicadores com título abaixo da mediana sem truncamento.
+  - **Coluna Direita:** Mapa Territorial Interativo (Leaflet + Esri Canvas) com navegação fluida em 3 níveis (Brasil ➔ Regiões ➔ Estados ➔ Municípios).
+* 🏛️ **Resumo das 5 Grandes Prioridades Nacionais & Modais Especializados:**
+  - 💊 **Farmácia Popular & Alta Complexidade SUS:** Decomposição clínica por patologia (Hipertensão, Diabetes, Asma) e linhas de cuidado de alto custo e oncologia do DATASUS (`saude-municipios.web.app`), com economia anual do bolso familiar de R$ 7,73 Bilhões;
+  - 🎓 **Educação Básica & Programa Escola em Tempo Integral (ETI):** Fomento federal pactuado de R$ 2,13 Bilhões para 406.400 matrículas em 4.107 redes municipais (MEC / Lei nº 14.640/2023) com ranking estadual;
+  - 💼 **Mercado de Trabalho CLT & Suporte ao MEI:** Visualização com zoom no eixo de valores iniciando em **80M** e rótulos limpos no eixo temporal (apenas anos, de 2016 a 2026);
   - 👴 **Previdência & Seguridade Social:** Injeção direta de benefícios RGPS na economia municipal;
-  - 🌾 **Agricultura Familiar & Merenda Escolar:** Repasse do PNAE (mínimo legal de 30% local) para produtores da agricultura familiar.
-* ⚡ **Raio-X Municipal Estratégico com Benchmark da Mediana:** 8 eixos temáticos estruturados segundo a Teoria da Gestalt, com chips de posicionamento relativo (`▲ Acima` ou `▼ Abaixo` da mediana do Brasil) e barras de dispersão contínua (Range Bullet Track).
-* 🗳️ **Seletor de Pleito Eleitoral:** Alternância em 1 clique entre **2026 (1º Turno)**, **2022 (1º Turno)** e **2022 (2º Turno)**, com recálculo instantâneo de todos os gráficos e cards.
-* 🔎 **Busca Preditiva de Municípios:** Autocomplete em milissegundos para localizar qualquer cidade e exibir seu raio-x completo (Saúde, Educação, RGPS, Emprego e Votação).
-* 📈 **Séries Históricas & Poder de Compra (2016–2026):** Gráficos analíticos de Cesta Básica (DIEESE), Botijão de Gás e Gasolina (ANP) em relação ao Salário Mínimo, Emprego CLT, MEIs, Veículos e Habitação.
-* 🎨 **Estúdio de Cards Sociais (Card Studio):** Gerador client-side de cards em alta resolução (**Retina 2x**) nos formatos **Feed (1:1)** e **Stories (9:16)**, com botão de **Copiar Imagem (Ctrl+V)** e compartilhamento direto para **WhatsApp, X/Twitter, Telegram, LinkedIn e Web Share API**.
+  - 🌾 **Agricultura Familiar & Merenda Escolar:** Repasse do PNAE (mínimo legal de 30% local) para pequenos produtores.
+  - *Regra de Visualização Integrada:* Apenas 1 dado aberto por padrão em todos os gráficos de modais.
+* 📈 **Painel de Séries Temporais & Atividade Econômica (Largura Total):**
+  - Custo de Bens Essenciais (% do Salário Mínimo: Cesta Básica, Gás GLP e **Gasolina Comum**);
+  - Venda e Transferência de Veículos com **barras empilhadas**;
+  - Imóveis Financiados SBPE com **comparativo direto contra 2022** (▲ +61,8% vs 2022);
+  - Mercado Formal (foco exclusivo em CLT e MEI);
+  - Orçamento Federal (com **Farmácia Popular Real** substituindo PAC);
+  - **Vendas do Comércio Varejista Ampliado** (R$ 2,48 Tri - BCB Série 28544);
+  - **Gastos de Brasileiros no Exterior** (US$ 18,7 Bi - BCB Série 22742).
+* 📍 **Sinalizador de Filtro Territorial e Selos de Escopo:** Chip permanente no cabeçalho superior (`top-nav`) com botão `✕` e badges explícitos de escopo (`[Visão Nacional]`, `[Visão Estadual / Regional]` ou `[Visão Municipal]`) em todas as telas.
 
 👉 **Documentação Completa da Interface:** Consulte o manual em [docs/DASHBOARD_E_VISUALIZACOES.md](docs/DASHBOARD_E_VISUALIZACOES.md).
 

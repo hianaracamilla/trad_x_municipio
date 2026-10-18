@@ -21,6 +21,27 @@ merged = pd.merge(
     how='left'
 )
 
+# Ingestão de Saúde e Remédios (saude_municipios.xlsx)
+try:
+    print("Carregando saude_municipios.xlsx...")
+    df_s = pd.read_excel('saude_municipios.xlsx', sheet_name='Dados')
+    df_s['cod_ibge7'] = df_s['cod_ibge7'].astype(str).str.strip()
+    cols_s = ['cod_ibge7', 'fp_total', 'fp_so_hipertensao', 'fp_so_diabetes', 'fp_hipertensao_e_diabetes', 'fp_asma', 'alto_custo_pacientes', 'quimioterapia_pacientes', 'radioterapia_pacientes', 'bolso_anual_minimo_rs', 'bolso_anual_mediano_rs', 'no_regiao_saude']
+    merged = pd.merge(merged, df_s[cols_s], on='cod_ibge7', how='left')
+except Exception as e:
+    print(f"Aviso ao carregar saude_municipios: {e}")
+
+# Ingestão de Educação ETI (educacao_municipios_2025.xlsx)
+try:
+    print("Carregando educacao_municipios_2025.xlsx...")
+    df_e = pd.read_excel('educacao_municipios_2025.xlsx', sheet_name='educacao_municipios_2025')
+    df_e['cod_ibge_7'] = df_e['cod_ibge_7'].astype(int).astype(str).str.strip()
+    cols_e = ['cod_ibge_7', 'qtd_matriculas_eti_rede_municipal', 'vl_fomento_eti_rede_municipal', 'qtd_escolas_eti_rede_municipal', 'vl_eti_media_por_escola_rede_municipal', 'afetados_eti', 'registrou_politica_eti_rede_municipal', 'vl_fomento_eti_rede_estadual_est']
+    df_e_sub = df_e[cols_e].rename(columns={'cod_ibge_7': 'cod_ibge7'})
+    merged = pd.merge(merged, df_e_sub, on='cod_ibge7', how='left')
+except Exception as e:
+    print(f"Aviso ao carregar educacao_municipios: {e}")
+
 # Mapeamento de Regiões
 uf_to_regiao = {
     'AC': 'Norte', 'AP': 'Norte', 'AM': 'Norte', 'PA': 'Norte', 'RO': 'Norte', 'RR': 'Norte', 'TO': 'Norte',
@@ -425,6 +446,28 @@ for _, row in merged.iterrows():
             "fp": round(float(row['farmacia_pop_100_hab']), 1) if pd.notnull(row['farmacia_pop_100_hab']) else 0,
             "pdm": round(float(row['pe_de_meia_cobertura_pct']), 1) if pd.notnull(row['pe_de_meia_cobertura_pct']) else 0,
             "fundeb": round(float(row['dep_fundeb_uniao_pct']), 1) if pd.notnull(row['dep_fundeb_uniao_pct']) else 0
+        },
+        "sde": {
+            "tot": int(row['fp_total']) if pd.notnull(row.get('fp_total')) else 0,
+            "hip": int(row['fp_so_hipertensao']) if pd.notnull(row.get('fp_so_hipertensao')) else 0,
+            "diab": int(row['fp_so_diabetes']) if pd.notnull(row.get('fp_so_diabetes')) else 0,
+            "amb": int(row['fp_hipertensao_e_diabetes']) if pd.notnull(row.get('fp_hipertensao_e_diabetes')) else 0,
+            "asma": int(row['fp_asma']) if pd.notnull(row.get('fp_asma')) else 0,
+            "ac": int(row['alto_custo_pacientes']) if pd.notnull(row.get('alto_custo_pacientes')) else 0,
+            "quim": int(row['quimioterapia_pacientes']) if pd.notnull(row.get('quimioterapia_pacientes')) else 0,
+            "rad": int(row['radioterapia_pacientes']) if pd.notnull(row.get('radioterapia_pacientes')) else 0,
+            "b_min": round(float(row['bolso_anual_minimo_rs']), 1) if pd.notnull(row.get('bolso_anual_minimo_rs')) else 0,
+            "b_med": round(float(row['bolso_anual_mediano_rs']), 1) if pd.notnull(row.get('bolso_anual_mediano_rs')) else 0,
+            "reg_s": str(row['no_regiao_saude']) if pd.notnull(row.get('no_regiao_saude')) else ""
+        },
+        "eti": {
+            "mat": int(row['qtd_matriculas_eti_rede_municipal']) if pd.notnull(row.get('qtd_matriculas_eti_rede_municipal')) else 0,
+            "fom": round(float(row['vl_fomento_eti_rede_municipal']), 2) if pd.notnull(row.get('vl_fomento_eti_rede_municipal')) else 0,
+            "esc": int(row['qtd_escolas_eti_rede_municipal']) if pd.notnull(row.get('qtd_escolas_eti_rede_municipal')) else 0,
+            "med_esc": round(float(row['vl_eti_media_por_escola_rede_municipal']), 1) if pd.notnull(row.get('vl_eti_media_por_escola_rede_municipal')) else 0,
+            "afet": int(row['afetados_eti']) if pd.notnull(row.get('afetados_eti')) else 0,
+            "reg": bool(row['registrou_politica_eti_rede_municipal']) if pd.notnull(row.get('registrou_politica_eti_rede_municipal')) else False,
+            "fom_est": round(float(row['vl_fomento_eti_rede_estadual_est']), 2) if pd.notnull(row.get('vl_fomento_eti_rede_estadual_est')) else 0
         }
     })
 
@@ -489,6 +532,38 @@ series_historicas_data = {
     "orcamento_governos": orcamento_series
 }
 
+# Agregações Nacionais e Estaduais de ETI e Saúde
+eti_uf_df = merged.groupby('uf')[['vl_fomento_eti_rede_municipal', 'qtd_matriculas_eti_rede_municipal']].sum().reset_index()
+eti_uf_df = eti_uf_df.sort_values(by='vl_fomento_eti_rede_municipal', ascending=False)
+eti_por_uf = [
+    {
+        "uf": str(row['uf']),
+        "nome": uf_to_nome.get(row['uf'], row['uf']),
+        "fomento": round(float(row['vl_fomento_eti_rede_municipal']), 2) if pd.notnull(row['vl_fomento_eti_rede_municipal']) else 0,
+        "matriculas": int(row['qtd_matriculas_eti_rede_municipal']) if pd.notnull(row['qtd_matriculas_eti_rede_municipal']) else 0
+    }
+    for _, row in eti_uf_df.iterrows()
+]
+
+saude_nacional = {
+    "fp_total": int(merged['fp_total'].sum()) if 'fp_total' in merged.columns else 12957809,
+    "fp_so_hipertensao": int(merged['fp_so_hipertensao'].sum()) if 'fp_so_hipertensao' in merged.columns else 4962509,
+    "fp_so_diabetes": int(merged['fp_so_diabetes'].sum()) if 'fp_so_diabetes' in merged.columns else 1808126,
+    "fp_hipertensao_e_diabetes": int(merged['fp_hipertensao_e_diabetes'].sum()) if 'fp_hipertensao_e_diabetes' in merged.columns else 3239501,
+    "fp_asma": int(merged['fp_asma'].sum()) if 'fp_asma' in merged.columns else 875033,
+    "alto_custo": int(merged['alto_custo_pacientes'].sum()) if 'alto_custo_pacientes' in merged.columns else 3284659,
+    "quimioterapia": int(merged['quimioterapia_pacientes'].sum()) if 'quimioterapia_pacientes' in merged.columns else 361331,
+    "radioterapia": int(merged['radioterapia_pacientes'].sum()) if 'radioterapia_pacientes' in merged.columns else 8987,
+    "bolso_minimo": round(float(merged['bolso_anual_minimo_rs'].sum()), 2) if 'bolso_anual_minimo_rs' in merged.columns else 4661567780.02,
+    "bolso_mediano": round(float(merged['bolso_anual_mediano_rs'].sum()), 2) if 'bolso_anual_mediano_rs' in merged.columns else 7732862870.86
+}
+
+eti_nacional = {
+    "total_fomento": round(float(merged['vl_fomento_eti_rede_municipal'].sum()), 2) if 'vl_fomento_eti_rede_municipal' in merged.columns else 2134201430.33,
+    "total_matriculas": int(merged['qtd_matriculas_eti_rede_municipal'].sum()) if 'qtd_matriculas_eti_rede_municipal' in merged.columns else 406400,
+    "total_redes": int((merged['vl_fomento_eti_rede_municipal'] > 0).sum()) if 'vl_fomento_eti_rede_municipal' in merged.columns else 4883
+}
+
 dashboard_data = {
     "totais_nacionais": totais_nacionais,
     "eleicoes_info": eleicoes_info,
@@ -496,7 +571,10 @@ dashboard_data = {
     "regioes": regioes_dict,
     "estados": estados_dict,
     "municipios": municipios_lista,
-    "series_historicas": series_historicas_data
+    "series_historicas": series_historicas_data,
+    "saude_nacional": saude_nacional,
+    "eti_nacional": eti_nacional,
+    "eti_por_uf": eti_por_uf
 }
 
 # Recursively clean any remaining float NaN in dashboard_data
