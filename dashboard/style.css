@@ -3968,6 +3968,132 @@ button.impact-topic-pill:hover {
   line-height: 1.35;
 }
 
+/* ========================================================
+   MAPA DE CALOR: ASSINATURA DOS CENTRÓIDES (Z-SCORE)
+   ======================================================== */
+.heatmap-legend-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+}
+
+.heatmap-legend-title {
+  font-size: 0.73rem;
+  font-weight: 800;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.heatmap-scale {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.scale-item {
+  font-size: 0.70rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.scale-item.scale-neg-high {
+  background-color: #93C5FD;
+  color: #1E3A8A;
+}
+
+.scale-item.scale-neg-mid {
+  background-color: #BAE6FD;
+  color: #0C4A6E;
+}
+
+.scale-item.scale-neutral {
+  background-color: #E2E8F0;
+  color: #334155;
+}
+
+.scale-item.scale-pos-mid {
+  background-color: #FDBA74;
+  color: #7C2D12;
+}
+
+.scale-item.scale-pos-high {
+  background-color: #FCA5A5;
+  color: #7F1D1D;
+}
+
+/* Células de Indicador no Mapa de Calor */
+.cluster-matrix-table td.hm-cell {
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+/* Alta Concentração / Destaque Positivo (Z >= +1.0) */
+.cluster-matrix-table td.hm-pos-high {
+  background-color: #FCA5A5 !important;
+  color: #7F1D1D !important;
+}
+
+/* Acima da Média (+0.45 <= Z < +1.0) */
+.cluster-matrix-table td.hm-pos-mid {
+  background-color: #FDBA74 !important;
+  color: #7C2D12 !important;
+}
+
+/* Levemente Acima (+0.15 <= Z < +0.45) */
+.cluster-matrix-table td.hm-pos-low {
+  background-color: #FED7AA !important;
+  color: #9A3412 !important;
+}
+
+/* Neutro / Em torno da média (-0.15 < Z < +0.15) */
+.cluster-matrix-table td.hm-neutral {
+  background-color: #E2E8F0 !important;
+  color: #334155 !important;
+}
+
+/* Levemente Abaixo (-0.45 < Z <= -0.15) */
+.cluster-matrix-table td.hm-neg-low {
+  background-color: #E0E7FF !important;
+  color: #312E81 !important;
+}
+
+/* Abaixo da Média (-1.0 < Z <= -0.45) */
+.cluster-matrix-table td.hm-neg-mid {
+  background-color: #BAE6FD !important;
+  color: #0C4A6E !important;
+}
+
+/* Menor Impacto / Baixa Concentração (Z <= -1.0) */
+.cluster-matrix-table td.hm-neg-high {
+  background-color: #93C5FD !important;
+  color: #1E3A8A !important;
+}
+
+.clickable-matrix-row:hover td.hm-cell {
+  filter: brightness(0.96);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
 .row-brasil-total {
   background: #F8FAFC;
   border-top: 2px solid #CBD5E1;

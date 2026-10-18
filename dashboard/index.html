@@ -625,9 +625,23 @@
           <div class="matrix-header-row">
             <div>
               <h4 class="matrix-title">Matriz Comparativa: Médias dos Indicadores por Perfil Socioeconômico</h4>
-              <p class="matrix-subtitle">Valores médios reais consolidados entre todos os municípios pertencentes a cada cluster. Clique em uma linha para filtrar o painel.</p>
+              <p class="matrix-subtitle">Valores médios reais consolidados entre todos os municípios pertencentes a cada cluster com mapa de calor de assinatura socioeconômica (Z-Score). Clique em uma linha para filtrar o painel.</p>
             </div>
             <span class="matrix-tip">💡 Clique em qualquer perfil para filtrar o dashboard</span>
+          </div>
+
+          <!-- Barra de Legenda do Mapa de Calor (Z-Score) -->
+          <div class="heatmap-legend-bar">
+            <span class="heatmap-legend-title">
+              🎨 Mapa de Calor (Assinatura Z-Score dos Centróides):
+            </span>
+            <div class="heatmap-scale">
+              <span class="scale-item scale-neg-high" title="Z-Score &le; -1.0: Concentração muito abaixo da média">Menor Impacto / Baixa Concentração (Z &le; -1.0)</span>
+              <span class="scale-item scale-neg-mid" title="Z-Score entre -1.0 e -0.45">Abaixo da Média</span>
+              <span class="scale-item scale-neutral" title="Z-Score entre -0.15 e +0.15">Na Média dos Clusters</span>
+              <span class="scale-item scale-pos-mid" title="Z-Score entre +0.45 e +1.0">Acima da Média</span>
+              <span class="scale-item scale-pos-high" title="Z-Score &ge; +1.0: Forte assinatura e destaque de impacto central">Forte Destaque / Alta Concentração (Z &ge; +1.0)</span>
+            </div>
           </div>
 
           <div class="matrix-table-scroll">
@@ -657,14 +671,14 @@
                   </td>
                   <td style="text-align: center; font-weight: 700;">1.414 <span class="sub-col">(25,4%)</span></td>
                   <td style="text-align: right; font-weight: 600;">37,7 mil</td>
-                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">16,0</td>
-                  <td style="text-align: right; font-weight: 600; color: #0284C7;">6,0</td>
-                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">7,6</td>
-                  <td style="text-align: right; font-weight: 600; color: #475569;">6,3</td>
-                  <td style="text-align: right; font-weight: 700; color: #DC2626;">12,6</td>
-                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,8</td>
-                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">3,2</td>
-                  <td style="text-align: right; font-weight: 800; color: #047857;">75,9%</td>
+                  <td class="hm-cell hm-neg-high" title="Z-Score: -1.09 (Baixa densidade de empregos formais CLT)">16,0</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.94 (Abaixo da média dos clusters)">6,0</td>
+                  <td class="hm-cell hm-pos-low" title="Z-Score: +0.29 (Levemente acima da média)">7,6</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.79 (População jovem, baixa densidade de idosos)">6,3</td>
+                  <td class="hm-cell hm-pos-high" title="Z-Score: +1.08 (Alta concentração de famílias no Bolsa Família)">12,6</td>
+                  <td class="hm-cell hm-neutral" title="Z-Score: -0.08 (Na média dos clusters)">2,8</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.60 (Abaixo da média nacional)">3,2</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.82 (Forte impacto de cobertura no Ensino Médio)">75,9%</td>
                   <td class="col-vocacao">População jovem com forte impacto de transferências de renda e alta permanência escolar.</td>
                 </tr>
 
@@ -676,14 +690,14 @@
                   </td>
                   <td style="text-align: center; font-weight: 700;">1.134 <span class="sub-col">(20,4%)</span></td>
                   <td style="text-align: right; font-weight: 600;">62,1 mil</td>
-                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">28,4</td>
-                  <td style="text-align: right; font-weight: 600; color: #0284C7;">9,0</td>
-                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">5,5</td>
-                  <td style="text-align: right; font-weight: 600; color: #475569;">12,0</td>
-                  <td style="text-align: right; font-weight: 700; color: #DC2626;">6,5</td>
-                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,4</td>
-                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">7,9</td>
-                  <td style="text-align: right; font-weight: 800; color: #047857;">44,2%</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.82 (Forte dinamismo em contratações com carteira assinada)">28,4</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.54 (Alta geração de microempreendedores)">9,0</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.50 (Menor peso do funcionalismo na economia local)">5,5</td>
+                  <td class="hm-cell hm-neutral" title="Z-Score: +0.01 (Na média exata dos clusters)">12,0</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.47 (Abaixo da média dos clusters)">6,5</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.89 (Menor vulnerabilidade social extrema)">2,4</td>
+                  <td class="hm-cell hm-pos-low" title="Z-Score: +0.17 (Levemente acima da média)">7,9</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.64 (Menor dependência de apoio social escolar)">44,2%</td>
                   <td class="col-vocacao">Centros regionais urbanos de comércio e serviços dinâmicos, com alta densidade de carteiras assinadas.</td>
                 </tr>
 
@@ -695,14 +709,14 @@
                   </td>
                   <td style="text-align: center; font-weight: 700;">957 <span class="sub-col">(17,2%)</span></td>
                   <td style="text-align: right; font-weight: 600;">56,6 mil</td>
-                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">27,3</td>
-                  <td style="text-align: right; font-weight: 600; color: #0284C7;">9,3</td>
-                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">5,6</td>
-                  <td style="text-align: right; font-weight: 600; color: #475569;">11,9</td>
-                  <td style="text-align: right; font-weight: 700; color: #DC2626;">4,2</td>
-                  <td style="text-align: right; font-weight: 600; color: #D97706;">3,3</td>
-                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">7,5</td>
-                  <td style="text-align: right; font-weight: 800; color: #047857;">44,9%</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.61 (Alta taxa de carteira assinada no agronegócio e cooperativas)">27,3</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.63 (Forte atividade de pequenos negócios locais)">9,3</td>
+                  <td class="hm-cell hm-neg-low" title="Z-Score: -0.41 (Abaixo da média)">5,6</td>
+                  <td class="hm-cell hm-neutral" title="Z-Score: 0.00 (Exatamente na média nacional)">11,9</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.95 (Menor taxa de vulnerabilidade do país)">4,2</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.91 (Maior índice entre os polos produtivos)">3,3</td>
+                  <td class="hm-cell hm-neutral" title="Z-Score: +0.09 (Na média nacional)">7,5</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.58 (Abaixo da média)">44,9%</td>
                   <td class="col-vocacao">Produção do agronegócio e cooperativas industriais, com a menor dependência de Bolsa Família do país.</td>
                 </tr>
 
@@ -714,14 +728,14 @@
                   </td>
                   <td style="text-align: center; font-weight: 700;">766 <span class="sub-col">(13,8%)</span></td>
                   <td style="text-align: right; font-weight: 600;">26,2 mil</td>
-                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">15,4</td>
-                  <td style="text-align: right; font-weight: 600; color: #0284C7;">5,7</td>
-                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">6,4</td>
-                  <td style="text-align: right; font-weight: 600; color: #475569;">16,5</td>
-                  <td style="text-align: right; font-weight: 700; color: #DC2626;">13,0</td>
-                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,8</td>
-                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">4,7</td>
-                  <td style="text-align: right; font-weight: 800; color: #047857;">79,7%</td>
+                  <td class="hm-cell hm-neg-high" title="Z-Score: -1.19 (Baixíssima oferta de carteira assinada)">15,4</td>
+                  <td class="hm-cell hm-neg-high" title="Z-Score: -1.08 (Baixa densidade de pequenos negócios)">5,7</td>
+                  <td class="hm-cell hm-neg-low" title="Z-Score: -0.16 (Em torno da média)">6,4</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.64 (Forte sustentação econômica da previdência)">16,5</td>
+                  <td class="hm-cell hm-pos-high" title="Z-Score: +1.17 (Maior taxa de famílias no Bolsa Família)">13,0</td>
+                  <td class="hm-cell hm-neutral" title="Z-Score: +0.02 (Na média nacional)">2,8</td>
+                  <td class="hm-cell hm-neg-low" title="Z-Score: -0.35 (Abaixo da média)">4,7</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.99 (Recorde de cobertura no Pé-de-Meia)">79,7%</td>
                   <td class="col-vocacao">Economia fortemente sustentada por benefícios previdenciários e assistência social conjugada ao FPM.</td>
                 </tr>
 
@@ -733,14 +747,14 @@
                   </td>
                   <td style="text-align: center; font-weight: 700;">722 <span class="sub-col">(13,0%)</span></td>
                   <td style="text-align: right; font-weight: 600;">12,1 mil</td>
-                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">28,5</td>
-                  <td style="text-align: right; font-weight: 600; color: #0284C7;">9,6</td>
-                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">6,2</td>
-                  <td style="text-align: right; font-weight: 700; color: #7E3AF2;">22,1</td>
-                  <td style="text-align: right; font-weight: 700; color: #DC2626;">5,0</td>
-                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,9</td>
-                  <td style="text-align: right; font-weight: 700; color: #0E9F6E;">15,1</td>
-                  <td style="text-align: right; font-weight: 800; color: #047857;">41,2%</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.82 (Comércio ativo e serviços locais)">28,5</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.79 (Alta densidade de MEIs voltados à terceira idade)">9,6</td>
+                  <td class="hm-cell hm-neg-low" title="Z-Score: -0.25 (Em torno da média)">6,2</td>
+                  <td class="hm-cell hm-pos-high" title="Z-Score: +1.40 (Destaque nacional: maior índice de aposentadorias do Brasil)">22,1</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.84 (Baixa dependência do Bolsa Família)">5,0</td>
+                  <td class="hm-cell hm-neutral" title="Z-Score: +0.10 (Na média nacional)">2,9</td>
+                  <td class="hm-cell hm-pos-high" title="Z-Score: +1.31 (Recorde absoluto de medicamentos gratuitos)">15,1</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.79 (Menor contingente de jovens no Ensino Médio)">41,2%</td>
                   <td class="col-vocacao">Municípios sêniores com o maior índice de aposentadorias do país e recorde de gratuidade na Farmácia Popular.</td>
                 </tr>
 
@@ -752,14 +766,14 @@
                   </td>
                   <td style="text-align: center; font-weight: 700;">573 <span class="sub-col">(10,3%)</span></td>
                   <td style="text-align: right; font-weight: 600;">5,4 mil</td>
-                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">26,9</td>
-                  <td style="text-align: right; font-weight: 600; color: #0284C7;">9,1</td>
-                  <td style="text-align: right; font-weight: 700; color: #C026D3;">10,7</td>
-                  <td style="text-align: right; font-weight: 600; color: #475569;">6,6</td>
-                  <td style="text-align: right; font-weight: 700; color: #DC2626;">6,2</td>
-                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,9</td>
-                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">5,5</td>
-                  <td style="text-align: right; font-weight: 800; color: #047857;">57,4%</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.55 (Acima da média)">26,9</td>
+                  <td class="hm-cell hm-pos-mid" title="Z-Score: +0.56 (Acima da média)">9,1</td>
+                  <td class="hm-cell hm-pos-high" title="Z-Score: +1.42 (Destaque absoluto: prefeitura e serviço público sustentam a economia local)">10,7</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.75 (Abaixo da média)">6,6</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.54 (Abaixo da média)">6,2</td>
+                  <td class="hm-cell hm-pos-low" title="Z-Score: +0.17 (Levemente acima da média)">2,9</td>
+                  <td class="hm-cell hm-neg-low" title="Z-Score: -0.23 (Abaixo da média)">5,5</td>
+                  <td class="hm-cell hm-neutral" title="Z-Score: -0.04 (Na média dos clusters)">57,4%</td>
                   <td class="col-vocacao">Pequenos municípios onde o serviço público municipal e estadual representa o principal eixo empregador.</td>
                 </tr>
 
@@ -771,14 +785,14 @@
                   </td>
                   <td style="text-align: center; font-weight: 700;">5 <span class="sub-col">(0,1%)</span></td>
                   <td style="text-align: right; font-weight: 600;">720,1 mil</td>
-                  <td style="text-align: right; font-weight: 700; color: #1E3A8A;">18,4</td>
-                  <td style="text-align: right; font-weight: 600; color: #0284C7;">5,4</td>
-                  <td style="text-align: right; font-weight: 600; color: #7E3AF2;">2,8</td>
-                  <td style="text-align: right; font-weight: 600; color: #475569;">8,3</td>
-                  <td style="text-align: right; font-weight: 700; color: #DC2626;">12,3</td>
-                  <td style="text-align: right; font-weight: 600; color: #D97706;">2,9</td>
-                  <td style="text-align: right; font-weight: 600; color: #0E9F6E;">7,0</td>
-                  <td style="text-align: right; font-weight: 800; color: #047857;">59,8%</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.82 (Desafios de informalidade metropolitana)">18,4</td>
+                  <td class="hm-cell hm-neg-high" title="Z-Score: -1.31 (Baixa densidade per capita devido a grandes contingentes periféricos)">5,4</td>
+                  <td class="hm-cell hm-neg-high" title="Z-Score: -1.62 (Baixa taxa de servidores por 100 habitantes em grandes aglomerações)">2,8</td>
+                  <td class="hm-cell hm-neg-mid" title="Z-Score: -0.69 (População economicamente ativa predominante)">8,3</td>
+                  <td class="hm-cell hm-pos-high" title="Z-Score: +1.04 (Forte contingente de famílias vulneráveis nas periferias urbanas)">12,3</td>
+                  <td class="hm-cell hm-pos-low" title="Z-Score: +0.18 (Levemente acima da média)">2,9</td>
+                  <td class="hm-cell hm-neutral" title="Z-Score: -0.08 (Na média dos clusters)">7,0</td>
+                  <td class="hm-cell hm-pos-low" title="Z-Score: +0.15 (Na média)">59,8%</td>
                   <td class="col-vocacao">Grandes aglomerações atípicas com desafios metropolitanos de densidade, periferias e serviços complexos.</td>
                 </tr>
 
