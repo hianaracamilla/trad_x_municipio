@@ -2177,7 +2177,7 @@ function atualizarAvisoGranularidade(nivel) {
   if (nivel === 'brasil') {
     notice.innerHTML = `
       <span class="granularity-icon">ℹ️</span>
-      <span>Séries temporais consolidadas em nível nacional (Trajetória Oficial 2010 a 2026).</span>
+      <span>Séries temporais consolidadas em nível nacional (Trajetória Oficial 2010 a 2025 com Projeções Oficiais e Posições Parciais para 2026*).</span>
     `;
   } else if (nivel === 'regiao') {
     notice.innerHTML = `
@@ -2378,6 +2378,7 @@ function atualizarGraficoSeriesHistoricas() {
 
   let datasets = [];
   let yAxisConfig = {};
+  let scalesConfigExtra = {};
   let highlightsHtml = '';
 
   if (currentSeriesMetric === 'poder_compra') {
@@ -2546,23 +2547,23 @@ function atualizarGraficoSeriesHistoricas() {
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
         <span class="series-highlight-title">Empregos Formais CLT</span>
-        <div class="series-highlight-val">102,7 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +7,0% vs 2022</span></div>
-        <span class="series-highlight-sub">Passou de 96,0M em 2022 para 102,7M de carteiras assinadas ativas em 2026.</span>
+        <div class="series-highlight-val">51,9 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +8,0% vs 2022</span></div>
+        <span class="series-highlight-sub">Passou de 48,0M em 2022 para 51,9M de carteiras assinadas ativas em 2026 (+3,85M vínculos CLT).</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
         <span class="series-highlight-title">Microempreendedores MEI</span>
-        <div class="series-highlight-val">16,94 M <span style="font-size: 0.8rem; color: #D97706; font-weight: 700;">▲ +17,2% vs 2022</span></div>
-        <span class="series-highlight-sub">Passou de 14,45M em 2022 para 16,94M de MEIs cadastrados ativos em 2026.</span>
+        <div class="series-highlight-val">16,94 M <span style="font-size: 0.8rem; color: #D97706; font-weight: 700;">▲ +17,6% vs 2022</span></div>
+        <span class="series-highlight-sub">Passou de 14,40M em 2022 para 16,94M de MEIs cadastrados ativos em 2026 (posição parcial).</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
         <span class="series-highlight-title">Total da Força Formal</span>
-        <div class="series-highlight-val">119,6 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Recorde</span></div>
-        <span class="series-highlight-sub">Soma de empregados CLT e microempreendedores formalizados no Brasil.</span>
+        <div class="series-highlight-val">68,8 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Recorde</span></div>
+        <span class="series-highlight-sub">Soma de 51,9M de trabalhadores CLT e 16,9M de MEIs formalizados no país.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
-        <span class="series-highlight-title">Massa Salarial em Alta</span>
-        <div class="series-highlight-val">R$ 330 Bi/mês</div>
-        <span class="series-highlight-sub">Massa de rendimento real habitualmente recebida por trabalhadores.</span>
+        <span class="series-highlight-title">Pessoas Ocupadas (PNAD)</span>
+        <div class="series-highlight-val">102,7 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +7,0% vs 2022</span></div>
+        <span class="series-highlight-sub">Total de ocupados no país (era 96,0M em 2022). Massa salarial habitual: R$ 330 Bi/mês.</span>
       </div>
     `;
 
@@ -2574,7 +2575,8 @@ function atualizarGraficoSeriesHistoricas() {
         backgroundColor: '#1A56DB',
         borderWidth: 3,
         tension: 0.25,
-        pointRadius: 4
+        pointRadius: 5,
+        yAxisID: 'y'
       },
       {
         label: 'Microempreendedores MEI (Milhões)',
@@ -2583,13 +2585,24 @@ function atualizarGraficoSeriesHistoricas() {
         backgroundColor: '#D97706',
         borderWidth: 3,
         tension: 0.25,
-        pointRadius: 4
+        pointRadius: 5,
+        yAxisID: 'y1'
       }
     ];
 
     yAxisConfig = {
+      position: 'left',
       ticks: { callback: v => v + ' M' },
-      title: { display: true, text: 'Milhões de Pessoas Formalizadas' }
+      title: { display: true, text: 'Trabalhadores CLT (Milhões)', color: '#1A56DB', font: { weight: 'bold' } }
+    };
+
+    scalesConfigExtra = {
+      y1: {
+        position: 'right',
+        grid: { drawOnChartArea: false },
+        ticks: { callback: v => v + ' M' },
+        title: { display: true, text: 'Microempreendedores MEI (Milhões)', color: '#D97706', font: { weight: 'bold' } }
+      }
     };
 
   } else if (currentSeriesMetric === 'orcamento_federal') {
@@ -2808,6 +2821,28 @@ function atualizarGraficoSeriesHistoricas() {
 
   highlightsEl.innerHTML = highlightsHtml;
 
+  // Atualiza nota explicativa de metodologia e cálculo da projeção de 2026 (mesmo padrão do notebook)
+  const noteEl = document.getElementById('series-projection-note');
+  if (noteEl) {
+    let noteHtml = '';
+    if (currentSeriesMetric === 'trabalho_agro') {
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota Metodológica (*2026):</strong> Posições apuradas com base nos dados mais recentes divulgados pelos órgãos oficiais. O estoque de <strong>Carteiras Assinadas CLT</strong> (MTE / Novo CAGED) atinge <strong>51,9M</strong> (+3,85M vínculos formais vs 2022). O estoque de <strong>MEIs</strong> (Mapa de Empresas / RFB) alcança <strong>16,94M</strong> formalizados. Na <strong>PNAD Contínua / IBGE</strong> (BCB SGS 24379), a média de ocupados atinge recorde de <strong>102,7M</strong> (+7,0% vs 2022) e a massa salarial alcança <strong>R$ 330 Bi/mês</strong>.</div>`;
+    } else if (currentSeriesMetric === 'veiculos') {
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota de Cálculo da Projeção (*2026):</strong> Conforme metodologia aplicada no notebook, a projeção anual de fechamento é calculada linearmente por <em>(Acumulado até o mês / Meses decorridos) × 12</em>, desconsiderando sazonalidade do final de ano. Fontes: Banco Central do Brasil (SGS 1374 / ANFAVEA) e FENAUTO / Senatran.</div>`;
+    } else if (currentSeriesMetric === 'habitacao') {
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota de Cálculo da Projeção (*2026):</strong> Anualização linear simples <em>(Total realizado até o mês / Meses decorridos) × 12</em> sobre unidades habitacionais financiadas pelo SBPE (Poupança). Fontes: Banco Central (SGS 20703) e ABECIP.</div>`;
+    } else if (currentSeriesMetric === 'comercio') {
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota de Cálculo da Projeção (*2026):</strong> Calculada linearmente por <em>(Faturamento acumulado até o mês / Meses decorridos) × 12</em>, sem ponderar o aquecimento sazonal de vendas do 4º trimestre (Black Friday e Natal). Fontes: Banco Central (SGS 28544) e IBGE (PMC).</div>`;
+    } else if (currentSeriesMetric === 'gastos_exterior') {
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota de Cálculo da Projeção (*2026):</strong> Anualização linear simples <em>(Despesas acumuladas no exterior / Meses decorridos) × 12</em> na Conta de Viagens Internacionais do Balanço de Pagamentos. Fonte: Banco Central do Brasil (SGS 22742).</div>`;
+    } else if (currentSeriesMetric === 'poder_compra') {
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota Metodológica (*2026):</strong> Valores calculados a partir da média apurada dos preços de bens essenciais (Cesta Básica DIEESE SGS 7493, Gasolina e Gás GLP via ANP) ponderados sobre o Salário Mínimo nacional vigente em 2026 (R$ 1.518, reajustado com valorização real acima da inflação).</div>`;
+    } else if (currentSeriesMetric === 'orcamento_federal') {
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota de Cálculo da Projeção (*2026):</strong> Projeção oficial calculada por anualização linear dos meses apurados pelo Tesouro Nacional: <em>Projeção = (Executado Jan-Jul / 7) × 12</em>. Valores reais corrigidos pelo IPCA acumulado a preços constantes de 2026. Fontes: Secretaria do Tesouro Nacional (RTN / SIAFI) e Banco Central.</div>`;
+    }
+    noteEl.innerHTML = noteHtml;
+  }
+
   if (chartSeriesHistoricas) {
     chartSeriesHistoricas.destroy();
   }
@@ -2819,7 +2854,7 @@ function atualizarGraficoSeriesHistoricas() {
   chartSeriesHistoricas = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: chartLabels.map(a => `${a}`),
+      labels: chartLabels.map(a => a === 2026 ? '2026* (Proj.)' : `${a}`),
       datasets: datasets
     },
     options: {
@@ -2844,19 +2879,25 @@ function atualizarGraficoSeriesHistoricas() {
         },
         tooltip: {
           callbacks: {
-            title: (items) => `Ano: ${items[0].label}`,
+            title: (items) => {
+              const lbl = items[0].label;
+              return lbl.includes('2026') ? 'Ano: 2026* (Projeção / Posição Parcial)' : `Ano: ${lbl}`;
+            },
             label: (item) => {
               if (currentSeriesMetric === 'orcamento_federal') {
                 const modo = currentOrcamentoMode === 'real' ? 'Real 2026' : 'Gasto Nominal';
                 return ` ${item.dataset.label}: R$ ${typeof item.raw === 'number' ? item.raw.toFixed(1) : item.raw} Bi (${modo})`;
               }
-              return ` ${item.dataset.label}: ${item.raw.toLocaleString('pt-BR')}`;
+              const is2026 = item.label.includes('2026');
+              const sufixoProj = is2026 ? ' (Projeção / Parcial)' : '';
+              return ` ${item.dataset.label}: ${item.raw.toLocaleString('pt-BR')}${sufixoProj}`;
             }
           }
         }
       },
       scales: {
         y: yAxisConfig,
+        ...scalesConfigExtra,
         x: {
           stacked: currentSeriesMetric === 'veiculos',
           grid: { display: false }
@@ -2868,7 +2909,7 @@ function atualizarGraficoSeriesHistoricas() {
       afterDatasetsDraw(chart) {
         const { ctx } = chart;
         ctx.save();
-        ctx.font = 'bold 9px Inter, sans-serif';
+        ctx.font = 'bold 12px Inter, system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
 
@@ -2881,20 +2922,23 @@ function atualizarGraficoSeriesHistoricas() {
               const novos = chart.data.datasets[1]?.data[index] || 0;
               const total = usados + novos;
               if (total <= 0) return;
+              const is2026 = index === chart.data.labels.length - 1;
+              const text = is2026 ? `${total.toFixed(2)} M*` : `${total.toFixed(2)} M`;
+              ctx.lineWidth = 3.5;
+              ctx.strokeStyle = '#FFFFFF';
+              ctx.strokeText(text, point.x, point.y - 6);
               ctx.fillStyle = '#0F172A';
-              ctx.font = 'bold 10px Inter, sans-serif';
-              ctx.fillText(`${total.toFixed(2)} M`, point.x, point.y - 6);
+              ctx.fillText(text, point.x, point.y - 6);
             });
           }
         } else {
-          // Em todos os gráficos de linha e coluna, exibe o rótulo de dados em cada ponto sem pular
+          // Em todos os gráficos de linha e coluna, exibe o rótulo de dados aumentado em cada ponto
           chart.data.datasets.forEach((dataset, datasetIndex) => {
             const meta = chart.getDatasetMeta(datasetIndex);
             if (meta.hidden || (chart.isDatasetVisible && !chart.isDatasetVisible(datasetIndex))) return;
             meta.data.forEach((point, index) => {
               const val = dataset.data[index];
               if (val === undefined || val === null) return;
-              ctx.fillStyle = dataset.borderColor || dataset.backgroundColor || '#1E293B';
               let text = '';
               if (typeof val === 'number') {
                 if (val >= 1000) text = formatarNumero(Math.round(val));
@@ -2903,8 +2947,16 @@ function atualizarGraficoSeriesHistoricas() {
               } else {
                 text = val;
               }
-              const yOffset = datasetIndex > 0 ? (datasetIndex * 11) + 5 : 5;
-              ctx.fillText(`${text}`, point.x, point.y - yOffset);
+              const is2026 = index === chart.data.labels.length - 1;
+              if (is2026) {
+                text = `${text}*`;
+              }
+              const yOffset = datasetIndex > 0 && currentSeriesMetric !== 'trabalho_agro' ? (datasetIndex * 14) + 6 : 6;
+              ctx.lineWidth = 3.5;
+              ctx.strokeStyle = '#FFFFFF';
+              ctx.strokeText(text, point.x, point.y - yOffset);
+              ctx.fillStyle = dataset.borderColor || dataset.backgroundColor || '#1E293B';
+              ctx.fillText(text, point.x, point.y - yOffset);
             });
           });
         }
@@ -5044,8 +5096,8 @@ function atualizarPreviewCard() {
           <span class="card-export-stat-lbl">Salário Mínimo (R$ 1.212 em 2022 • Ganho Real)</span>
         </div>
         <div class="card-export-stat-box" style="border-left: 4px solid #7E3AF2;">
-          <span class="card-export-stat-val">102,7 M</span>
-          <span class="card-export-stat-lbl">Empregos Formais CLT (+6,7M vagas desde 2022)</span>
+          <span class="card-export-stat-val">51,9 M</span>
+          <span class="card-export-stat-lbl">Carteiras CLT Ativas (+3,9M vagas desde 2022)</span>
         </div>
       </div>
 

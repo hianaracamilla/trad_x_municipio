@@ -1333,6 +1333,43 @@ body {
   position: relative;
 }
 
+.series-projection-note {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #F8FAFC;
+  border-left: 3px solid #1A56DB;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: #475569;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.series-projection-note .note-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.series-projection-note .note-content {
+  flex: 1;
+}
+
+.series-projection-note strong {
+  color: #1E293B;
+}
+
+.series-projection-note em {
+  color: #0F172A;
+  font-weight: 600;
+  font-style: normal;
+  background: #E2E8F0;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
 /* ==========================================================================
    MODAL / DRAWER (MUNICIPALITY DETAIL)
    ========================================================================== */
