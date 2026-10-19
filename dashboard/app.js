@@ -2359,6 +2359,39 @@ function renderizarSeriesHistoricas() {
   atualizarGraficoSeriesHistoricas();
 }
 
+function getComparativo2026(metric, datasetIndex, orcMode, rawVal) {
+  if (metric === 'veiculos') {
+    if (datasetIndex === 0) return { real: '8,80M', proj: '13,20M*' };
+    if (datasetIndex === 1) return { real: '1,30M', proj: '2,23M*' };
+    return { real: '10,10M', proj: '15,43M*' };
+  }
+  if (metric === 'habitacao') {
+    return { real: '158,8 mil', proj: '211,8 mil*' };
+  }
+  if (metric === 'trabalho_agro') {
+    if (datasetIndex === 0) return { real: '49,66M', proj: '51,90M*' };
+    if (datasetIndex === 1) return { real: '16,94M', proj: '18,20M*' };
+  }
+  if (metric === 'comercio') {
+    return { real: 'R$ 2,77T', proj: 'R$ 4,75T*' };
+  }
+  if (metric === 'gastos_exterior') {
+    return { real: 'US$ 16,98B', proj: 'US$ 25,5B*' };
+  }
+  if (metric === 'poder_compra') {
+    if (datasetIndex === 0) return { real: '54,5%', proj: '54,5%*' };
+    if (datasetIndex === 1) return { real: '6,7%', proj: '6,7%*' };
+    if (datasetIndex === 2) return { real: '0,39%', proj: '0,39%*' };
+  }
+  if (metric === 'orcamento_federal') {
+    if (datasetIndex === 0) return { real: 'R$ 149,6 Bi', proj: 'R$ 256,4 Bi*' };
+    if (datasetIndex === 1) return { real: 'R$ 33,2 Bi', proj: 'R$ 56,9 Bi*' };
+    if (datasetIndex === 2) return { real: 'R$ 3,15 Bi', proj: 'R$ 5,40 Bi*' };
+  }
+  let vStr = typeof rawVal === 'number' ? (rawVal >= 100 ? Math.round(rawVal).toString() : rawVal.toFixed(1)) : rawVal;
+  return { real: vStr, proj: `${vStr}*` };
+}
+
 function atualizarGraficoSeriesHistoricas() {
   const chartCanvas = document.getElementById('chart-series-historicas');
   if (!chartCanvas) return;
@@ -2452,14 +2485,14 @@ function atualizarGraficoSeriesHistoricas() {
 
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
-        <span class="series-highlight-title">Veículos Usados e Seminovos</span>
-        <div class="series-highlight-val">12,85 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +23,8% vs 2022</span></div>
-        <span class="series-highlight-sub">Volume anual de transferências no mercado formal (era 10,38M em 2022).</span>
+        <span class="series-highlight-title">Veículos Usados e Seminovos (2026)</span>
+        <div class="series-highlight-val">8,80 M <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: 13,20 M*</span></div>
+        <span class="series-highlight-sub">Parcial até Ago: 8,80M transferidos. Projeção anual de fechamento: 13,20M de veículos usados.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
-        <span class="series-highlight-title">Veículos Novos (0 km)</span>
-        <div class="series-highlight-val">2,65 M <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +26,2% vs 2022</span></div>
-        <span class="series-highlight-sub">Licenciamentos anuais de automóveis e comerciais leves (era 2,10M em 2022).</span>
+        <span class="series-highlight-title">Veículos Novos 0 km (2026)</span>
+        <div class="series-highlight-val">1,30 M <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: 2,23 M*</span></div>
+        <span class="series-highlight-sub">Licenciamentos Jan-Ago: 1,30M. Projeção de fechamento: 2,23M (Total: 10,10M Real / 15,43M Proj*).</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
         <span class="series-highlight-title">Razão Usados por Novo</span>
@@ -2505,13 +2538,13 @@ function atualizarGraficoSeriesHistoricas() {
 
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
-        <span class="series-highlight-title">Imóveis Financiados SBPE</span>
-        <div class="series-highlight-val">194,8 mil <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +25,3% vs 2022</span></div>
-        <span class="series-highlight-sub">Evoluiu de 155,5 mil unidades em 2022 para o pico de 194,8 mil em 2024 (e 179,1 mil em 2025).</span>
+        <span class="series-highlight-title">Imóveis Financiados SBPE (2026)</span>
+        <div class="series-highlight-val">158,8 mil <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: 211,8 mil*</span></div>
+        <span class="series-highlight-sub">Realizado Jan-Ago: 158,8 mil unidades. Projeção anual de fechamento SBPE: 211,8 mil unidades.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
         <span class="series-highlight-title">Crédito Habitacional PF</span>
-        <div class="series-highlight-val">R$ 187 Bi <span style="font-size: 0.8rem; color: #7E3AF2; font-weight: 700;">SBPE Poupança</span></div>
+        <div class="series-highlight-val">R$ 187 Bi <span style="font-size: 0.8rem; color: #7E3AF2; font-weight: 700;">Proj: R$ 249 Bi*</span></div>
         <span class="series-highlight-sub">Volume financeiro de empréstimos concedidos aos adquirentes residenciais (ABECIP).</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
@@ -2546,19 +2579,19 @@ function atualizarGraficoSeriesHistoricas() {
 
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
-        <span class="series-highlight-title">Empregos Formais CLT</span>
-        <div class="series-highlight-val">51,9 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +8,0% vs 2022</span></div>
-        <span class="series-highlight-sub">Passou de 48,0M em 2022 para 51,9M de carteiras assinadas ativas em 2026 (+3,85M vínculos CLT).</span>
+        <span class="series-highlight-title">Empregos Formais CLT (2026)</span>
+        <div class="series-highlight-val">49,66 M <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: 51,90 M*</span></div>
+        <span class="series-highlight-sub">Estoque formal apurado: 49,66M vínculos formais. Projeção anualizada: 51,90M de carteiras ativas.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #D97706;">
-        <span class="series-highlight-title">Microempreendedores MEI</span>
-        <div class="series-highlight-val">16,94 M <span style="font-size: 0.8rem; color: #D97706; font-weight: 700;">▲ +17,6% vs 2022</span></div>
-        <span class="series-highlight-sub">Passou de 14,40M em 2022 para 16,94M de MEIs cadastrados ativos em 2026 (posição parcial).</span>
+        <span class="series-highlight-title">Microempreendedores MEI (2026)</span>
+        <div class="series-highlight-val">16,94 M <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: 18,20 M*</span></div>
+        <span class="series-highlight-sub">MEIs cadastrados e ativos: 16,94M formalizados. Projeção anual de fechamento: 18,20M de MEIs.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
         <span class="series-highlight-title">Total da Força Formal</span>
-        <div class="series-highlight-val">68,8 M <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Recorde</span></div>
-        <span class="series-highlight-sub">Soma de 51,9M de trabalhadores CLT e 16,9M de MEIs formalizados no país.</span>
+        <div class="series-highlight-val">66,6 M <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: 70,1 M*</span></div>
+        <span class="series-highlight-sub">Soma de trabalhadores formais CLT e microempreendedores MEI formalizados no país.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
         <span class="series-highlight-title">Pessoas Ocupadas (PNAD)</span>
@@ -2601,7 +2634,8 @@ function atualizarGraficoSeriesHistoricas() {
         position: 'right',
         grid: { drawOnChartArea: false },
         ticks: { callback: v => v + ' M' },
-        title: { display: true, text: 'Microempreendedores MEI (Milhões)', color: '#D97706', font: { weight: 'bold' } }
+        title: { display: true, text: 'Microempreendedores MEI (Milhões)', color: '#D97706', font: { weight: 'bold' } },
+        grace: '15%'
       }
     };
 
@@ -2619,18 +2653,18 @@ function atualizarGraficoSeriesHistoricas() {
       highlightsHtml = `
         <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
           <span class="series-highlight-title">Saúde Pública (Real 2026)</span>
-          <div class="series-highlight-val">R$ 231,0 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Recorde</span></div>
-          <span class="series-highlight-sub">Orçamento executado na Saúde Pública em 2024 a preços de 2026.</span>
+          <div class="series-highlight-val">R$ 149,6 Bi <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: R$ 256,4 Bi*</span></div>
+          <span class="series-highlight-sub">Executado Jan-Jul: R$ 149,6 Bi (Real). Projeção oficial de fechamento: R$ 256,4 Bi*.</span>
         </div>
         <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
           <span class="series-highlight-title">Educação e FUNDEB (Real)</span>
-          <div class="series-highlight-val">R$ 137,8 Bi <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +48%</span></div>
-          <span class="series-highlight-sub">Expansão via Novo FUNDEB e implantação do Pé-de-Meia.</span>
+          <div class="series-highlight-val">R$ 33,2 Bi <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: R$ 56,9 Bi*</span></div>
+          <span class="series-highlight-sub">Executado Jan-Jul MEC direto: R$ 33,2 Bi (Real). Projeção anual: R$ 56,9 Bi* (+ R$ 68,4 Bi Fundeb).</span>
         </div>
         <div class="series-highlight-box" style="border-left: 4px solid #DC2626;">
           <span class="series-highlight-title">Farmácia Popular (Real)</span>
-          <div class="series-highlight-val">R$ 5,4 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +116% vs 2022</span></div>
-          <span class="series-highlight-sub">Orçamento integralmente garantido com gratuidade de 40 medicamentos essenciais.</span>
+          <div class="series-highlight-val">R$ 3,15 Bi <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: R$ 5,40 Bi*</span></div>
+          <span class="series-highlight-sub">Executado Jan-Jul: R$ 3,15 Bi (Real). Projeção oficial de fechamento: R$ 5,40 Bi*.</span>
         </div>
         <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
           <span class="series-highlight-title">Economia das Famílias</span>
@@ -2677,18 +2711,18 @@ function atualizarGraficoSeriesHistoricas() {
       highlightsHtml = `
         <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
           <span class="series-highlight-title">Saúde Pública (Gasto Nominal)</span>
-          <div class="series-highlight-val">R$ 203,9 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ 4x vs 2010</span></div>
-          <span class="series-highlight-sub">Gasto nominal executado no Ministério da Saúde em 2024 (R$ 228,6 Bi em 2025 vs R$ 50,5 Bi em 2010).</span>
+          <div class="series-highlight-val">R$ 149,6 Bi <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: R$ 256,4 Bi*</span></div>
+          <span class="series-highlight-sub">Executado Jan-Jul em 2026: R$ 149,6 Bi. Projeção nominal anual: R$ 256,4 Bi* (vs R$ 50,5 Bi em 2010).</span>
         </div>
         <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
           <span class="series-highlight-title">Educação e FUNDEB (Gasto Nominal)</span>
-          <div class="series-highlight-val">R$ 36,6 Bi <span style="font-size: 0.8rem; color: #1A56DB; font-weight: 700;">▲ +108% vs 2010</span></div>
-          <span class="series-highlight-sub">Orçamento direto MEC em 2024 (R$ 41,2 Bi em 2025) somado a R$ 47,5 Bi de complementação Fundeb.</span>
+          <div class="series-highlight-val">R$ 33,2 Bi <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: R$ 56,9 Bi*</span></div>
+          <span class="series-highlight-sub">Executado Jan-Jul: R$ 33,2 Bi MEC direto. Projeção anual: R$ 56,9 Bi* somado a complementação Fundeb.</span>
         </div>
         <div class="series-highlight-box" style="border-left: 4px solid #DC2626;">
           <span class="series-highlight-title">Farmácia Popular (Gasto Nominal)</span>
-          <div class="series-highlight-val">R$ 4,72 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ Recorde Histórico</span></div>
-          <span class="series-highlight-sub">Execução orçamentária nominal em 2025 (vs R$ 2,74 Bi em 2024 e R$ 0,95 Bi em 2010).</span>
+          <div class="series-highlight-val">R$ 3,15 Bi <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: R$ 5,40 Bi*</span></div>
+          <span class="series-highlight-sub">Executado Jan-Jul: R$ 3,15 Bi. Projeção oficial de fechamento: R$ 5,40 Bi* (vs R$ 0,95 Bi em 2010).</span>
         </div>
         <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
           <span class="series-highlight-title">Economia das Famílias</span>
@@ -2734,20 +2768,25 @@ function atualizarGraficoSeriesHistoricas() {
     }
 
   } else if (currentSeriesMetric === 'comercio') {
-    titleEl.textContent = 'Vendas do Comércio Varejista Ampliado (2016 – 2025)';
+    titleEl.textContent = 'Vendas do Comércio Varejista Ampliado (2016 – 2026)';
     subtitleEl.textContent = 'Volume total de faturamento do varejo brasileiro incluindo veículos, motos e materiais de construção';
     tagEl.textContent = 'Banco Central (Série 28544) / IBGE (PMC)';
 
-    const dadosComercio = dados.filter(d => d.ano <= 2025);
+    const dadosComercio = dados;
     labels = dadosComercio.map(d => d.ano);
 
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
-        <span class="series-highlight-title">Faturamento Varejista Ampliado (2025)</span>
-        <div class="series-highlight-val">R$ 2,38 Tri <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +20,2% vs 2022</span></div>
-        <span class="series-highlight-sub">Evoluiu de R$ 1,98 Tri em 2022 para R$ 2,38 Tri ao ano em 2025.</span>
+        <span class="series-highlight-title">Faturamento Varejista Ampliado (2026)</span>
+        <div class="series-highlight-val">R$ 2,77 Tri <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: R$ 4,75 Tri*</span></div>
+        <span class="series-highlight-sub">Apurado Jan-Jul: R$ 2,77 Tri (Real). Projeção linear anual de fechamento: R$ 4,75 Tri*.</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #0E9F6E;">
+        <span class="series-highlight-title">Faturamento Consolidado (2025)</span>
+        <div class="series-highlight-val">R$ 4,58 Tri <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +20,2% vs 2022</span></div>
+        <span class="series-highlight-sub">Evoluiu de R$ 3,81 Tri em 2022 para R$ 4,58 Tri ao ano em 2025 (BCB SGS 28544).</span>
+      </div>
+      <div class="series-highlight-box" style="border-left: 4px solid #7E3AF2;">
         <span class="series-highlight-title">Massa de Renda Circulante</span>
         <div class="series-highlight-val">R$ 330 Bi/mês <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">Recorde</span></div>
         <span class="series-highlight-sub">Aumento da massa salarial real impulsiona o consumo de bens duráveis e semiduráveis.</span>
@@ -2780,8 +2819,8 @@ function atualizarGraficoSeriesHistoricas() {
     highlightsHtml = `
       <div class="series-highlight-box" style="border-left: 4px solid #1A56DB;">
         <span class="series-highlight-title">Despesas no Exterior (2026)</span>
-        <div class="series-highlight-val">US$ 18,7 Bi <span style="font-size: 0.8rem; color: #0E9F6E; font-weight: 700;">▲ +53,3% vs 2022</span></div>
-        <span class="series-highlight-sub">Recuperação expressiva frente aos US$ 12,2 Bi de 2022 e pico pós-pandemia.</span>
+        <div class="series-highlight-val">US$ 16,98 Bi <span style="font-size: 0.8rem; color: #DC2626; font-weight: 700;">Proj: US$ 25,5 Bi*</span></div>
+        <span class="series-highlight-sub">Apurado Jan-Ago: US$ 16,98 Bi (Real). Projeção linear de fechamento: US$ 25,47 Bi* (+108% vs 2022).</span>
       </div>
       <div class="series-highlight-box" style="border-left: 4px solid #DC2626;">
         <span class="series-highlight-title">Mínima Histórica (Pandemia)</span>
@@ -2821,24 +2860,24 @@ function atualizarGraficoSeriesHistoricas() {
 
   highlightsEl.innerHTML = highlightsHtml;
 
-  // Atualiza nota explicativa de metodologia e cálculo da projeção de 2026 (mesmo padrão do notebook)
+  // Atualiza nota explicativa de metodologia e comparativo da projeção de 2026 (mesmo padrão do notebook)
   const noteEl = document.getElementById('series-projection-note');
   if (noteEl) {
     let noteHtml = '';
     if (currentSeriesMetric === 'trabalho_agro') {
-      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota Metodológica (*2026):</strong> Posições apuradas com base nos dados mais recentes divulgados pelos órgãos oficiais. O estoque de <strong>Carteiras Assinadas CLT</strong> (MTE / Novo CAGED) atinge <strong>51,9M</strong> (+3,85M vínculos formais vs 2022). O estoque de <strong>MEIs</strong> (Mapa de Empresas / RFB) alcança <strong>16,94M</strong> formalizados. Na <strong>PNAD Contínua / IBGE</strong> (BCB SGS 24379), a média de ocupados atinge recorde de <strong>102,7M</strong> (+7,0% vs 2022) e a massa salarial alcança <strong>R$ 330 Bi/mês</strong>.</div>`;
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Comparativo Metodológico (2026):</strong> Exibição do dado <strong>Real Apurado</strong> e acima a <strong>Projeção Anual*</strong>. Vagas formais <strong>CLT</strong> (MTE / Novo CAGED): <strong>49,66M (Real)</strong> com projeção de <strong>51,9M*</strong> (+3,85M vínculos formais vs 2022). Estoque de <strong>MEIs</strong> (Mapa de Empresas / RFB): <strong>16,94M (Real)</strong> com projeção de <strong>18,20M*</strong> formalizados. Na <strong>PNAD Contínua / IBGE</strong> (BCB SGS 24379), a média de ocupados atinge recorde de <strong>102,7M</strong> (+7,0% vs 2022) e a massa salarial alcança <strong>R$ 330 Bi/mês</strong>.</div>`;
     } else if (currentSeriesMetric === 'veiculos') {
-      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota de Cálculo da Projeção (*2026):</strong> Conforme metodologia aplicada no notebook, a projeção anual de fechamento é calculada linearmente por <em>(Acumulado até o mês / Meses decorridos) × 12</em>, desconsiderando sazonalidade do final de ano. Fontes: Banco Central do Brasil (SGS 1374 / ANFAVEA) e FENAUTO / Senatran.</div>`;
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Comparativo Metodológico (2026):</strong> A coluna exibe o dado <strong>Real Apurado (10,10M)</strong> até Agosto (1,30M novos + 8,80M usados) e acima a <strong>Projeção Anual de Fechamento (15,43M*)</strong> calculada linearmente por <em>(Acumulado / Meses Decorridos) × 12</em>, sem ponderar aquecimento sazonal de final de ano. Fontes: Banco Central (SGS 1374 / ANFAVEA) e FENAUTO / Senatran.</div>`;
     } else if (currentSeriesMetric === 'habitacao') {
-      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota de Cálculo da Projeção (*2026):</strong> Anualização linear simples <em>(Total realizado até o mês / Meses decorridos) × 12</em> sobre unidades habitacionais financiadas pelo SBPE (Poupança). Fontes: Banco Central (SGS 20703) e ABECIP.</div>`;
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Comparativo Metodológico (2026):</strong> Exibição do <strong>Real Apurado (158,8 mil unidades)</strong> até Agosto e acima a <strong>Projeção Anualizada (211,8 mil unidades*)</strong> pelo SBPE Poupança: <em>(Total realizado / Meses decorridos) × 12</em>. Fontes: Banco Central (SGS 20703) e ABECIP.</div>`;
     } else if (currentSeriesMetric === 'comercio') {
-      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota de Cálculo da Projeção (*2026):</strong> Calculada linearmente por <em>(Faturamento acumulado até o mês / Meses decorridos) × 12</em>, sem ponderar o aquecimento sazonal de vendas do 4º trimestre (Black Friday e Natal). Fontes: Banco Central (SGS 28544) e IBGE (PMC).</div>`;
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Comparativo Metodológico (2026):</strong> Exibição do <strong>Real Apurado (R$ 2,77 Tri)</strong> de Jan a Julho e acima a <strong>Projeção Anual (R$ 4,75 Tri*)</strong> calculada linearmente por <em>(Faturamento acumulado / Meses decorridos) × 12</em>, sem ponderar o aquecimento sazonal de vendas do 4º trimestre (Black Friday e Natal). Fontes: Banco Central (SGS 28544) e IBGE (PMC).</div>`;
     } else if (currentSeriesMetric === 'gastos_exterior') {
-      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota de Cálculo da Projeção (*2026):</strong> Anualização linear simples <em>(Despesas acumuladas no exterior / Meses decorridos) × 12</em> na Conta de Viagens Internacionais do Balanço de Pagamentos. Fonte: Banco Central do Brasil (SGS 22742).</div>`;
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Comparativo Metodológico (2026):</strong> Exibição do <strong>Real Apurado (US$ 16,98 Bi)</strong> até Agosto e acima a <strong>Projeção Anual (US$ 25,47 Bi*)</strong> na Conta de Viagens Internacionais: <em>(Despesas acumuladas / Meses decorridos) × 12</em>. Fonte: Banco Central do Brasil (SGS 22742).</div>`;
     } else if (currentSeriesMetric === 'poder_compra') {
-      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota Metodológica (*2026):</strong> Valores calculados a partir da média apurada dos preços de bens essenciais (Cesta Básica DIEESE SGS 7493, Gasolina e Gás GLP via ANP) ponderados sobre o Salário Mínimo nacional vigente em 2026 (R$ 1.518, reajustado com valorização real acima da inflação).</div>`;
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Comparativo Metodológico (2026):</strong> Valores apurados dos preços médios de bens essenciais (Cesta Básica DIEESE SGS 7493, Gasolina e Gás GLP via ANP) ponderados sobre o Salário Mínimo nacional vigente em 2026 (R$ 1.518, reajustado com ganho real acima da inflação).</div>`;
     } else if (currentSeriesMetric === 'orcamento_federal') {
-      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Nota de Cálculo da Projeção (*2026):</strong> Projeção oficial calculada por anualização linear dos meses apurados pelo Tesouro Nacional: <em>Projeção = (Executado Jan-Jul / 7) × 12</em>. Valores reais corrigidos pelo IPCA acumulado a preços constantes de 2026. Fontes: Secretaria do Tesouro Nacional (RTN / SIAFI) e Banco Central.</div>`;
+      noteHtml = `<span class="note-icon">📌</span><div class="note-content"><strong>Comparativo Metodológico (2026):</strong> Exibição do <strong>Real Executado (Jan-Jul, 7 meses)</strong> e acima a <strong>Projeção Oficial Anualizada</strong> do Tesouro Nacional: <em>Projeção = (Executado Jan-Jul / 7) × 12</em>. Valores reais corrigidos pelo IPCA a preços constantes de 2026. Fontes: Secretaria do Tesouro Nacional (RTN / SIAFI) e Banco Central.</div>`;
     }
     noteEl.innerHTML = noteHtml;
   }
@@ -2854,7 +2893,7 @@ function atualizarGraficoSeriesHistoricas() {
   chartSeriesHistoricas = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: chartLabels.map(a => a === 2026 ? '2026* (Proj.)' : `${a}`),
+      labels: chartLabels.map(a => a === 2026 ? '2026* (Real/Proj)' : `${a}`),
       datasets: datasets
     },
     options: {
@@ -2881,22 +2920,34 @@ function atualizarGraficoSeriesHistoricas() {
           callbacks: {
             title: (items) => {
               const lbl = items[0].label;
-              return lbl.includes('2026') ? 'Ano: 2026* (Projeção / Posição Parcial)' : `Ano: ${lbl}`;
+              return lbl.includes('2026') 
+                ? 'Ano 2026* — Comparativo: Real Parcial vs. Projeção Anual' 
+                : `Ano: ${lbl}`;
             },
             label: (item) => {
+              const is2026 = item.label.includes('2026');
+              if (is2026) {
+                const comp = getComparativo2026(currentSeriesMetric, item.datasetIndex, currentOrcamentoMode, item.raw);
+                return [
+                  ` ${item.dataset.label}:`,
+                  `   • Real apurado parcial: ${comp.real}`,
+                  `   • Projeção anual de fechamento: ${comp.proj}`
+                ];
+              }
               if (currentSeriesMetric === 'orcamento_federal') {
                 const modo = currentOrcamentoMode === 'real' ? 'Real 2026' : 'Gasto Nominal';
                 return ` ${item.dataset.label}: R$ ${typeof item.raw === 'number' ? item.raw.toFixed(1) : item.raw} Bi (${modo})`;
               }
-              const is2026 = item.label.includes('2026');
-              const sufixoProj = is2026 ? ' (Projeção / Parcial)' : '';
-              return ` ${item.dataset.label}: ${item.raw.toLocaleString('pt-BR')}${sufixoProj}`;
+              return ` ${item.dataset.label}: ${item.raw.toLocaleString('pt-BR')}`;
             }
           }
         }
       },
       scales: {
-        y: yAxisConfig,
+        y: {
+          ...yAxisConfig,
+          grace: '15%'
+        },
         ...scalesConfigExtra,
         x: {
           stacked: currentSeriesMetric === 'veiculos',
@@ -2909,7 +2960,6 @@ function atualizarGraficoSeriesHistoricas() {
       afterDatasetsDraw(chart) {
         const { ctx } = chart;
         ctx.save();
-        ctx.font = 'bold 12px Inter, system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
 
@@ -2923,12 +2973,33 @@ function atualizarGraficoSeriesHistoricas() {
               const total = usados + novos;
               if (total <= 0) return;
               const is2026 = index === chart.data.labels.length - 1;
-              const text = is2026 ? `${total.toFixed(2)} M*` : `${total.toFixed(2)} M`;
-              ctx.lineWidth = 3.5;
-              ctx.strokeStyle = '#FFFFFF';
-              ctx.strokeText(text, point.x, point.y - 6);
-              ctx.fillStyle = '#0F172A';
-              ctx.fillText(text, point.x, point.y - 6);
+              if (is2026) {
+                // Rótulo Superior: Projeção Anual de Fechamento (destaque vermelho)
+                const textProj = "Proj: 15.43M*";
+                ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.strokeText(textProj, point.x, point.y - 24);
+                ctx.fillStyle = '#DC2626';
+                ctx.fillText(textProj, point.x, point.y - 24);
+
+                // Rótulo Inferior: Real Apurado Parcial (azul escuro)
+                const textReal = `Real: ${total.toFixed(2)}M`;
+                ctx.font = 'bold 11.5px Inter, system-ui, sans-serif';
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.strokeText(textReal, point.x, point.y - 8);
+                ctx.fillStyle = '#0F172A';
+                ctx.fillText(textReal, point.x, point.y - 8);
+              } else {
+                const text = `${total.toFixed(2)} M`;
+                ctx.font = 'bold 12px Inter, system-ui, sans-serif';
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.strokeText(text, point.x, point.y - 6);
+                ctx.fillStyle = '#0F172A';
+                ctx.fillText(text, point.x, point.y - 6);
+              }
             });
           }
         } else {
@@ -2939,24 +3010,45 @@ function atualizarGraficoSeriesHistoricas() {
             meta.data.forEach((point, index) => {
               const val = dataset.data[index];
               if (val === undefined || val === null) return;
-              let text = '';
-              if (typeof val === 'number') {
-                if (val >= 1000) text = formatarNumero(Math.round(val));
-                else if (val >= 100) text = Math.round(val).toString();
-                else text = val.toFixed(1);
-              } else {
-                text = val;
-              }
               const is2026 = index === chart.data.labels.length - 1;
+
               if (is2026) {
-                text = `${text}*`;
+                const comp = getComparativo2026(currentSeriesMetric, datasetIndex, currentOrcamentoMode, val);
+
+                // Rótulo Superior: Projeção Anual de Fechamento (destaque vermelho)
+                const textProj = `Proj: ${comp.proj}`;
+                ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.strokeText(textProj, point.x, point.y - 24);
+                ctx.fillStyle = '#DC2626';
+                ctx.fillText(textProj, point.x, point.y - 24);
+
+                // Rótulo Inferior: Real Apurado Parcial (cor do dataset)
+                const textReal = `Real: ${comp.real}`;
+                ctx.font = 'bold 11.5px Inter, system-ui, sans-serif';
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.strokeText(textReal, point.x, point.y - 8);
+                ctx.fillStyle = dataset.borderColor || dataset.backgroundColor || '#1E293B';
+                ctx.fillText(textReal, point.x, point.y - 8);
+              } else {
+                let text = '';
+                if (typeof val === 'number') {
+                  if (val >= 1000) text = formatarNumero(Math.round(val));
+                  else if (val >= 100) text = Math.round(val).toString();
+                  else text = val.toFixed(1);
+                } else {
+                  text = val;
+                }
+                const yOffset = datasetIndex > 0 && currentSeriesMetric !== 'trabalho_agro' ? (datasetIndex * 14) + 6 : 6;
+                ctx.font = 'bold 12px Inter, system-ui, sans-serif';
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.strokeText(text, point.x, point.y - yOffset);
+                ctx.fillStyle = dataset.borderColor || dataset.backgroundColor || '#1E293B';
+                ctx.fillText(text, point.x, point.y - yOffset);
               }
-              const yOffset = datasetIndex > 0 && currentSeriesMetric !== 'trabalho_agro' ? (datasetIndex * 14) + 6 : 6;
-              ctx.lineWidth = 3.5;
-              ctx.strokeStyle = '#FFFFFF';
-              ctx.strokeText(text, point.x, point.y - yOffset);
-              ctx.fillStyle = dataset.borderColor || dataset.backgroundColor || '#1E293B';
-              ctx.fillText(text, point.x, point.y - yOffset);
             });
           });
         }
@@ -3604,6 +3696,29 @@ function gerarTabelaHistoricoOrcamento(tipo) {
       const isLula3 = item.ano >= 2023 ? 'row-lula-3' : '';
       const totalFormal = ((item.clt_milhoes || 0) + (item.meis_milhoes || 0)).toFixed(2);
 
+      if (item.ano === 2026) {
+        return `
+          <tr class="${isLula3}" style="background: rgba(26, 86, 219, 0.05); border-left: 3px solid #1A56DB;">
+            <td style="font-weight: 800;">2026* <span style="font-size: 0.65rem; color: #DC2626; display: block;">Real vs Proj</span></td>
+            <td><span class="gov-badge ${badgeClass}">${govNome}</span></td>
+            <td>
+              <div style="font-weight: 700; color: #1A56DB;">49,66 M <span style="font-size: 0.7rem; color: #64748B;">(Real)</span></div>
+              <div style="font-size: 0.74rem; font-weight: 800; color: #DC2626;">Proj: 51,90 M*</div>
+            </td>
+            <td>
+              <div style="font-weight: 700; color: #D97706;">16,94 M <span style="font-size: 0.7rem; color: #64748B;">(Real)</span></div>
+              <div style="font-size: 0.74rem; font-weight: 800; color: #DC2626;">Proj: 18,20 M*</div>
+            </td>
+            <td>
+              <div style="font-weight: 800; color: #047857;">66,60 M <span style="font-size: 0.7rem; color: #64748B;">(Real)</span></div>
+              <div style="font-size: 0.74rem; font-weight: 800; color: #DC2626;">Proj: 70,10 M*</div>
+            </td>
+            <td>R$ ${formatarNumero(item.salario_minimo)}</td>
+            <td style="font-size: 0.72rem; color: #1A56DB; font-weight: 600;">Real Apurado + Projeção Anual*</td>
+          </tr>
+        `;
+      }
+
       return `
         <tr class="${isLula3}">
           <td style="font-weight: 700;">${item.ano}</td>
@@ -3612,7 +3727,7 @@ function gerarTabelaHistoricoOrcamento(tipo) {
           <td style="font-weight: 700; color: #D97706;">${(item.meis_milhoes || 0).toFixed(2)} M</td>
           <td style="font-weight: 800; color: #047857;">${totalFormal} M</td>
           <td>R$ ${formatarNumero(item.salario_minimo)}</td>
-          <td style="font-size: 0.72rem; color: #64748B;">${item.ano >= 2025 ? 'Projeção / Estimativa' : 'Consolidado Oficial'}</td>
+          <td style="font-size: 0.72rem; color: #64748B;">${item.ano === 2025 ? 'Consolidado / Estimativa' : 'Consolidado Oficial'}</td>
         </tr>
       `;
     }).join('');
@@ -3693,28 +3808,70 @@ function gerarTabelaHistoricoOrcamento(tipo) {
     const isLula3 = item.ano >= 2023 ? 'row-lula-3' : '';
 
     let colDados = '';
+    const is2026 = item.ano === 2026;
     if (tipo === 'previdencia') {
       const prevTot = item.previdencia_total_bi || 0;
       const aposTot = item.aposentadorias_total_bi || (prevTot * 0.675);
       const rural = item.previdencia_rural_bi || 0;
       const pesoRural = prevTot > 0 ? ((rural / prevTot) * 100).toFixed(1) + '%' : '—';
-      colDados = `
-        <td style="font-weight: 700; color: #1E40AF;">R$ ${prevTot.toFixed(1)} Bi</td>
-        <td style="font-weight: 700; color: #7E3AF2;">R$ ${aposTot.toFixed(1)} Bi</td>
-        <td style="font-weight: 700; color: #059669;">R$ ${rural.toFixed(1)} Bi</td>
-        <td style="font-weight: 600; color: #059669;">${pesoRural}</td>
-        <td>R$ ${(item.investimento_total_bi || 0).toFixed(1)} Bi</td>
-      `;
+
+      if (is2026) {
+        const prevReal = (prevTot * 7 / 12).toFixed(1);
+        const aposReal = (aposTot * 7 / 12).toFixed(1);
+        const ruralReal = (rural * 7 / 12).toFixed(1);
+        colDados = `
+          <td>
+            <div style="font-weight: 700; color: #1E40AF;">R$ ${prevReal} Bi <span style="font-size: 0.68rem; color: #64748B;">(Real)</span></div>
+            <div style="font-size: 0.74rem; font-weight: 800; color: #DC2626;">Proj: R$ ${prevTot.toFixed(1)} Bi*</div>
+          </td>
+          <td>
+            <div style="font-weight: 700; color: #7E3AF2;">R$ ${aposReal} Bi <span style="font-size: 0.68rem; color: #64748B;">(Real)</span></div>
+            <div style="font-size: 0.74rem; font-weight: 800; color: #DC2626;">Proj: R$ ${aposTot.toFixed(1)} Bi*</div>
+          </td>
+          <td>
+            <div style="font-weight: 700; color: #059669;">R$ ${ruralReal} Bi <span style="font-size: 0.68rem; color: #64748B;">(Real)</span></div>
+            <div style="font-size: 0.74rem; font-weight: 800; color: #DC2626;">Proj: R$ ${rural.toFixed(1)} Bi*</div>
+          </td>
+          <td style="font-weight: 600; color: #059669;">${pesoRural}</td>
+          <td>R$ ${(item.investimento_total_bi || 0).toFixed(1)} Bi</td>
+        `;
+      } else {
+        colDados = `
+          <td style="font-weight: 700; color: #1E40AF;">R$ ${prevTot.toFixed(1)} Bi</td>
+          <td style="font-weight: 700; color: #7E3AF2;">R$ ${aposTot.toFixed(1)} Bi</td>
+          <td style="font-weight: 700; color: #059669;">R$ ${rural.toFixed(1)} Bi</td>
+          <td style="font-weight: 600; color: #059669;">${pesoRural}</td>
+          <td>R$ ${(item.investimento_total_bi || 0).toFixed(1)} Bi</td>
+        `;
+      }
     } else if (tipo === 'agro') {
       const agroNom = item.pnae_compras_agricultura_familiar_bi || 0.45;
       const agroReal = (agroNom * (item.ano <= 2014 ? 1.75 : item.ano <= 2018 ? 1.45 : item.ano <= 2022 ? 1.22 : 1.05)).toFixed(2);
       const pnaeTotal = (agroNom / 0.3).toFixed(2);
-      colDados = `
-        <td>R$ ${pnaeTotal} Bi</td>
-        <td style="font-weight: 700; color: #0E9F6E;">R$ ${agroNom.toFixed(2)} Bi</td>
-        <td style="font-weight: 700; color: #1E40AF;">R$ ${agroReal} Bi</td>
-        <td>R$ ${(item.conab_orcamento_executado_bi || 0.8).toFixed(2)} Bi</td>
-      `;
+
+      if (is2026) {
+        const agroNomReal = (agroNom * 7 / 12).toFixed(2);
+        const conabReal = ((item.conab_orcamento_executado_bi || 0.8) * 7 / 12).toFixed(2);
+        colDados = `
+          <td>R$ ${pnaeTotal} Bi</td>
+          <td>
+            <div style="font-weight: 700; color: #0E9F6E;">R$ ${agroNomReal} Bi <span style="font-size: 0.68rem; color: #64748B;">(Real)</span></div>
+            <div style="font-size: 0.74rem; font-weight: 800; color: #DC2626;">Proj: R$ ${agroNom.toFixed(2)} Bi*</div>
+          </td>
+          <td style="font-weight: 700; color: #1E40AF;">R$ ${agroReal} Bi</td>
+          <td>
+            <div style="font-weight: 700; color: #0F172A;">R$ ${conabReal} Bi <span style="font-size: 0.68rem; color: #64748B;">(Real)</span></div>
+            <div style="font-size: 0.74rem; font-weight: 800; color: #DC2626;">Proj: R$ ${(item.conab_orcamento_executado_bi || 0.8).toFixed(2)} Bi*</div>
+          </td>
+        `;
+      } else {
+        colDados = `
+          <td>R$ ${pnaeTotal} Bi</td>
+          <td style="font-weight: 700; color: #0E9F6E;">R$ ${agroNom.toFixed(2)} Bi</td>
+          <td style="font-weight: 700; color: #1E40AF;">R$ ${agroReal} Bi</td>
+          <td>R$ ${(item.conab_orcamento_executado_bi || 0.8).toFixed(2)} Bi</td>
+        `;
+      }
     }
 
     return `
@@ -3983,7 +4140,7 @@ function renderizarGraficoModalOrcamento(tipo) {
   // Caso 3: Mercado de Trabalho Formal CLT & Suporte ao MEI
   if (tipo === 'trabalho') {
     const nacList = APP_DATA?.series_historicas?.nacional || [];
-    const labels = nacList.map(d => String(d.ano));
+    const labels = nacList.map(d => d.ano === 2026 ? '2026* (Real/Proj)' : String(d.ano));
     const cltData = nacList.map(d => d.clt_milhoes);
     const meiData = nacList.map(d => d.meis_milhoes);
 
@@ -4064,7 +4221,19 @@ function renderizarGraficoModalOrcamento(tipo) {
           },
           tooltip: {
             callbacks: {
-              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)} Milhões`
+              label: (ctx) => {
+                if (ctx.label.includes('2026')) {
+                  const comp = ctx.datasetIndex === 0 
+                    ? { real: '49,66M', proj: '51,90M*' } 
+                    : { real: '16,94M', proj: '18,20M*' };
+                  return [
+                    ` ${ctx.dataset.label}:`,
+                    `   • Real apurado: ${comp.real}`,
+                    `   • Projeção anual de fechamento: ${comp.proj}`
+                  ];
+                }
+                return ` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)} Milhões`;
+              }
             }
           }
         },
@@ -4084,7 +4253,6 @@ function renderizarGraficoModalOrcamento(tipo) {
         afterDatasetsDraw(chart) {
           const { ctx } = chart;
           ctx.save();
-          ctx.font = 'bold 9px Inter, sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
           chart.data.datasets.forEach((dataset, datasetIndex) => {
@@ -4093,8 +4261,21 @@ function renderizarGraficoModalOrcamento(tipo) {
             meta.data.forEach((bar, index) => {
               const val = dataset.data[index];
               if (val === undefined || val === null || val <= 0) return;
-              ctx.fillStyle = '#1E293B';
-              ctx.fillText(`${val.toFixed(1)}M`, bar.x, bar.y - 3);
+              const is2026 = index === chart.data.labels.length - 1;
+              if (is2026) {
+                const comp = datasetIndex === 0 
+                  ? { real: '49.7M', proj: '51.9M*' } 
+                  : { real: '16.9M', proj: '18.2M*' };
+                ctx.font = 'bold 8.5px Inter, sans-serif';
+                ctx.fillStyle = '#DC2626';
+                ctx.fillText(`Proj: ${comp.proj}`, bar.x, bar.y - 14);
+                ctx.fillStyle = '#1E293B';
+                ctx.fillText(`Real: ${comp.real}`, bar.x, bar.y - 3);
+              } else {
+                ctx.font = 'bold 9px Inter, sans-serif';
+                ctx.fillStyle = '#1E293B';
+                ctx.fillText(`${val.toFixed(1)}M`, bar.x, bar.y - 3);
+              }
             });
           });
           ctx.restore();
@@ -4108,7 +4289,7 @@ function renderizarGraficoModalOrcamento(tipo) {
   const lista = APP_DATA?.series_historicas?.orcamento_governos || [];
   if (lista.length === 0) return;
 
-  const labels = lista.map(d => String(d.ano));
+  const labels = lista.map(d => d.ano === 2026 ? '2026* (Real/Proj)' : String(d.ano));
 
   const barColors = lista.map(d => {
     if (d.governo.includes('Lula 2')) return 'rgba(239, 68, 68, 0.75)';
@@ -4258,6 +4439,14 @@ function renderizarGraficoModalOrcamento(tipo) {
           callbacks: {
             label: function(context) {
               const val = context.parsed.y !== null ? context.parsed.y.toFixed(2) : '0.00';
+              if (context.label.includes('2026')) {
+                const realVal = (context.parsed.y * 7 / 12).toFixed(2);
+                return [
+                  ` ${context.dataset.label}:`,
+                  `   • Real (parcial Jan-Jul): R$ ${realVal} Bi`,
+                  `   • Projeção anual 2026*: R$ ${val} Bi`
+                ];
+              }
               return ` ${context.dataset.label}: R$ ${val} Bi`;
             }
           }
@@ -4293,7 +4482,6 @@ function renderizarGraficoModalOrcamento(tipo) {
       afterDatasetsDraw(chart) {
         const { ctx } = chart;
         ctx.save();
-        ctx.font = 'bold 9px Inter, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
         chart.data.datasets.forEach((dataset, datasetIndex) => {
@@ -4302,12 +4490,27 @@ function renderizarGraficoModalOrcamento(tipo) {
           meta.data.forEach((element, index) => {
             const val = dataset.data[index];
             if (val === undefined || val === null || val <= 0) return;
-            if (tipo === 'previdencia') {
-              ctx.fillStyle = datasetIndex === 0 ? '#7E3AF2' : (datasetIndex === 1 ? '#047857' : '#1E3A8A');
+            const is2026 = index === chart.data.labels.length - 1;
+            if (is2026) {
+              const realVal = Math.round(val * 7 / 12);
+              ctx.font = 'bold 8.5px Inter, sans-serif';
+              ctx.fillStyle = '#DC2626';
+              ctx.fillText(`Proj: ${val.toFixed(0)}B*`, element.x, element.y - 14);
+              if (tipo === 'previdencia') {
+                ctx.fillStyle = datasetIndex === 0 ? '#7E3AF2' : (datasetIndex === 1 ? '#047857' : '#1E3A8A');
+              } else {
+                ctx.fillStyle = datasetIndex === 0 ? '#0F172A' : '#1E3A8A';
+              }
+              ctx.fillText(`Real: ${realVal}B`, element.x, element.y - 3);
             } else {
-              ctx.fillStyle = datasetIndex === 0 ? '#0F172A' : '#1E3A8A';
+              ctx.font = 'bold 9px Inter, sans-serif';
+              if (tipo === 'previdencia') {
+                ctx.fillStyle = datasetIndex === 0 ? '#7E3AF2' : (datasetIndex === 1 ? '#047857' : '#1E3A8A');
+              } else {
+                ctx.fillStyle = datasetIndex === 0 ? '#0F172A' : '#1E3A8A';
+              }
+              ctx.fillText(`${val.toFixed(0)}B`, element.x, element.y - 4);
             }
-            ctx.fillText(`${val.toFixed(0)}B`, element.x, element.y - 4);
           });
         });
         ctx.restore();
