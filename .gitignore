@@ -29,8 +29,10 @@ scratch*
 .gemini/
 
 # Pastas de extração intermediária e dados brutos
-extratores/
-dados_prioridades/
+extratores/cache/
+dados_prioridades/*
+!dados_prioridades/fontes_oficiais/
+!dados_prioridades/fontes_oficiais/**
 
 # Arquivos de sistema operacional
 .DS_Store
