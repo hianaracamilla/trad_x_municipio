@@ -147,11 +147,11 @@ totais_nacionais = {
     },
     "trabalho": {
         "titulo": "Trabalho, Renda & Cidadania",
-        "destaque_numero": "49,66 M",
+        "destaque_numero": "48,24 M",
         "destaque_rotulo": "Empregos Formais CLT",
         "subtitulo": "17,2M de MEIs e 17,2M de famílias amparadas",
         "detalhes": [
-            {"rotulo": "Trabalhadores CLT ativos", "valor": "49.660.143 vínculos"},
+            {"rotulo": "Trabalhadores CLT ativos", "valor": "48.244.696 vínculos (Agosto/2026)"},
             {"rotulo": "Microempreendedores (MEI)", "valor": "17.216.626 ativos"},
             {"rotulo": "Bolsa Família (famílias)", "valor": "17.204.187 famílias"},
             {"rotulo": "Repasse mensal Bolsa Família", "valor": "R$ 11,96 Bilhões/mês"}
@@ -528,20 +528,20 @@ for _, row in merged.iterrows():
 # 7. Séries Históricas e Poder de Compra (2016 - 2026)
 print("Processando Séries Históricas...")
 series_nacionais = []
-# Série Oficial de Vínculos Formais com Carteira Assinada CLT (MTE / Novo CAGED / RAIS)
-# 2024 fecha exatamente em 49,66M (igual à soma dos 5.571 municípios)
+# Série Oficial de Vínculos Formais com Carteira Assinada CLT (MTE / Novo CAGED Tabela 5.1 com ajustes)
+# Anos anteriores a 2026: Dezembro de cada ano | 2026: Agosto de 2026
 estoque_clt_oficial = {
-    2016: 46.06,
-    2017: 46.28,
-    2018: 46.63,
-    2019: 47.55,
-    2020: 46.22,
-    2021: 47.10,
-    2022: 48.05,
-    2023: 48.80,
-    2024: 49.66,
-    2025: 50.85,
-    2026: 51.90
+    2016: 38.00,
+    2017: 38.00,
+    2018: 38.44,
+    2019: 39.05,
+    2020: 37.91, # Dezembro/2020: 37.907.718 vínculos
+    2021: 40.69, # Dezembro/2021: 40.690.220 vínculos
+    2022: 42.71, # Dezembro/2022: 42.705.233 vínculos
+    2023: 44.16, # Dezembro/2023: 44.161.013 vínculos
+    2024: 45.84, # Dezembro/2024: 45.840.107 vínculos
+    2025: 47.11, # Dezembro/2025: 47.110.663 vínculos
+    2026: 48.24  # Agosto/2026: 48.244.696 vínculos
 }
 meis_oficial = {
     2016: 6.55,

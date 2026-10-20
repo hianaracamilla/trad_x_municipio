@@ -147,21 +147,23 @@ $$D(M_i, C_k) = \sqrt{\sum_{j=1}^{10} (Z_{M_{ij}} - Z_{C_{kj}})^2}$$
 Uma dúvida frequente na leitura de dados econômicos refere-se à origem e cálculo do **Emprego Formal CLT** e dos **Microempreendedores Individuais (MEI)** nos diferentes níveis do sistema:
 
 1. **Fontes Primárias Auditadas:**
-   - **Emprego Formal com Carteira Assinada (CLT):** Ministério do Trabalho e Emprego (MTE) via **Novo CAGED** (estoque acumulado de empregos formais ativos) conjugado com a **RAIS** (Relação Anual de Informações Sociais) vinculados à malha municipal do Censo Demográfico do IBGE.
+   - **Emprego Formal com Carteira Assinada (CLT):** Ministério do Trabalho e Emprego (MTE) via **Novo CAGED** (planilha oficial `3-tabelas_Agosto de 2026 (1).xlsx`, Tabela 8.1 - série com ajustes por município em **Agosto de 2026**; e Tabela 5.1 para a série histórica nacional em **Dezembro de cada ano** de 2020 a 2025).
    - **Microempreendedores Individuais (MEI):** Receita Federal do Brasil / DGI e **Portal do Empreendedor** (estoque de CNPJs ativos enquadrados no SIMEI com domicílio tributário no município).
 2. **Indicador de Intensidade Municipal (`m.ind.clt` e `m.ind.mei` por 100 hab):**
    - Para cada um dos 5.571 municípios, o indicador de intensidade relativa é definido como:
-     $$\text{taxa\_clt\_100\_hab} = \left(\frac{\text{Estoque de Vagas CLT no Município}}{\text{População IBGE}}\right) \times 100$$
+     $$\text{taxa\_clt\_100\_hab} = \left(\frac{\text{Estoque de Vagas CLT no Município (Agosto/2026)}}{\text{População IBGE}}\right) \times 100$$
      $$\text{taxa\_mei\_100\_hab} = \left(\frac{\text{Estoque de CNPJs MEI Ativos}}{\text{População IBGE}}\right) \times 100$$
-   - *Exemplo Concreto (Sobral - CE):*
-     - População auditada: **216.519 habitantes**.
-     - Taxa CLT municipal: **17,5 por 100 hab**.
-     - Vagas formais CLT ativas = $216.519 \times 17,5\% = \mathbf{37.890\text{ vagas}}$ (exibido como **~37,9 Mil** no Raio-X e nos cards municipais).
-     - Taxa MEI municipal: **6,6 por 100 hab** $\rightarrow 216.519 \times 6,6\% = \mathbf{14.290\text{ MEIs}}$ (exibido como **~14,3 Mil**).
 3. **Conciliação de Escala (Brasil vs. Território Filtrado):**
-   - **Visão Brasil (Sem Filtro):** O total nacional consolidado registra **49,66 Milhões a 50,4 Milhões de empregos com carteira assinada** e **17,2 Milhões de MEIs** (17.216.626 optantes formalizados).
-   - **Visão Filtrada (Município, Estado ou Região):** Anteriormente, uma fórmula ingênua baseada em proporção populacional nacional produzia distorções no card superior (ex.: projetava 50,4 Mil para Sobral porque supunha a média nacional de 24,5% sobre a população local).
-   - **Ajuste de Precisão Estrita:** O dashboard agrega os vínculos formais e MEIs pela **soma real dos microdados das cidades selecionadas**:
+   - **Visão Brasil (Sem Filtro):** O total nacional consolidado do Novo Caged em **Agosto de 2026** registra **48.244.696 vínculos formais CLT ativos** (48,24 Milhões) e **17,2 Milhões de MEIs** (17.216.626 optantes formalizados).
+   - **Série Histórica Nacional (Dezembro de cada ano):**
+     * Dezembro/2020: 37,91 Milhões
+     * Dezembro/2021: 40,69 Milhões
+     * Dezembro/2022: 42,71 Milhões
+     * Dezembro/2023: 44,16 Milhões
+     * Dezembro/2024: 45,84 Milhões
+     * Dezembro/2025: 47,11 Milhões
+     * Agosto/2026: 48,24 Milhões
+   - **Visão Filtrada (Município, Estado ou Região):** O dashboard agrega os vínculos formais e MEIs pela **soma real dos microdados das cidades selecionadas**:
      $$\text{Vagas CLT Filtro} = \sum_{c \in \text{Cidades}} \left(\text{Pop}_c \times \frac{\text{taxa\_clt}_c}{100}\right)$$
      Isso garante convergência exata (100% de coerência) entre o Card de Grandes Prioridades, as estatísticas de cabeçalho e os Indicadores Estratégicos do Raio-X.
 
@@ -178,6 +180,32 @@ O sistema incorpora a camada municipalizada de **Microempresas (ME)** extraída 
    - A lista exaustiva de atividades contempladas consta no arquivo auditável [`comercio.xlsx`](../comercio.xlsx) e [`dados_prioridades/fontes_oficiais/atividades_comercio_cnae_oficial.xlsx`](../dados_prioridades/fontes_oficiais/atividades_comercio_cnae_oficial.xlsx).
 3. **Relação com MEI e Total de Empresas:**
    - Todo MEI é enquadrado como uma modalidade especial de Microempresa pelo Estatuto Nacional da Microempresa (LC 123/2006). A base cadastral do Mapa de Empresas consolida essa amplitude, garantindo consistência com o total de estabelecimentos ativos do país.
+
+### 3.8. Metodologia de Desvinculação da Previdência Social e Argumento Econômico Local (2025/2026)
+
+Para mensurar com precisão a dependência da economia municipal em relação à Previdência Social RGPS e construir o argumento econômico adaptado à realidade de cada cidade, o sistema integra o microdado de **Valor Médio da Aposentadoria** e segmenta os 5.571 municípios em dois blocos estratégicos em torno do Salário Mínimo nacional de referência (**R$ 1.518,00**):
+
+1. **Fonte Primária do Valor Médio de Aposentadoria:**
+   - **Ministério da Previdência Social (MPS / INSS / DATAPREV):** Extraído da planilha oficial `ben_municipios_especie_2025.xlsx` (aba `Valor_Médio_R$_dez24`, competência Dezembro/2025).
+   - O indicador `valor_medio_aposentadoria_rs` corresponde ao valor médio pago especificamente por aposentadoria no município (coluna *Total de Aposentadorias*).
+2. **Segmentação Estratégica Nacional (Grupo 1 vs. Grupo 2):**
+   - **Grupo 1 (Média $\le$ R$ 1.518,00 — Até 1 Salário Mínimo):**
+     - **Universo:** 2.774 municípios (49,8% do Brasil).
+     - **Perfil Econômico:** Predomínio de aposentadorias rurais, pequenos produtores e segurados especiais cujo piso constitucional é indexado estritamente ao Salário Mínimo.
+     - **Argumento Econômico Focal:** Congelamento do Salário Mínimo (eliminação da política de valorização com ganho real acima da inflação) somado à perda do acesso a medicamentos gratuitos na Farmácia Popular.
+   - **Grupo 2 (Média > R$ 1.518,00 — Acima de 1 Salário Mínimo):**
+     - **Universo:** 2.797 municípios (50,2% do Brasil).
+     - **Perfil Econômico:** Centros urbanos, polos industriais e polos de serviços com forte presença de aposentadorias por tempo de contribuição ou valores acima do piso.
+     - **Argumento Econômico Focal:** Desindexação dos benefícios previdenciários + revogação da isenção do Imposto de Renda até R$ 5 mil somada ao fim do remédio gratuito na Farmácia Popular.
+3. **Módulo de Cálculo Parametrizado (`calculo_impacto_previdencia.py`):**
+   - O cálculo do impacto financeiro anual de uma eventual desvinculação ou congelamento foi calibrado pela soma da **mediana da inflação oficial (IPCA de 2016 a 2025 = 4,57% a.a.)** com a **mediana do crescimento real do PIB nos anos positivos (2,65% a.a.)**, totalizando uma taxa de reajuste anual de **7,22% a.a.**:
+     $$\text{Taxa de Reajuste} = \text{Mediana IPCA (4,57\%)} + \text{Mediana PIB Positivo (2,65\%)} = 7,22\%$$
+     $$\text{Perda Anual} = \text{Massa Anual de Aposentadorias} \times 7,22\%$$
+     $$\text{Perda por Comércio Local} = \frac{\text{Perda Anual}}{\text{Total de Microempresas Ativas no Comércio}}$$
+   - Esse valor reflete o volume direto de vendas que cada pequeno estabelecimento de comércio (mercados, feiras, padarias, farmácias) deixaria de faturar por ano devido à diminuição do poder de compra dos aposentados no município.
+4. **Preservação de Dados Customizados do Usuário:**
+   - A coluna `total_empresas_ativas` foi removida da aba `Trabalho_e_Renda` conforme solicitação do usuário.
+   - As datas e observações manuais registradas no `Dicionario_de_Dados` da planilha consolidada são rigorosamente preservadas via rotina de merge inteligente no pipeline de exportação.
 
 ---
 

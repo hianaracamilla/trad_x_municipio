@@ -32,20 +32,21 @@ Chave Primária de Cruzamento: `cod_ibge7` (Código IBGE com 7 dígitos)
 | `aposentadorias_sobre_pib_pct` | Numérico | % | Proporção que o valor líquido de aposentadorias representa sobre o PIB municipal | Cálculo Analítico | `(valor_liquido_aposentadorias / pib) * 100` |
 | `beneficios_rgps_rurais_dezembro`| Numérico | Quantidade | Benefícios previdenciários emitidos para trabalhadores rurais | MPS / INSS | Base Dezembro |
 | `participacao_rural_no_rgps_pct`| Numérico | % | Peso relativo dos benefícios rurais no total do RGPS | Cálculo Analítico | `(rurais / total_rgps) * 100` |
-| `perda_hipotetica_anual_brl` | Simulação | R$ / ano | Impacto financeiro anual de um corte/desindexação simulado de 10% nas aposentadorias | MPS / Cenário Analítico | `folha_rgps * 0.10` |
-| `perda_hipotetica_por_habitante_brl`| Simulação | R$ / morador / ano | Perda anual de 10% dividida pela população total do município (impacto macroeconômico local) | Cenário Analítico | `perda_hipotetica_anual / populacao_2025` |
-| `perda_por_aposentado` *(Derivada)* | Simulação | R$ / aposentado / ano | Impacto financeiro individual anual no bolso de cada aposentado | Análise Própria | `perda_hipotetica_anual / aposentadorias_rgps_dezembro` |
+| `valor_medio_aposentadoria_rs` | Numérico | R$ / benefício | Valor líquido médio das aposentadorias pagas aos moradores do município | MPS / INSS (Síntese Dezembro) | `ben_municipios_especie_2025.xlsx` |
+| `grupo_impacto_previdencia` | Categórico | Texto | Classificação de vulnerabilidade: Grupo 1 (≤ R$ 1.518,00 - piso SM) ou Grupo 2 (> R$ 1.518,00 - acima de 1 SM) | Matriz Metodológica | Corte na Média de 1 Salário Mínimo |
+| `perda_desvinculacao_anual_brl` | Simulação | R$ / ano | Impacto financeiro anual estimado na economia da cidade com a desvinculação / fim do ganho real do Salário Mínimo | Cenário Analítico Parametrizado | `calculo_impacto_previdencia.py` |
+| `perda_desvinculacao_por_comercio_anual_brl` | Simulação | R$ / comércio / ano | Perda anual média por microempresa ativa de comércio na cidade caso haja desvinculação / fim do ganho real do Salário Mínimo | Cenário Analítico Parametrizado | `perda_desvinculacao_anual / total_microempresas_comercio_ativas` |
+| `argumento_economico_previdencia` | Texto | Argumento | Síntese argumentativa oficial direcionada à realidade econômica do município | Matriz Estratégica | Grupo 1 vs Grupo 2 |
 
 ---
 
 ### 💼 Trabalho, Renda e Dinâmica Empresarial (`Trabalho_e_Renda`)
 | Coluna | Tipo | Unidade | Descrição | Fonte Primária | Período |
 | :--- | :--- | :--- | :--- | :--- | :---: |
-| `trabalhadores_clt_ativos` | Numérico | Trabalhadores | Total de empregos formais com carteira de trabalho assinada (CLT) | MTE / Novo CAGED / RAIS | 2025 |
-| `total_mei_ativos` | Numérico | Estabelecimentos | Total de Microempreendedores Individuais formalmente registrados e ativos | Receita Federal / Simples Nacional | 2025/2026 |
-| `total_empresas_ativas` | Numérico | Estabelecimentos | Total de estabelecimentos e empresas ativas registradas no município | Receita Federal / Mapa de Empresas | 2026 |
-| `total_microempresas_ativas` | Numérico | Estabelecimentos | Estoque de Microempresas (ME) formalmente ativas no município | Mapa de Empresas (MDIC / MEMP / REDESIM) | 2026 |
-| `total_microempresas_comercio_ativas` | Numérico | Estabelecimentos | Estoque de Microempresas (ME) ativas no segmento de Comércio (79 subclasses CNAE oficiais detalhadas em `comercio.xlsx`) | Mapa de Empresas (MDIC / MEMP / REDESIM) | 2026 |
+| `trabalhadores_clt_ativos` | Numérico | Trabalhadores | Total de empregos formais com carteira de trabalho assinada (CLT) | MTE / Novo CAGED (Tabela 8.1) | 08/2026 |
+| `total_mei_ativos` | Numérico | Estabelecimentos | Total de Microempreendedores Individuais formalmente registrados e ativos | Receita Federal / Simples Nacional | 19/10/2026 |
+| `total_microempresas_ativas` | Numérico | Estabelecimentos | Estoque de Microempresas (ME) formalmente ativas no município | Mapa de Empresas (MDIC / MEMP / REDESIM) | 26/08/2026 |
+| `total_microempresas_comercio_ativas` | Numérico | Estabelecimentos | Estoque de Microempresas (ME) ativas no segmento de Comércio (79 subclasses CNAE oficiais detalhadas em `comercio.xlsx`) | Mapa de Empresas (MDIC / MEMP / REDESIM) | 26/08/2026 |
 | `familias_bolsa_familia` | Numérico | Famílias | Famílias beneficiárias atendidas pelo Programa Bolsa Família | MDS / SAGICAD | 2025 |
 | `valor_mensal_bolsa_familia_rs` | Numérico | R$ / mês | Valor total da folha mensal de pagamento do Bolsa Família no município | MDS | Folha mensal |
 | `beneficiarios_bpc_loas` | Numérico | Pessoas | Idosos (>=65 anos) e pessoas com deficiência vulneráveis amparados pelo BPC | MDS / INSS | 2025 |

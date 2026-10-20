@@ -94,3 +94,42 @@ O projeto adota uma arquitetura em **três camadas complementares**, eliminando 
 * **Órgão Primário:** Fundação Instituto de Pesquisas Econômicas (FIPE) e Portal ZAP.
 * **Download Oficial:** Baixado diretamente do servidor oficial da FIPE (`https://downloads.fipe.org.br/indices/fipezap/fipezap-serieshistoricas.xlsx`).
 * **Metodologia:** Valor médio de locação por $m^2$ aplicado a um imóvel residencial padrão de 60 $m^2$.
+
+---
+
+### 8. Previdência Social, Valor Médio por Município e Impacto da Desvinculação do Salário Mínimo
+* **Módulo Parametrizado:** [`calculo_impacto_previdencia.py`](../calculo_impacto_previdencia.py)
+* **Bases Auditáveis:**
+  1. [`ben_municipios_especie_2025.xlsx`](../ben_municipios_especie_2025.xlsx) e [`dados_prioridades/fontes_oficiais/ben_municipios_especie_2025_oficial.xlsx`](../dados_prioridades/fontes_oficiais/ben_municipios_especie_2025_oficial.xlsx) (aba `Valor_Médio_R$_dez24`, coluna `Total de Aposentadorias`).
+  2. [`dados_prioridades/previdencia_municipios_2025.xlsx`](../dados_prioridades/previdencia_municipios_2025.xlsx)
+* **Órgão Primário:** Ministério da Previdência Social (MPS / INSS / CGEET/DRGPS/SRGPS).
+* **Parâmetros Oficiais de Referência:**
+  - Salário Mínimo de Referência: **R$ 1.518,00**
+  - Política de Reajuste da Previdência: Taxa anual de **7,22%** (soma da mediana da inflação IPCA de 10 anos = 4,57% com a mediana do PIB positivo de 10 anos = 2,65%).
+  - Teto de Isenção do IRPF: Proposta de **R$ 5.000,00**.
+* **Segmentação Estratégica Nacional (5.571 municípios):**
+  - **Grupo 1 (Média $\le$ R$ 1.518,00):** 2.774 municípios (49,8% do país).
+    * *Argumento central:* Congelamento do Salário Mínimo (fim do ganho real acima da inflação) somado ao risco do fim do remédio gratuito na Farmácia Popular.
+  - **Grupo 2 (Média > R$ 1.518,00):** 2.797 municípios (50,2% do país).
+    * *Argumento central:* Desindexação dos benefícios previdenciários + revogação da isenção do Imposto de Renda até R$ 5 mil somada ao fim do remédio gratuito na Farmácia Popular.
+* **Métrica Econômica por Comércio Local:**
+  - O impacto financeiro anual é dividido pelo total de microempresas ativas de comércio no município (`total_microempresas_comercio_ativas`, extraído do Mapa de Empresas/MDIC), mensurando diretamente quanto cada comércio de bairro deixa de faturar anualmente devido à retração do poder de compra dos aposentados.
+
+---
+
+### 9. Emprego Formal CLT (Novo CAGED - MTE)
+* **Bases Auditáveis:**
+  1. [`3-tabelas_Agosto de 2026 (1).xlsx`](../3-tabelas_Agosto%20de%202026%20(1).xlsx) e [`dados_prioridades/fontes_oficiais/3-tabelas_Agosto_2026_oficial.xlsx`](../dados_prioridades/fontes_oficiais/3-tabelas_Agosto_2026_oficial.xlsx)
+  2. **Tabela 8.1 (série com ajustes):** Estoque de empregos formais ativos nos **5.571 municípios em Agosto de 2026** (coluna 398).
+  3. **Tabela 5.1 (série com ajustes):** Evolução nacional de estoques em **Dezembro de cada ano** (2020 a 2025) e **Agosto de 2026**.
+* **Órgão Primário:** Ministério do Trabalho e Emprego (MTE / Subsecretaria de Estatísticas e Estudos do Trabalho / CGEET).
+* **Consolidação dos Dados:**
+  - **Dezembro/2020:** 37.907.718 vínculos (37,91 Milhões)
+  - **Dezembro/2021:** 40.690.220 vínculos (40,69 Milhões)
+  - **Dezembro/2022:** 42.705.233 vínculos (42,71 Milhões)
+  - **Dezembro/2023:** 44.161.013 vínculos (44,16 Milhões)
+  - **Dezembro/2024:** 45.840.107 vínculos (45,84 Milhões)
+  - **Dezembro/2025:** 47.110.663 vínculos (47,11 Milhões)
+  - **Agosto/2026:** 48.244.696 vínculos (48,24 Milhões — sendo 48.238.982 municipalizados nos 5.571 municípios)
+
+
