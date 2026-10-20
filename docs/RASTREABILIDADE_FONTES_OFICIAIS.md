@@ -114,6 +114,8 @@ O projeto adota uma arquitetura em **três camadas complementares**, eliminando 
     * *Argumento central:* Desindexação dos benefícios previdenciários + revogação da isenção do Imposto de Renda até R$ 5 mil somada ao fim do remédio gratuito na Farmácia Popular.
 * **Métrica Econômica por Comércio Local e Pequenos Negócios:**
   - O impacto financeiro anual é dividido pela soma de Microempreendedores Individuais e Microempresas ativas no município (`total_mei_ativos + total_microempresas_ativas`), mensurando diretamente quanto cada comerciante e pequeno negócio local deixa de faturar anualmente devido à retração do poder de compra dos aposentados.
+* **Métrica de Perda Média por Aposentado:**
+  - O impacto financeiro anual é dividido pelo número de aposentados do RGPS no município (`aposentadorias_rgps_dezembro`), expressando em Reais o valor que cada aposentado deixa de receber ao ano devido à desvinculação/fim do ganho real.
 
 ---
 

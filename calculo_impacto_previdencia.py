@@ -44,10 +44,11 @@ def calcular_impacto_anual(valor_liquido_apos_ano, valor_medio, comercios=1, apo
     
     Retorna:
     - impacto_anual_brl (float): Volume total em R$ retirado da economia municipal por ano
-    - impacto_por_comercio_anual_brl (float): Perda anual média por microempresa ativa de comércio
+    - impacto_por_comercio_anual_brl (float): Perda anual média por pequeno negócio/comércio local
+    - impacto_por_aposentado_anual_brl (float): Perda anual média por beneficiário de aposentadoria
     """
     if not valor_liquido_apos_ano or valor_liquido_apos_ano <= 0:
-        return 0.0, 0.0
+        return 0.0, 0.0, 0.0
     
     grupo = classificar_grupo(valor_medio)
     
@@ -61,7 +62,10 @@ def calcular_impacto_anual(valor_liquido_apos_ano, valor_medio, comercios=1, apo
     qtd_com = comercios if comercios and comercios > 0 else 1
     impacto_comercio = impacto_anual / qtd_com
     
-    return round(impacto_anual, 2), round(impacto_comercio, 2)
+    qtd_apos = aposentados if aposentados and aposentados > 0 else 1
+    impacto_aposentado = impacto_anual / qtd_apos
+    
+    return round(impacto_anual, 2), round(impacto_comercio, 2), round(impacto_aposentado, 2)
 
 def obter_argumento_economico(valor_medio):
     """

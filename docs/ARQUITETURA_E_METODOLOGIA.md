@@ -202,7 +202,8 @@ Para mensurar com precisão a dependência da economia municipal em relação à
      $$\text{Taxa de Reajuste} = \text{Mediana IPCA (4,57\%)} + \text{Mediana PIB Positivo (2,65\%)} = 7,22\%$$
      $$\text{Perda Anual} = \text{Massa Anual de Aposentadorias} \times 7,22\%$$
      $$\text{Perda por Comércio Local e Pequenos Negócios} = \frac{\text{Perda Anual}}{\text{Total de MEI} + \text{Total de Microempresas}}$$
-   - Esse valor reflete o volume direto de faturamento que os pequenos estabelecimentos da cidade (MEIs e Microempresas) deixariam de receber por ano devido à diminuição do poder de compra dos aposentados no município.
+     $$\text{Perda Média por Aposentado} = \frac{\text{Perda Anual}}{\text{Total de Aposentados do RGPS}}$$
+   - Esse valor reflete o volume direto de renda que cada beneficiário de aposentadoria deixa de receber no bolso a cada ano, bem como a retração correspondente no faturamento do pequeno comércio local.
 4. **Preservação de Dados Customizados do Usuário:**
    - A coluna `total_empresas_ativas` foi removida da aba `Trabalho_e_Renda` conforme solicitação do usuário.
    - As datas e observações manuais registradas no `Dicionario_de_Dados` da planilha consolidada são rigorosamente preservadas via rotina de merge inteligente no pipeline de exportação.
