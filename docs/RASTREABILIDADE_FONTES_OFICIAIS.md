@@ -45,13 +45,20 @@ O projeto adota uma arquitetura em **três camadas complementares**, eliminando 
 
 ---
 
-### 3. Dinâmica Empresarial & Microempreendedores Individuais (MEIs)
+### 3. Dinâmica Empresarial, Microempresas e Microempreendedores Individuais (MEIs)
 * **Extrator:** [`extratores/extrator_empresas.py`](../extratores/extrator_empresas.py)
-* **Base Auditável:** [`dados_prioridades/fontes_oficiais/serie_mapa_empresas_meis_oficial.csv`](../dados_prioridades/fontes_oficiais/serie_mapa_empresas_meis_oficial.csv)
-* **Órgãos Primários:**
-  1. **MDIC / DREI:** [Painel do Mapa de Empresas](https://www.gov.br/empresas-e-negocios/pt-br/mapa-de-empresas)
+* **Bases Auditáveis:**
+  1. [`dados_prioridades/fontes_oficiais/serie_mapa_empresas_meis_oficial.csv`](../dados_prioridades/fontes_oficiais/serie_mapa_empresas_meis_oficial.csv) (série histórica nacional)
+  2. [`consolidado ME.xlsx`](../consolidado%20ME.xlsx) (matriz municipalizada de Microempresas ativas totais e comércio em 2026)
+  3. [`comercio.xlsx`](../comercio.xlsx) e [`dados_prioridades/fontes_oficiais/atividades_comercio_cnae_oficial.xlsx`](../dados_prioridades/fontes_oficiais/atividades_comercio_cnae_oficial.xlsx) (79 subclasses CNAE selecionadas que delimitam o setor de comércio)
+  4. [`MEI.xlsx`](../MEI.xlsx) e [`dados_prioridades/fontes_oficiais/serie_mei_municipios_oficial.xlsx`](../dados_prioridades/fontes_oficiais/serie_mei_municipios_oficial.xlsx) (matriz municipalizada de optantes pelo MEI no Simples Nacional)
+* **Órgãos Primários e Portais Oficiais:**
+  1. **MDIC / MEMP / REDESIM:** [Painel Interativo do Mapa de Empresas](https://www.gov.br/empresas-e-negocios/pt-br/mapa-de-empresas/painel-mapa-de-empresas)
   2. **Receita Federal do Brasil:** Estatísticas do Simples Nacional / Portal do Empreendedor (dados de CNPJs ativos enquadrados no SIMEI).
-* **Camada Municipal (5.571 municípios):** Levantamento municipalizado do total de MEIs ativos extraído da base cadastral da Receita Federal e consolidado em [`dados_prioridades/cruzamento_perfil_x_eleicao_completo.csv`](../dados_prioridades/cruzamento_perfil_x_eleicao_completo.csv) (totalizando 16.943.835 MEIs no Brasil).
+* **Camada Municipal (5.571 municípios):**
+  - **Microempresas Ativas Totais (2026):** 22.299.554 estabelecimentos ativos apurados diretamente no Painel do Mapa de Empresas.
+  - **Microempresas Ativas no Comércio (2026):** 4.749.778 estabelecimentos ativos no comércio varejista, atacadista e representações comerciais (delimitadas por 79 subclasses CNAE).
+  - **MEIs Ativos:** Levantamento municipalizado do total de optantes pelo MEI apurado na Receita Federal / Simples Nacional e consolidado em [`dados_prioridades/cruzamento_perfil_x_eleicao_completo.csv`](../dados_prioridades/cruzamento_perfil_x_eleicao_completo.csv) (totalizando 17.216.626 MEIs no Brasil).
 
 ---
 

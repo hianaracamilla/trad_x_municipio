@@ -149,10 +149,10 @@ totais_nacionais = {
         "titulo": "Trabalho, Renda & Cidadania",
         "destaque_numero": "49,66 M",
         "destaque_rotulo": "Empregos Formais CLT",
-        "subtitulo": "16,9M de MEIs e 17,2M de famílias amparadas",
+        "subtitulo": "17,2M de MEIs e 17,2M de famílias amparadas",
         "detalhes": [
             {"rotulo": "Trabalhadores CLT ativos", "valor": "49.660.143 vínculos"},
-            {"rotulo": "Microempreendedores (MEI)", "valor": "16.943.835 ativos"},
+            {"rotulo": "Microempreendedores (MEI)", "valor": "17.216.626 ativos"},
             {"rotulo": "Bolsa Família (famílias)", "valor": "17.204.187 famílias"},
             {"rotulo": "Repasse mensal Bolsa Família", "valor": "R$ 11,96 Bilhões/mês"}
         ],

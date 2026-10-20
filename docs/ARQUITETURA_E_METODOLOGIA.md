@@ -159,11 +159,25 @@ Uma dúvida frequente na leitura de dados econômicos refere-se à origem e cál
      - Vagas formais CLT ativas = $216.519 \times 17,5\% = \mathbf{37.890\text{ vagas}}$ (exibido como **~37,9 Mil** no Raio-X e nos cards municipais).
      - Taxa MEI municipal: **6,6 por 100 hab** $\rightarrow 216.519 \times 6,6\% = \mathbf{14.290\text{ MEIs}}$ (exibido como **~14,3 Mil**).
 3. **Conciliação de Escala (Brasil vs. Território Filtrado):**
-   - **Visão Brasil (Sem Filtro):** O total nacional consolidado registra **49,66 Milhões a 50,4 Milhões de empregos com carteira assinada** e **16,9 Milhões de MEIs**.
+   - **Visão Brasil (Sem Filtro):** O total nacional consolidado registra **49,66 Milhões a 50,4 Milhões de empregos com carteira assinada** e **17,2 Milhões de MEIs** (17.216.626 optantes formalizados).
    - **Visão Filtrada (Município, Estado ou Região):** Anteriormente, uma fórmula ingênua baseada em proporção populacional nacional produzia distorções no card superior (ex.: projetava 50,4 Mil para Sobral porque supunha a média nacional de 24,5% sobre a população local).
    - **Ajuste de Precisão Estrita:** O dashboard agrega os vínculos formais e MEIs pela **soma real dos microdados das cidades selecionadas**:
      $$\text{Vagas CLT Filtro} = \sum_{c \in \text{Cidades}} \left(\text{Pop}_c \times \frac{\text{taxa\_clt}_c}{100}\right)$$
      Isso garante convergência exata (100% de coerência) entre o Card de Grandes Prioridades, as estatísticas de cabeçalho e os Indicadores Estratégicos do Raio-X.
+
+### 3.7. Metodologia de Microempresas (ME) e Filtro Setorial do Comércio (2026)
+
+O sistema incorpora a camada municipalizada de **Microempresas (ME)** extraída diretamente do **Painel do Mapa de Empresas** (MDIC / MEMP / REDESIM):
+
+1. **Microempresas Ativas Totais (2026):**
+   - Universo de **22.299.554 estabelecimentos ativos** distribuídos nos 5.571 municípios brasileiros.
+   - Registrada na coluna `total_microempresas_ativas` da aba `Trabalho_e_Renda` de `traducao_municipios_consolidado.xlsx`.
+2. **Segmentação Setorial de Comércio (79 Subclasses CNAE):**
+   - Universo de **4.749.778 estabelecimentos ativos** dedicados ao comércio varejista, atacadista e representações comerciais.
+   - Registrada na coluna `total_microempresas_comercio_ativas`.
+   - A lista exaustiva de atividades contempladas consta no arquivo auditável [`comercio.xlsx`](../comercio.xlsx) e [`dados_prioridades/fontes_oficiais/atividades_comercio_cnae_oficial.xlsx`](../dados_prioridades/fontes_oficiais/atividades_comercio_cnae_oficial.xlsx).
+3. **Relação com MEI e Total de Empresas:**
+   - Todo MEI é enquadrado como uma modalidade especial de Microempresa pelo Estatuto Nacional da Microempresa (LC 123/2006). A base cadastral do Mapa de Empresas consolida essa amplitude, garantindo consistência com o total de estabelecimentos ativos do país.
 
 ---
 

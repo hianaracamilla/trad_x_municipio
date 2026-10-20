@@ -38,15 +38,23 @@ Chave Primária de Cruzamento: `cod_ibge7` (Código IBGE com 7 dígitos)
 
 ---
 
-### 💼 Trabalho, Renda e Transferência de Renda (`Trabalho_e_Renda`)
+### 💼 Trabalho, Renda e Dinâmica Empresarial (`Trabalho_e_Renda`)
 | Coluna | Tipo | Unidade | Descrição | Fonte Primária | Período |
 | :--- | :--- | :--- | :--- | :--- | :---: |
 | `trabalhadores_clt_ativos` | Numérico | Trabalhadores | Total de empregos formais com carteira de trabalho assinada (CLT) | MTE / Novo CAGED / RAIS | 2025 |
-| `total_mei_ativos` | Numérico | Quantidade | Total de Microempreendedores Individuais formalmente registrados e ativos | Receita Federal / Mapa de Empresas | 2025 |
+| `total_mei_ativos` | Numérico | Estabelecimentos | Total de Microempreendedores Individuais formalmente registrados e ativos | Receita Federal / Simples Nacional | 2025/2026 |
+| `total_empresas_ativas` | Numérico | Estabelecimentos | Total de estabelecimentos e empresas ativas registradas no município | Receita Federal / Mapa de Empresas | 2026 |
+| `total_microempresas_ativas` | Numérico | Estabelecimentos | Estoque de Microempresas (ME) formalmente ativas no município | Mapa de Empresas (MDIC / MEMP / REDESIM) | 2026 |
+| `total_microempresas_comercio_ativas` | Numérico | Estabelecimentos | Estoque de Microempresas (ME) ativas no segmento de Comércio (79 subclasses CNAE oficiais detalhadas em `comercio.xlsx`) | Mapa de Empresas (MDIC / MEMP / REDESIM) | 2026 |
 | `familias_bolsa_familia` | Numérico | Famílias | Famílias beneficiárias atendidas pelo Programa Bolsa Família | MDS / SAGICAD | 2025 |
 | `valor_mensal_bolsa_familia_rs` | Numérico | R$ / mês | Valor total da folha mensal de pagamento do Bolsa Família no município | MDS | Folha mensal |
 | `beneficiarios_bpc_loas` | Numérico | Pessoas | Idosos (>=65 anos) e pessoas com deficiência vulneráveis amparados pelo BPC | MDS / INSS | 2025 |
 | `valor_mensal_bpc_rs` | Numérico | R$ / mês | Folha mensal de pagamento do Benefício de Prestação Continuada (1 Salário Mínimo) | MDS / INSS | Folha mensal |
+| `servidores_municipais` | Numérico | Servidores | Total de servidores municipais da administração direta e indireta | IBGE · MUNIC | 2023/2024 |
+| `servidores_municipais_estatutarios` | Numérico | Servidores | Servidores municipais concursados/efetivos | IBGE · MUNIC | 2023/2024 |
+| `servidores_municipais_comissionados` | Numérico | Servidores | Servidores municipais ocupantes de cargo em comissão | IBGE · MUNIC | 2023/2024 |
+| `servidores_federais_siape` | Numérico | Servidores | Servidores públicos federais civis ativos lotados no município | SIAPE / Painel Estatístico de Pessoal | 2025/2026 |
+| `total_servidores_publicos` | Numérico | Servidores | Total consolidado de servidores públicos municipais e federais | IBGE MUNIC / SIAPE | Consolidado |
 | `renda_social_prev_total` *(Derivada)* | Numérico | R$ / ano | Injeção total de Renda Social: `RGPS Anual + (Bolsa Família * 12) + (BPC * 12)` | Análise Própria | Anualizado |
 | `pct_renda_social_pib` *(Derivada)* | Numérico | % | Percentual da Renda Social e Previdenciária sobre o PIB do município | Análise Própria | `(renda_social / pib) * 100` |
 
