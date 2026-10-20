@@ -37,14 +37,48 @@ def classificar_grupo(valor_medio):
         return "Grupo 1 (Até 1 SM)"
     return "Grupo 2 (Acima de 1 SM)"
 
-def calcular_impacto_anual(valor_liquido_apos_ano, valor_medio, comercios=1, aposentados=0, populacao=1, **kwargs):
+def classificar_porte_municipio(populacao):
+    """
+    Classifica o município por porte populacional:
+    - Pequeno Porte: até 20.000 habitantes
+    - Médio Porte: de 20.001 a 100.000 habitantes
+    - Grande Porte: acima de 100.000 habitantes
+    """
+    try:
+        p = float(populacao)
+    except (ValueError, TypeError):
+        p = 0.0
+    if p <= 20000:
+        return "Pequeno Porte"
+    elif p <= 100000:
+        return "Médio Porte"
+    else:
+        return "Grande Porte"
+
+def obter_coeficiente_pof(populacao):
+    """
+    Retorna o coeficiente da Pesquisa de Orçamentos Familiares (POF/IBGE)
+    que representa a fração da renda que circula no comércio local:
+    - Pequeno Porte (até 20k): 55% (0.55)
+    - Médio Porte (20k a 100k): 70% (0.70)
+    - Grande Porte (> 100k): 85% (0.85)
+    """
+    porte = classificar_porte_municipio(populacao)
+    if porte == "Pequeno Porte":
+        return 0.55
+    elif porte == "Médio Porte":
+        return 0.70
+    else:
+        return 0.85
+
+def calcular_impacto_anual(valor_liquido_apos_ano, valor_medio, comercios=1, aposentados=0, populacao=None, pof=None, **kwargs):
     """
     Calcula o montante anual em R$ que deixa de circular na economia do município
     caso haja desvinculação ou fim da política de valorização do salário mínimo.
     
     Retorna:
     - impacto_anual_brl (float): Volume total em R$ retirado da economia municipal por ano
-    - impacto_por_comercio_anual_brl (float): Perda anual média por pequeno negócio/comércio local
+    - impacto_por_comercio_anual_brl (float): Perda anual média por pequeno negócio/comércio local ajustada pelo POF
     - impacto_por_aposentado_anual_brl (float): Perda anual média por beneficiário de aposentadoria
     """
     if not valor_liquido_apos_ano or valor_liquido_apos_ano <= 0:
@@ -60,7 +94,16 @@ def calcular_impacto_anual(valor_liquido_apos_ano, valor_medio, comercios=1, apo
         impacto_anual = valor_liquido_apos_ano * TAXA_DESINDEXACAO_G2
         
     qtd_com = comercios if comercios and comercios > 0 else 1
-    impacto_comercio = impacto_anual / qtd_com
+    
+    # Coeficiente POF conforme o porte do município
+    if pof is not None:
+        coef_pof = pof
+    elif populacao is not None:
+        coef_pof = obter_coeficiente_pof(populacao)
+    else:
+        coef_pof = 1.0
+
+    impacto_comercio = (impacto_anual / qtd_com) * coef_pof
     
     qtd_apos = aposentados if aposentados and aposentados > 0 else 1
     impacto_aposentado = impacto_anual / qtd_apos

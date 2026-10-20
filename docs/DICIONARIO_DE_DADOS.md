@@ -24,6 +24,7 @@ Chave Primária de Cruzamento: `cod_ibge7` (Código IBGE com 7 dígitos)
 ### 🛡️ Previdência Social e Risco de Desvinculação (`Previdencia_Economia`)
 | Coluna | Tipo | Unidade | Descrição | Fonte Primária | Fórmula / Metodologia |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| `porte_municipio` | Categórico | Texto | Classificação do porte populacional: Pequeno Porte (até 20k hab), Médio Porte (20k a 100k hab) e Grande Porte (> 100k hab) | IBGE / Critério Estratégico | Corte em 20 mil e 100 mil habitantes |
 | `aposentadorias_rgps_dezembro` | Numérico | Quantidade | Número de aposentadorias do Regime Geral da Previdência Social pagas em dezembro | MPS / INSS | Censo Previdenciário |
 | `pensoes_por_morte_rgps_dezembro`| Numérico | Quantidade | Número de pensões por morte pagas no município | MPS / INSS | Folha mensal |
 | `total_rgps_dezembro` | Numérico | Quantidade | Soma de aposentadorias e pensões pagas pelo RGPS | MPS / INSS | Soma simples |
@@ -35,7 +36,9 @@ Chave Primária de Cruzamento: `cod_ibge7` (Código IBGE com 7 dígitos)
 | `valor_medio_aposentadoria_rs` | Numérico | R$ / benefício | Valor líquido médio das aposentadorias pagas aos moradores do município | MPS / INSS (Síntese Dezembro) | `ben_municipios_especie_2025.xlsx` |
 | `grupo_impacto_previdencia` | Categórico | Texto | Classificação de vulnerabilidade: Grupo 1 (≤ R$ 1.518,00 - piso SM) ou Grupo 2 (> R$ 1.518,00 - acima de 1 SM) | Matriz Metodológica | Corte na Média de 1 Salário Mínimo |
 | `perda_desvinculacao_anual_brl` | Simulação | R$ / ano | Impacto financeiro anual estimado na economia da cidade com a desvinculação / fim do ganho real do Salário Mínimo | Cenário Analítico Parametrizado | `calculo_impacto_previdencia.py` |
-| `perda_desvinculacao_por_comercio_anual_brl` | Simulação | R$ / comércio / ano | Perda anual média por pequeno negócio da cidade (MEI + Microempresas) caso haja desvinculação / fim do ganho real do Salário Mínimo | Cenário Analítico Parametrizado | `perda_desvinculacao_anual / (total_mei_ativos + total_microempresas_ativas)` |
+| `total_microempresas_ativas` | Numérico | Estabelecimentos | Estoque de Microempresas (ME) ativas no município | Mapa de Empresas | Painel DREI / MDIC |
+| `coeficiente_pof_comercio_pct` | Parâmetro | % | Coeficiente POF de propensão de consumo no comércio local: Pequena = 55%, Média = 70%, Grande = 85% | Pesquisa de Orçamentos Familiares (POF/IBGE) | Parâmetro por porte de cidade |
+| `perda_desvinculacao_por_comercio_anual_brl` | Simulação | R$ / comércio / ano | Perda anual média estimada por comércio/microempresa local ajustada pelo Coeficiente POF | Cenário Analítico Parametrizado | `(perda_desvinculacao_anual_brl / total_microempresas_ativas) * (coeficiente_pof_comercio_pct / 100)` |
 | `perda_media_anual_por_aposentado_brl` | Simulação | R$ / aposentado / ano | Perda financeira anual média estimada no bolso de cada aposentado do município | Cenário Analítico Parametrizado | `perda_desvinculacao_anual / aposentadorias_rgps_dezembro` |
 | `argumento_economico_previdencia` | Texto | Argumento | Síntese argumentativa oficial direcionada à realidade econômica do município | Matriz Estratégica | Grupo 1 vs Grupo 2 |
 
