@@ -112,8 +112,8 @@ O projeto adota uma arquitetura em **três camadas complementares**, eliminando 
     * *Argumento central:* Congelamento do Salário Mínimo (fim do ganho real acima da inflação) somado ao risco do fim do remédio gratuito na Farmácia Popular.
   - **Grupo 2 (Média > R$ 1.518,00):** 2.797 municípios (50,2% do país).
     * *Argumento central:* Desindexação dos benefícios previdenciários + revogação da isenção do Imposto de Renda até R$ 5 mil somada ao fim do remédio gratuito na Farmácia Popular.
-* **Métrica Econômica por Comércio Local:**
-  - O impacto financeiro anual é dividido pelo total de microempresas ativas de comércio no município (`total_microempresas_comercio_ativas`, extraído do Mapa de Empresas/MDIC), mensurando diretamente quanto cada comércio de bairro deixa de faturar anualmente devido à retração do poder de compra dos aposentados.
+* **Métrica Econômica por Comércio Local e Pequenos Negócios:**
+  - O impacto financeiro anual é dividido pela soma de Microempreendedores Individuais e Microempresas ativas no município (`total_mei_ativos + total_microempresas_ativas`), mensurando diretamente quanto cada comerciante e pequeno negócio local deixa de faturar anualmente devido à retração do poder de compra dos aposentados.
 
 ---
 

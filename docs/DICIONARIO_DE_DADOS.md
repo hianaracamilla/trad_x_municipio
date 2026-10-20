@@ -35,7 +35,7 @@ Chave Primária de Cruzamento: `cod_ibge7` (Código IBGE com 7 dígitos)
 | `valor_medio_aposentadoria_rs` | Numérico | R$ / benefício | Valor líquido médio das aposentadorias pagas aos moradores do município | MPS / INSS (Síntese Dezembro) | `ben_municipios_especie_2025.xlsx` |
 | `grupo_impacto_previdencia` | Categórico | Texto | Classificação de vulnerabilidade: Grupo 1 (≤ R$ 1.518,00 - piso SM) ou Grupo 2 (> R$ 1.518,00 - acima de 1 SM) | Matriz Metodológica | Corte na Média de 1 Salário Mínimo |
 | `perda_desvinculacao_anual_brl` | Simulação | R$ / ano | Impacto financeiro anual estimado na economia da cidade com a desvinculação / fim do ganho real do Salário Mínimo | Cenário Analítico Parametrizado | `calculo_impacto_previdencia.py` |
-| `perda_desvinculacao_por_comercio_anual_brl` | Simulação | R$ / comércio / ano | Perda anual média por microempresa ativa de comércio na cidade caso haja desvinculação / fim do ganho real do Salário Mínimo | Cenário Analítico Parametrizado | `perda_desvinculacao_anual / total_microempresas_comercio_ativas` |
+| `perda_desvinculacao_por_comercio_anual_brl` | Simulação | R$ / comércio / ano | Perda anual média por pequeno negócio da cidade (MEI + Microempresas) caso haja desvinculação / fim do ganho real do Salário Mínimo | Cenário Analítico Parametrizado | `perda_desvinculacao_anual / (total_mei_ativos + total_microempresas_ativas)` |
 | `argumento_economico_previdencia` | Texto | Argumento | Síntese argumentativa oficial direcionada à realidade econômica do município | Matriz Estratégica | Grupo 1 vs Grupo 2 |
 
 ---

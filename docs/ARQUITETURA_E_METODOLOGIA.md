@@ -201,8 +201,8 @@ Para mensurar com precisão a dependência da economia municipal em relação à
    - O cálculo do impacto financeiro anual de uma eventual desvinculação ou congelamento foi calibrado pela soma da **mediana da inflação oficial (IPCA de 2016 a 2025 = 4,57% a.a.)** com a **mediana do crescimento real do PIB nos anos positivos (2,65% a.a.)**, totalizando uma taxa de reajuste anual de **7,22% a.a.**:
      $$\text{Taxa de Reajuste} = \text{Mediana IPCA (4,57\%)} + \text{Mediana PIB Positivo (2,65\%)} = 7,22\%$$
      $$\text{Perda Anual} = \text{Massa Anual de Aposentadorias} \times 7,22\%$$
-     $$\text{Perda por Comércio Local} = \frac{\text{Perda Anual}}{\text{Total de Microempresas Ativas no Comércio}}$$
-   - Esse valor reflete o volume direto de vendas que cada pequeno estabelecimento de comércio (mercados, feiras, padarias, farmácias) deixaria de faturar por ano devido à diminuição do poder de compra dos aposentados no município.
+     $$\text{Perda por Comércio Local e Pequenos Negócios} = \frac{\text{Perda Anual}}{\text{Total de MEI} + \text{Total de Microempresas}}$$
+   - Esse valor reflete o volume direto de faturamento que os pequenos estabelecimentos da cidade (MEIs e Microempresas) deixariam de receber por ano devido à diminuição do poder de compra dos aposentados no município.
 4. **Preservação de Dados Customizados do Usuário:**
    - A coluna `total_empresas_ativas` foi removida da aba `Trabalho_e_Renda` conforme solicitação do usuário.
    - As datas e observações manuais registradas no `Dicionario_de_Dados` da planilha consolidada são rigorosamente preservadas via rotina de merge inteligente no pipeline de exportação.
